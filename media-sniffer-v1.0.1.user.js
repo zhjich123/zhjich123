@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         媒体嗅探器 Media Sniffer Pro v1.0.0
+// @name         媒体嗅探器 Media Sniffer Pro v1.0.1
 // @namespace    http://tampermonkey.net/
-// @version      1.0.0
+// @version      1.0.1
 // @description  图片/视频/音频/m3u8 抓取 · AES-128解密 · 分片合并 · 虚拟列表 · 进度可视化 · 跨域兜底 · Cookie/Storage · 翻译 · 元信息 · 高级筛选
 // @match        *://*/*
 // @exclude      *://*chrome.google.com/*
@@ -42,7 +42,7 @@
     // 🧩 模块 1：核心工具 (Utils) + 日志系统
     // =========================================================================
     var U = {};
-    U.VERSION = '1.0.0';
+    U.VERSION = '1.0.1';
     U.toStr = Object.prototype.toString;
     U.isArr = Array.isArray || function (x) { return U.toStr.call(x) === '[object Array]'; };
     U.isStr = function (x) { return typeof x === 'string'; };
@@ -467,7 +467,7 @@
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': '媒体嗅探器 Pro v1.0.0 · SelectionManager · 拖拽排序 · 收藏夹 · 智能去重 · 分组 · 批量操作注册',
+            'infoLine1': '媒体嗅探器 Pro v1.0.1 · SelectionManager · 拖拽排序 · 收藏夹 · 智能去重 · 分组 · 批量操作注册',
             'infoLine2': '快捷键：Alt+T 翻译选中 · Alt+B 开关面板 · Esc 关闭',
             'clickTabScan': '点击标签扫描',
             'dlProgress': '下载进度',
@@ -715,7 +715,7 @@
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': 'Media Sniffer Pro v1.0.0 · SelectionManager · Drag Sort · Favorites · Smart Dedup · Groups · Batch Actions',
+            'infoLine1': 'Media Sniffer Pro v1.0.1 · SelectionManager · Drag Sort · Favorites · Smart Dedup · Groups · Batch Actions',
             'infoLine2': 'Shortcuts: Alt+T Translate · Alt+B Toggle · Esc Close',
             'clickTabScan': 'Click a tab above to start scanning',
             'dlProgress': 'Download Progress',
@@ -3420,7 +3420,7 @@
             try {
                 var opts = options || {};
                 var currentVersion = opts.currentVersion || U.VERSION;
-                var repo = opts.repo || 'zhjich123/zhjich';
+                var repo = opts.repo || 'zhjich123/zhjich123';
                 var intervalHours = opts.checkIntervalHours != null ? opts.checkIntervalHours : 24;
                 var popupOpts = opts.popup || {};
 
@@ -4437,6 +4437,12 @@
             var url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text.substring(0, 500)) + '&langpair=' + pair;
             TranslateEngine._xhrGet(url, 25000, function (data, err) {
                 if (err) { if (cb) cb(null, err); return; }
+                // MyMemory 可能在 responseStatus 中返回非 200 错误码
+                if (data && data.responseStatus && (data.responseStatus < 200 || data.responseStatus >= 300)) {
+                    var errMsg = data.responseDetails || ('MyMemory HTTP ' + data.responseStatus);
+                    if (cb) cb(null, errMsg);
+                    return;
+                }
                 var result = '';
                 if (data && data.responseData && data.responseData.translatedText) {
                     result = data.responseData.translatedText;
@@ -4451,6 +4457,11 @@
                     }
                 }
                 if (!result) { if (cb) cb(null, LANG.t('transFail')); return; }
+                // 识别 MyMemory 免费额度警告并作为错误返回
+                if (/MYMEMORY WARNING|INVALID LANGUAGE PAIR|NO QUERY SPECIFIED/i.test(result)) {
+                    if (cb) cb(null, result);
+                    return;
+                }
                 if (cb) cb(result, null);
             });
         }
@@ -4567,6 +4578,28 @@
     // ===== 辅助方法：XHR GET =====
     TranslateEngine._xhrGet = function (url, timeout, cb) {
         try {
+            // 优先使用 GM_xmlhttpRequest 绕过浏览器 CORS 限制
+            if (typeof GM_xmlhttpRequest === 'function') {
+                GM_xmlhttpRequest({
+                    method: 'GET',
+                    url: url,
+                    timeout: timeout || 25000,
+                    onload: function (resp) {
+                        if (resp.status >= 200 && resp.status < 300) {
+                            try {
+                                var data = U.safeJson(resp.responseText, null);
+                                if (cb) cb(data, null);
+                            } catch (e) { if (cb) cb(null, e.message); }
+                        } else {
+                            if (cb) cb(null, 'HTTP ' + resp.status);
+                        }
+                    },
+                    onerror: function () { if (cb) cb(null, LANG.t('transNetErr')); },
+                    ontimeout: function () { if (cb) cb(null, LANG.t('transTimeout')); }
+                });
+                return;
+            }
+            // 兜底：标准 XHR（在同域或目标接口允许 CORS 时可用）
             var xhr = new XMLHttpRequest();
             xhr.open('GET', url, true);
             xhr.timeout = timeout || 25000;
@@ -4590,6 +4623,30 @@
     // ===== 辅助方法：XHR POST =====
     TranslateEngine._xhrPost = function (url, body, timeout, cb) {
         try {
+            // 优先使用 GM_xmlhttpRequest 绕过浏览器 CORS 限制
+            if (typeof GM_xmlhttpRequest === 'function') {
+                GM_xmlhttpRequest({
+                    method: 'POST',
+                    url: url,
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    data: body,
+                    timeout: timeout || 25000,
+                    onload: function (resp) {
+                        if (resp.status >= 200 && resp.status < 300) {
+                            try {
+                                var data = U.safeJson(resp.responseText, null);
+                                if (cb) cb(data, null);
+                            } catch (e) { if (cb) cb(null, e.message); }
+                        } else {
+                            if (cb) cb(null, 'HTTP ' + resp.status);
+                        }
+                    },
+                    onerror: function () { if (cb) cb(null, LANG.t('transNetErr')); },
+                    ontimeout: function () { if (cb) cb(null, LANG.t('transTimeout')); }
+                });
+                return;
+            }
+            // 兜底：标准 XHR
             var xhr = new XMLHttpRequest();
             xhr.open('POST', url, true);
             xhr.timeout = timeout || 25000;
@@ -9973,7 +10030,7 @@
             checkBtn.style.cursor = 'not-allowed';
             AutoUpdater.checkNow({
                 currentVersion: U.VERSION,
-                repo: 'zhjich123/zhjich',
+                repo: 'zhjich123/zhjich123',
             }).then(function (res) {
                 checkBtn._loading = false;
                 checkBtn.textContent = originalText;
@@ -10287,7 +10344,7 @@
                 if (State.config.autoCheckUpdate) {
                     AutoUpdater.check({
                         currentVersion: U.VERSION,
-                        repo: 'zhjich123/zhjich',
+                        repo: 'zhjich123/zhjich123',
                         checkIntervalHours: 24,
                     });
                 }
