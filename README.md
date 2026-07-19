@@ -1,16 +1,52 @@
-## Hi there 👋
+# Hi, I'm zhjich123 👋
 
-<!--
-**zhjich123/zhjich123** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+欢迎来到我的 GitHub 主页！这里主要存放我开发的一些小工具和脚本项目。
 
-Here are some ideas to get you started:
+---
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+## 🎯 代表作：媒体嗅探器 Pro (Media Sniffer Pro)
+
+一个功能强大的浏览器油猴脚本，用于自动嗅探网页中的图片、视频、音频、M3U8 流媒体等资源，支持一键下载、批量导出和视频平台链接解析。
+
+### ✨ 主要功能
+
+- **🖼 图片嗅探**：自动扫描 `<img>`、CSS 背景图、懒加载图片，支持按尺寸/格式筛选和批量下载
+- **🎬 视频嗅探**：检测页面视频元素，支持 MP4 / WebM / MOV 等常见格式，自动提取视频封面
+- **🔗 视频平台解析**：支持 B站、抖音、快手等平台的无水印/多清晰度视频解析
+- **📺 M3U8 / HLS 下载**：支持 AES-128 解密、分片并发下载并合并为完整视频
+- **🎵 音频嗅探**：MP3 / WAV / FLAC / AAC / Opus 等格式
+- **⚡ 批量操作**：一键解析当前页面所有视频链接，并发控制 + 自动重试
+- **🌐 翻译引擎**：划词翻译，支持多翻译引擎切换
+- **🍪 Cookie / Storage 查看**：方便调试网页状态
+- **📱 移动端适配**：响应式 UI、触摸手势、长按菜单、浮动按钮
+- **⌨ 快捷键**：`Alt + B` 呼出面板，`Alt + T` 翻译选中内容
+
+### 🚀 安装方式
+
+1. 安装浏览器扩展 [Tampermonkey](https://www.tampermonkey.net/) 或 [ScriptCat](https://docs.scriptcat.org/)
+2. 从本仓库 [Releases](../../releases) 页面下载最新版脚本
+3. 点击安装即可开始使用
+
+---
+
+## 📝 更新日志 (Changelog)
+
+### v1.0.0 (2026-07-17)
+- 🎉 首个正式版本发布
+- 🔖 版本号统一升级为 v1.0.0
+- 📦 脚本文件重命名为 `media-sniffer-v1.0.0.user.js`
+- ✨ 包含完整的图片/视频/音频/M3U8 嗅探功能
+- 🔗 集成 B站、抖音、快手视频解析
+- 📺 支持 AES-128 解密与 M3U8 分片合并
+- 🌐 内置多引擎翻译与划词翻译
+- 📱 完整的移动端适配与触摸交互
+
+---
+
+## 📥 下载最新版
+
+👉 [点击前往 Releases 页面](../../releases)
+
+---
+
+*本仓库 `zhjich123/zhjich123` 是一个 special repository，README 会显示在我的 GitHub 个人资料页。*
