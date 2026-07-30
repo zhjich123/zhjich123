@@ -1,16 +1,64 @@
-## Hi there 👋
+# 媒体嗅探器 Media Sniffer Pro
 
-<!--
-**zhjich123/zhjich123** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+一个功能强大的 Tampermonkey / ScriptCat 油猴脚本，用于抓取网页中的图片、视频、音频、m3u8 流媒体资源，支持批量下载、AES-128 解密、翻译、Cookie/Storage 管理等功能。
 
-Here are some ideas to get you started:
+## 功能特性
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+- 多类型资源嗅探：图片、视频、音频、m3u8 流媒体
+- 虚拟列表与进度可视化
+- AES-128 解密与分片合并
+- 批量下载与 Aria2 推送
+- 翻译工具（中/英/日/韩等多语言）
+- Cookie / Storage 管理
+- 界面主题与界面风格切换（普通 / Material / 苹果玻璃拟态）
+- 自定义域名规则
+- 自定义主题色盘：支持添加、编辑、删除自定义渐变色方案
+- 面板位置记忆与快捷操作面板
+- 脚本市场 / 插件系统：自定义过滤规则 + 第三方解析器插件
+- 多语言界面（简体中文 / English / 日本語 / 한국어）
+
+## 安装方式
+
+1. 安装 [Tampermonkey](https://www.tampermonkey.net/) 或 [ScriptCat](https://docs.scriptcat.org/) 扩展
+2. 访问 [Releases](https://github.com/zhjich123/zhjich123/releases) 页面
+3. 下载最新版本的 `.user.js` 文件
+4. 点击安装即可使用
+
+## 快捷键
+
+- `Alt + B`：开关面板
+- `Alt + T`：翻译选中文本
+- `Esc`：关闭面板
+
+## 更新日志
+
+### v1.0.6
+- 修复 IIFE 模块拆分导致的变量作用域错误，脚本启动崩溃问题
+- 修复右下角浮动按钮不显示（SVG 矢量图标替换 emoji）
+- 新增全局错误捕获，启动失败时打印详细堆栈
+- 统一模块变量名，清理冗余代码
+
+### v1.0.5
+- 统一配置对象 `MS_CONFIG` 与组件工厂 `MS_FACTORY`
+- IIFE 模块按功能拆分，提高代码可维护性
+- 修复暗色/苹果风格按钮占比、自定义配色持久化等多项问题
+
+### v1.0.4
+- 自定义主题色盘：支持添加、编辑、删除自定义渐变色方案
+- 面板位置记忆：新增高度、位置、上次打开标签页的记忆
+- 浮动按钮快捷操作面板：桌面右键 / 移动局长按触发快捷菜单
+
+### v1.0.3
+- 新增脚本市场 / 插件系统
+- 界面支持中/英/日/韩多语言
+
+### v1.0.2
+- 新增三种界面风格：普通 / Material / 苹果玻璃拟态
+- 苹果风格下浮动按钮同步应用玻璃拟态效果
+
+### v1.0.1
+- 修复自动更新检测功能
+- 修复翻译功能（改用 GM_xmlhttpRequest 解决 CORS 限制）
+
+### v1.0.0
+- 初始版本发布
