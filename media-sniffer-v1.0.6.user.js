@@ -39,6 +39,9 @@
         return;
     }
 
+    try {
+    console.info('[MS] 脚本开始加载，版本:', '1.0.6');
+
 
 
     // =========================================================================
@@ -216,7 +219,7 @@
     // 🧩 模块 1：核心工具 (Utils) + 日志系统
     // =========================================================================
     var U = {};
-    U.VERSION = '1.0.5';
+    U.VERSION = '1.0.6';
     U.toStr = Object.prototype.toString;
     U.isArr = Array.isArray || function (x) { return U.toStr.call(x) === '[object Array]'; };
     U.isStr = function (x) { return typeof x === 'string'; };
@@ -12546,4 +12549,8 @@
     });
         return {};
     })();
+    } catch (_msFatal) {
+        console.error('[MS] 致命错误，脚本未能启动:', _msFatal);
+        try { console.error(_msFatal.stack); } catch (e) {}
+    }
 })();
