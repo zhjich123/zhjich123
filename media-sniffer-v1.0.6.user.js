@@ -2700,7 +2700,7 @@
         NetState.install = installNetHook;
         return NetState;
     })();
-    var installNetHook = NetState.install;
+    var installNetHook = NetHook.install;
     var Toast = (function () {
         'use strict';
     // =========================================================================
@@ -5822,10 +5822,10 @@
         var m3u8Urls = Scanner.scanM3u8();
         var vidLinks = Scanner.scanVideoLinks();
         Scanner.scanBackgroundsAsync(function (bgImgs) {
-            State.images = U.uniq(imgUrls.concat(bgImgs).concat(Array.from(NetState.hits).filter(function (u) { return SEC.guessKind(u) === 'image'; })));
-            State.videos = U.uniq(vidUrls.concat(Array.from(NetState.hits).filter(function (u) { return SEC.guessKind(u) === 'video'; })));
-            State.audios = U.uniq(audUrls.concat(Array.from(NetState.hits).filter(function (u) { return SEC.guessKind(u) === 'audio'; })));
-            State.m3u8 = U.uniq(m3u8Urls.concat(Array.from(NetState.hits).filter(function (u) { return SEC.guessKind(u) === 'm3u8'; })));
+            State.images = U.uniq(imgUrls.concat(bgImgs).concat(Array.from(NetHook.hits).filter(function (u) { return SEC.guessKind(u) === 'image'; })));
+            State.videos = U.uniq(vidUrls.concat(Array.from(NetHook.hits).filter(function (u) { return SEC.guessKind(u) === 'video'; })));
+            State.audios = U.uniq(audUrls.concat(Array.from(NetHook.hits).filter(function (u) { return SEC.guessKind(u) === 'audio'; })));
+            State.m3u8 = U.uniq(m3u8Urls.concat(Array.from(NetHook.hits).filter(function (u) { return SEC.guessKind(u) === 'm3u8'; })));
             State.videoLinks = vidLinks;
             Plugins.filterResources();
             LOG.info('扫描完成: 图片', State.images.length, '视频', State.videos.length, '音频', State.audios.length, 'm3u8', State.m3u8.length, '视频链接', State.videoLinks.length);
@@ -6142,7 +6142,7 @@
                 var all = [];
                 for (var i = 0; i < imgUrls.length; i++) all.push({ url: imgUrls[i], type: 'image', source: 'dom' });
                 for (var j = 0; j < bgImgs.length; j++) all.push({ url: bgImgs[j], type: 'image', source: 'dom' });
-                NetState.hits.forEach(function (u) {
+                NetHook.hits.forEach(function (u) {
                     var k = SEC.guessKind(u);
                     if (k === 'image' || k === 'video' || k === 'audio' || k === 'm3u8') all.push({ url: u, type: k, source: 'network' });
                 });
