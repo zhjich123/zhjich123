@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         媒体嗅探器 Media Sniffer Pro v1.0.5
+// @name         媒体嗅探器 Media Sniffer Pro v1.0.6
 // @namespace    http://tampermonkey.net/
-// @version      1.0.5
+// @version      1.0.6
 // @description  图片/视频/音频/m3u8 抓取 · AES-128解密 · 分片合并 · 虚拟列表 · 进度可视化 · 跨域兜底 · Cookie/Storage · 翻译 · 元信息 · 高级筛选
 // @match        *://*/*
 // @exclude      *://*chrome.google.com/*
@@ -45,14 +45,14 @@
     // 🎨 全局配置（图标 / 颜色 / 尺寸 / 配色板）
     // =========================================================================
     var MS_CONFIG = {
-        VERSION: '1.0.5',
+        VERSION: '1.0.6',
         ICONS: {
             chevronLeft: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 1px 2px rgba(0,0,0,.2));"><polyline points="15 18 9 12 15 6"></polyline></svg>',
-            play: '▶',
-            music: '🎵',
-            target: '🎯',
-            check: '✓',
-            film: '🎬'
+            play: '<svg width="22" height="22" viewBox="0 0 24 24" fill="#ffffff" style="filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));"><polygon points="5 3 21 12 5 21 5 3"></polygon></svg>',
+            music: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>',
+            target: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,.35));"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4" fill="#ffffff"></circle><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line></svg>',
+            check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+            film: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>'
         },
         COLORS: {
             primary: '#6366f1',
@@ -196,7 +196,7 @@
                 thumbHtml = '<div style="width:100%;height:100%;background:linear-gradient(135deg,' + MS_CONFIG.COLORS.m3u8GradientStart + ',' + MS_CONFIG.COLORS.m3u8GradientEnd + ');display:flex;align-items:center;justify-content:center;color:' + MS_CONFIG.COLORS.white + ';font-size:' + (isMobile ? '24px' : '20px') + ';font-weight:700;">m3u8</div>';
             }
             var markDisplay = inSelMode ? 'flex' : 'none';
-            var markHtml = '<div class="_ms_sel_mark" style="position:absolute;top:' + (isMobile ? '8px' : '6px') + ';right:' + (isMobile ? '8px' : '6px') + ';width:' + markSize + ';height:' + markSize + ';border-radius:50%;' + (isSel ? 'background:' + primary + ';color:' + MS_CONFIG.COLORS.white + ';' : 'background:rgba(255,255,255,.9);border:2px solid ' + primary + ';color:' + primary + ';') + 'font-size:' + markFontSize + ';font-weight:700;display:' + markDisplay + ';align-items:center;justify-content:center;z-index:2;">' + (isSel ? MS_CONFIG.ICONS.check : '') + '</div>';
+            var markHtml = '<div class="_ms_sel_mark" style="position:absolute;top:' + (isMobile ? '8px' : '6px') + ';right:' + (isMobile ? '8px' : '6px') + ';width:' + markSize + ';height:' + markSize + ';border-radius:50%;' + (isSel ? 'background:' + primary + ';color:' + MS_CONFIG.COLORS.white + ';' : 'background:rgba(255,255,255,.9);border:2px solid ' + primary + ';color:' + primary + ';') + 'display:' + markDisplay + ';align-items:center;justify-content:center;z-index:2;">' + (isSel ? MS_CONFIG.ICONS.check : '') + '</div>';
             var iframeBadge = '';
             if (kind === 'video' && Scanner._iframeVideoUrls && Scanner._iframeVideoUrls.has(url)) {
                 iframeBadge = '<div style="position:absolute;top:' + (isMobile ? '8px' : '6px') + ';left:' + (isMobile ? '8px' : '6px') + ';padding:2px 6px;border-radius:4px;background:rgba(0,0,0,.6);color:' + MS_CONFIG.COLORS.white + ';font-size:10px;font-weight:600;z-index:2;pointer-events:none;">' + LANG.t('iframeBadge') + '</div>';
@@ -8469,13 +8469,10 @@
                 '  border-radius: 50% !important;',
                 '  border: none !important;',
                 '  background: linear-gradient(135deg,' + MS_CONFIG.COLORS.primary2 + ',' + MS_CONFIG.COLORS.purple2 + ') !important;',
-                '  color: ' + MS_CONFIG.COLORS.white + ' !important;',
-                '  font-size: ' + MS_CONFIG.SIZES.floatBtnFont + 'px !important;',
-                '  font-weight: 700 !important;',
-                '  text-align: center !important;',
-                '  line-height: ' + MS_CONFIG.SIZES.floatBtn + 'px !important;',
                 '  cursor: pointer !important;',
-                '  display: block !important;',
+                '  display: flex !important;',
+                '  align-items: center !important;',
+                '  justify-content: center !important;',
                 '  visibility: visible !important;',
                 '  opacity: 1 !important;',
                 '  box-shadow: 0 8px 24px rgba(139,92,246,.6) !important;',
@@ -8520,7 +8517,7 @@
             var btn = document.createElement('div');
             btn.id = '_ms_float';
             btn.setAttribute('data-ms-btn', '1');
-            btn.textContent = '\uD83C\uDFAF';
+            btn.innerHTML = MS_CONFIG.ICONS.target;
 
             // 恢复保存的位置
             if (State.config && State.config.btnPos && State.config.btnPos.x != null && State.config.btnPos.y != null) {
@@ -8611,6 +8608,28 @@
 
             // 同步当前界面风格到浮动按钮
             try { UI.applyUiStyle(); } catch (e) {}
+
+            // 窗口尺寸变化时把按钮拉回可视区
+            try {
+                window.addEventListener('resize', function () {
+                    var b = UI._floatBtn || document.getElementById('_ms_float');
+                    if (!b) return;
+                    var rect = b.getBoundingClientRect();
+                    var size = MS_CONFIG.SIZES.floatBtn;
+                    var nx = Math.max(4, Math.min(window.innerWidth - size - 4, rect.left));
+                    var ny = Math.max(4, Math.min(window.innerHeight - size - 4, rect.top));
+                    if (nx !== rect.left || ny !== rect.top) {
+                        b.style.left = nx + 'px';
+                        b.style.top = ny + 'px';
+                        b.style.right = 'auto';
+                        b.style.bottom = 'auto';
+                        if (State.config) {
+                            State.config.btnPos = { x: nx, y: ny };
+                            try { State.save(); } catch (e2) {}
+                        }
+                    }
+                });
+            } catch (e) {}
 
             LOG.info('浮动按钮创建成功 ✓');
         } catch (err) {
