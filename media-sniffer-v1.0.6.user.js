@@ -213,7 +213,7 @@
         }
     };
 
-    var Utils = (function () {
+    var U = (function () {
         'use strict';
     // =========================================================================
     // 🧩 模块 1：核心工具 (Utils) + 日志系统
@@ -382,10 +382,12 @@
             return decodeURIComponent(escape(atob(b64)));
         } catch (e) { return ''; }
     };
+        U.LOG = LOG;
         return U;
     })();
+    var LOG = U.LOG;
 
-    var I18n = (function () {
+    var LANG = (function () {
         'use strict';
     // =========================================================================
 
@@ -1577,7 +1579,7 @@
 
         return LANG;
     })();
-    var Security = (function () {
+    var SEC = (function () {
         'use strict';
         // 🛡 模块 2：安全 (Security) + AES-128 解密
     // =========================================================================
@@ -2291,7 +2293,7 @@
 
         return SEC;
     })();
-    var Settings = (function () {
+    var State = (function () {
         'use strict';
     // =========================================================================
     // 💾 模块 4：状态管理 (State) + 配置校验
@@ -4992,7 +4994,7 @@
 
         return Meta;
     })();
-    var Translate = (function () {
+    var TranslateEngine = (function () {
         'use strict';
     // =========================================================================
     // 🌐 模块 8：翻译引擎 (TranslateEngine) - 多引擎架构
@@ -7344,7 +7346,7 @@
 
         return DownloadManager;
     })();
-    var Downloader = (function () {
+    var Dl = (function () {
         'use strict';
     // =========================================================================
     // ⬇ 模块 10：下载引擎 (Downloader) + 进度可视化 (P0-3)
