@@ -1,0 +1,2562 @@
+[
+  {
+    "line": 48,
+    "emojis": [
+      "🎨"
+    ],
+    "text": "    // 🎨 全局配置（图标 / 颜色 / 尺寸 / 配色板）"
+  },
+  {
+    "line": 111,
+    "emojis": [
+      "🏭"
+    ],
+    "text": "    // 🏭 组件工厂（按钮 / 元素 / 卡片 / 最小化栏）"
+  },
+  {
+    "line": 219,
+    "emojis": [
+      "🧩"
+    ],
+    "text": "    // 🧩 模块 1：核心工具 (Utils) + 日志系统"
+  },
+  {
+    "line": 395,
+    "emojis": [
+      "🌍"
+    ],
+    "text": "    // 🌍 模块 1b：国际化系统 (i18n)"
+  },
+  {
+    "line": 443,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'enabled': '✅ 已启用',"
+  },
+  {
+    "line": 460,
+    "emojis": [
+      "☀",
+      "🌙"
+    ],
+    "text": "            'themeAuto': '跟随系统', 'themeLight': '☀ 亮色', 'themeDark': '🌙 暗色',"
+  },
+  {
+    "line": 488,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'coverExtracted': '✅ 封面已提取并下载',"
+  },
+  {
+    "line": 496,
+    "emojis": [
+      "🖼",
+      "🎬",
+      "🎵"
+    ],
+    "text": "            'tabImg': '🖼 图片', 'tabVideo': '🎬 视频', 'tabAudio': '🎵 音频',"
+  },
+  {
+    "line": 497,
+    "emojis": [
+      "📺",
+      "📖"
+    ],
+    "text": "            'tabM3u8': '📺 流媒体', 'tabTranslate': '📖 翻译',"
+  },
+  {
+    "line": 498,
+    "emojis": [
+      "🍪",
+      "💾"
+    ],
+    "text": "            'tabCookie': '🍪 Cookie', 'tabStorage': '💾 存储',"
+  },
+  {
+    "line": 499,
+    "emojis": [
+      "⚙"
+    ],
+    "text": "            'tabSettings': '⚙️ 设置',"
+  },
+  {
+    "line": 502,
+    "emojis": [
+      "🔧"
+    ],
+    "text": "            'advFilterTitle': '🔧 高级筛选设置',"
+  },
+  {
+    "line": 515,
+    "emojis": [
+      "📋"
+    ],
+    "text": "            'copyCookieStr': '📋 复制 Cookie 字符串',"
+  },
+  {
+    "line": 516,
+    "emojis": [
+      "📋"
+    ],
+    "text": "            'copyJson': '📋 复制 JSON',"
+  },
+  {
+    "line": 517,
+    "emojis": [
+      "➕"
+    ],
+    "text": "            'addCookie': '➕ 新增 Cookie',"
+  },
+  {
+    "line": 518,
+    "emojis": [
+      "🗑"
+    ],
+    "text": "            'clearSite': '🗑 清空本站',"
+  },
+  {
+    "line": 529,
+    "emojis": [
+      "📤"
+    ],
+    "text": "            'exportLs': '📤 导出 localStorage',"
+  },
+  {
+    "line": 530,
+    "emojis": [
+      "📤"
+    ],
+    "text": "            'exportSs': '📤 导出 sessionStorage',"
+  },
+  {
+    "line": 531,
+    "emojis": [
+      "➕"
+    ],
+    "text": "            'addItem': '➕ 新增项',"
+  },
+  {
+    "line": 532,
+    "emojis": [
+      "🗑"
+    ],
+    "text": "            'clearAll': '🗑 清空全部',"
+  },
+  {
+    "line": 538,
+    "emojis": [
+      "📦"
+    ],
+    "text": "            'lsTitle': '📦 localStorage',"
+  },
+  {
+    "line": 539,
+    "emojis": [
+      "💾"
+    ],
+    "text": "            'ssTitle': '💾 sessionStorage',"
+  },
+  {
+    "line": 540,
+    "emojis": [
+      "📦",
+      "💾"
+    ],
+    "text": "            'lsCount': '📦 localStorage {n} 条 · 💾 sessionStorage {m} 条',"
+  },
+  {
+    "line": 541,
+    "emojis": [
+      "📖"
+    ],
+    "text": "            'transTitle': '📖 翻译工具',"
+  },
+  {
+    "line": 549,
+    "emojis": [
+      "📋"
+    ],
+    "text": "            'copyResult': '📋 复制结果',"
+  },
+  {
+    "line": 550,
+    "emojis": [
+      "🔁"
+    ],
+    "text": "            'resultAsInput': '🔁 结果当输入',"
+  },
+  {
+    "line": 552,
+    "emojis": [
+      "⏳"
+    ],
+    "text": "            'translating': '⏳ 正在翻译（{from} → {to}）…',"
+  },
+  {
+    "line": 554,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'transDone': '✅ 翻译完成 · ',"
+  },
+  {
+    "line": 555,
+    "emojis": [
+      "❌"
+    ],
+    "text": "            'transFail': '❌ 翻译失败',"
+  },
+  {
+    "line": 564,
+    "emojis": [
+      "🔊"
+    ],
+    "text": "            'speakBtn': '🔊 发音',"
+  },
+  {
+    "line": 595,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'copiedN': '✅ 已复制 {n} 字符',"
+  },
+  {
+    "line": 599,
+    "emojis": [
+      "⬇"
+    ],
+    "text": "            'batchStart': '⬇ 开始批量下载 {n} 项（并发 {c}）',"
+  },
+  {
+    "line": 600,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'batchDone': '✅ 批量下载完成：成功 {ok} / {total}，失败 {fail}，耗时 {t}秒',"
+  },
+  {
+    "line": 610,
+    "emojis": [
+      "❌"
+    ],
+    "text": "            'm3u8Fail': '❌ 下载失败',"
+  },
+  {
+    "line": 622,
+    "emojis": [
+      "📺"
+    ],
+    "text": "            'm3u8Title': '📺 流媒体：{n} 个 m3u8',"
+  },
+  {
+    "line": 627,
+    "emojis": [
+      "📺"
+    ],
+    "text": "            'm3u8Detail': '📺 m3u8 流媒体详情',"
+  },
+  {
+    "line": 632,
+    "emojis": [
+      "🔐"
+    ],
+    "text": "            'encrypted': '🔐 AES 加密',"
+  },
+  {
+    "line": 633,
+    "emojis": [
+      "🔓"
+    ],
+    "text": "            'notEncrypted': '🔓 未加密',"
+  },
+  {
+    "line": 639,
+    "emojis": [
+      "📊"
+    ],
+    "text": "            'logLevelTitle': '📊 日志级别（调试用）',"
+  },
+  {
+    "line": 644,
+    "emojis": [
+      "🎨"
+    ],
+    "text": "            'otherOps': '🎨 其他操作',"
+  },
+  {
+    "line": 645,
+    "emojis": [
+      "📤"
+    ],
+    "text": "            'exportAllConfig': '📤 导出全部配置',"
+  },
+  {
+    "line": 646,
+    "emojis": [
+      "📥"
+    ],
+    "text": "            'importConfig': '📥 导入配置',"
+  },
+  {
+    "line": 648,
+    "emojis": [
+      "📦"
+    ],
+    "text": "            'batchTitle': '📦 批量下载设置',"
+  },
+  {
+    "line": 659,
+    "emojis": [
+      "🔧"
+    ],
+    "text": "            'requestHeaders': '🔧 请求头设置',"
+  },
+  {
+    "line": 668,
+    "emojis": [
+      "⌨"
+    ],
+    "text": "            'shortcutTitle': '⌨️ 快捷键设置',"
+  },
+  {
+    "line": 751,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'enabled': '✅ Enabled', 'disabled': '○ Disabled',"
+  },
+  {
+    "line": 760,
+    "emojis": [
+      "☀",
+      "🌙"
+    ],
+    "text": "            'themeAuto': 'System', 'themeLight': '☀ Light', 'themeDark': '🌙 Dark',"
+  },
+  {
+    "line": 788,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'coverExtracted': '✅ Cover extracted',"
+  },
+  {
+    "line": 796,
+    "emojis": [
+      "🖼",
+      "🎬",
+      "🎵"
+    ],
+    "text": "            'tabImg': '🖼 Images', 'tabVideo': '🎬 Videos', 'tabAudio': '🎵 Audio',"
+  },
+  {
+    "line": 797,
+    "emojis": [
+      "📺",
+      "📖"
+    ],
+    "text": "            'tabM3u8': '📺 Streams', 'tabTranslate': '📖 Translate',"
+  },
+  {
+    "line": 798,
+    "emojis": [
+      "🍪",
+      "💾"
+    ],
+    "text": "            'tabCookie': '🍪 Cookies', 'tabStorage': '💾 Storage',"
+  },
+  {
+    "line": 799,
+    "emojis": [
+      "⚙"
+    ],
+    "text": "            'tabSettings': '⚙️ Settings',"
+  },
+  {
+    "line": 802,
+    "emojis": [
+      "🔧"
+    ],
+    "text": "            'advFilterTitle': '🔧 Advanced Filter Settings',"
+  },
+  {
+    "line": 812,
+    "emojis": [
+      "🔍"
+    ],
+    "text": "            'searchPlaceholder': '🔍 Search URL or filename…',"
+  },
+  {
+    "line": 813,
+    "emojis": [
+      "🔧"
+    ],
+    "text": "            'advFilter': '🔧 Advanced Filter',"
+  },
+  {
+    "line": 815,
+    "emojis": [
+      "📋"
+    ],
+    "text": "            'copyCookieStr': '📋 Copy Cookie String',"
+  },
+  {
+    "line": 816,
+    "emojis": [
+      "📋"
+    ],
+    "text": "            'copyJson': '📋 Copy JSON',"
+  },
+  {
+    "line": 817,
+    "emojis": [
+      "➕"
+    ],
+    "text": "            'addCookie': '➕ Add Cookie',"
+  },
+  {
+    "line": 818,
+    "emojis": [
+      "🗑"
+    ],
+    "text": "            'clearSite': '🗑 Clear Site',"
+  },
+  {
+    "line": 823,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'clearedRefresh': '✅ Cleared, please refresh',"
+  },
+  {
+    "line": 824,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'added': '✅ Added',"
+  },
+  {
+    "line": 829,
+    "emojis": [
+      "📤"
+    ],
+    "text": "            'exportLs': '📤 Export localStorage',"
+  },
+  {
+    "line": 830,
+    "emojis": [
+      "📤"
+    ],
+    "text": "            'exportSs': '📤 Export sessionStorage',"
+  },
+  {
+    "line": 831,
+    "emojis": [
+      "➕"
+    ],
+    "text": "            'addItem': '➕ Add Item',"
+  },
+  {
+    "line": 832,
+    "emojis": [
+      "🗑"
+    ],
+    "text": "            'clearAll': '🗑 Clear All',"
+  },
+  {
+    "line": 836,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'cleared': '✅ Cleared',"
+  },
+  {
+    "line": 837,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'addToLs': '✅ Added to localStorage',"
+  },
+  {
+    "line": 838,
+    "emojis": [
+      "📦"
+    ],
+    "text": "            'lsTitle': '📦 localStorage',"
+  },
+  {
+    "line": 839,
+    "emojis": [
+      "💾"
+    ],
+    "text": "            'ssTitle': '💾 sessionStorage',"
+  },
+  {
+    "line": 840,
+    "emojis": [
+      "📦",
+      "💾"
+    ],
+    "text": "            'lsCount': '📦 localStorage {n} · 💾 sessionStorage {m}',"
+  },
+  {
+    "line": 841,
+    "emojis": [
+      "🌐"
+    ],
+    "text": "            'transTitle': '🌐 Text Translation',"
+  },
+  {
+    "line": 849,
+    "emojis": [
+      "📋"
+    ],
+    "text": "            'copyResult': '📋 Copy Result',"
+  },
+  {
+    "line": 850,
+    "emojis": [
+      "🔁"
+    ],
+    "text": "            'resultAsInput': '🔁 Use as Input',"
+  },
+  {
+    "line": 851,
+    "emojis": [
+      "⚠"
+    ],
+    "text": "            'plsInputText': '⚠ Please enter text to translate',"
+  },
+  {
+    "line": 852,
+    "emojis": [
+      "⏳"
+    ],
+    "text": "            'translating': '⏳ Translating ({from} → {to})…',"
+  },
+  {
+    "line": 853,
+    "emojis": [
+      "⏳"
+    ],
+    "text": "            'translatingShort': '⏳ Translating, please wait…',"
+  },
+  {
+    "line": 854,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'transDone': '✅ Translated · ',"
+  },
+  {
+    "line": 855,
+    "emojis": [
+      "❌"
+    ],
+    "text": "            'transFail': '❌ Translation failed',"
+  },
+  {
+    "line": 864,
+    "emojis": [
+      "🔊"
+    ],
+    "text": "            'speakBtn': '🔊 Speak',"
+  },
+  {
+    "line": 888,
+    "emojis": [
+      "⬇"
+    ],
+    "text": "            'downloadSelBtn': '⬇ Download',"
+  },
+  {
+    "line": 891,
+    "emojis": [
+      "📝"
+    ],
+    "text": "            'genScript': '📝 Generate Script',"
+  },
+  {
+    "line": 892,
+    "emojis": [
+      "🔄"
+    ],
+    "text": "            'rescan': '🔄 Rescan',"
+  },
+  {
+    "line": 894,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'scriptCopied': '✅ aria2 script generated and copied',"
+  },
+  {
+    "line": 895,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'rescanDone': '✅ Rescanned',"
+  },
+  {
+    "line": 896,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'copiedN': '✅ Copied {n} chars',"
+  },
+  {
+    "line": 899,
+    "emojis": [
+      "⏳"
+    ],
+    "text": "            'downloading': '⏳ Download already in progress',"
+  },
+  {
+    "line": 900,
+    "emojis": [
+      "⬇"
+    ],
+    "text": "            'batchStart': '⬇ Starting batch download of {n} items ({c} concurrent)',"
+  },
+  {
+    "line": 901,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'batchDone': '✅ Batch done: {ok}/{total} success, {fail} failed, {t}s',"
+  },
+  {
+    "line": 902,
+    "emojis": [
+      "⏹"
+    ],
+    "text": "            'dlStopped': '⏹ Download stopped',"
+  },
+  {
+    "line": 903,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'scanDoneToast': '✅ Scan complete',"
+  },
+  {
+    "line": 904,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'filterAppliedToast': '✅ Filter applied',"
+  },
+  {
+    "line": 909,
+    "emojis": [
+      "⏳"
+    ],
+    "text": "            'm3u8Start': '⏳ Starting m3u8 download...',"
+  },
+  {
+    "line": 911,
+    "emojis": [
+      "❌"
+    ],
+    "text": "            'm3u8Fail': '❌ Download failed',"
+  },
+  {
+    "line": 912,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'm3u8Done': '✅ m3u8 merged and downloaded',"
+  },
+  {
+    "line": 915,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'logLevelChanged': '✅ Log level changed',"
+  },
+  {
+    "line": 916,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'resetDone': '✅ Reset',"
+  },
+  {
+    "line": 918,
+    "emojis": [
+      "🌐"
+    ],
+    "text": "            'transSelText': '🌐 Translate Selection',"
+  },
+  {
+    "line": 923,
+    "emojis": [
+      "📺"
+    ],
+    "text": "            'm3u8Title': '📺 Streams: {n} m3u8',"
+  },
+  {
+    "line": 925,
+    "emojis": [
+      "⬇"
+    ],
+    "text": "            'dlMerge': '⬇ Download & Merge',"
+  },
+  {
+    "line": 926,
+    "emojis": [
+      "📝"
+    ],
+    "text": "            'genScriptBtn': '📝 Generate Script',"
+  },
+  {
+    "line": 927,
+    "emojis": [
+      "👁"
+    ],
+    "text": "            'detailBtn': '👁 Details',"
+  },
+  {
+    "line": 928,
+    "emojis": [
+      "📺"
+    ],
+    "text": "            'm3u8Detail': '📺 m3u8 Stream Details',"
+  },
+  {
+    "line": 940,
+    "emojis": [
+      "📊"
+    ],
+    "text": "            'logLevelTitle': '📊 Log Level (debug)',"
+  },
+  {
+    "line": 945,
+    "emojis": [
+      "🎨"
+    ],
+    "text": "            'otherOps': '🎨 Other Actions',"
+  },
+  {
+    "line": 946,
+    "emojis": [
+      "📤"
+    ],
+    "text": "            'exportAllConfig': '📤 Export All Config',"
+  },
+  {
+    "line": 947,
+    "emojis": [
+      "📥"
+    ],
+    "text": "            'importConfig': '📥 Import Config',"
+  },
+  {
+    "line": 949,
+    "emojis": [
+      "📦"
+    ],
+    "text": "            'batchTitle': '📦 Batch Download Settings',"
+  },
+  {
+    "line": 960,
+    "emojis": [
+      "🔧"
+    ],
+    "text": "            'requestHeaders': '🔧 Request Headers',"
+  },
+  {
+    "line": 969,
+    "emojis": [
+      "⌨"
+    ],
+    "text": "            'shortcutTitle': '⌨️ Shortcuts',"
+  },
+  {
+    "line": 1053,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'enabled': '✅ 有効', 'disabled': '○ 無効',"
+  },
+  {
+    "line": 1060,
+    "emojis": [
+      "☀",
+      "🌙"
+    ],
+    "text": "            'themeAuto': 'システム', 'themeLight': '☀ ライト', 'themeDark': '🌙 ダーク',"
+  },
+  {
+    "line": 1072,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'coverExtracted': '✅ カバーを抽出しました',"
+  },
+  {
+    "line": 1080,
+    "emojis": [
+      "🖼",
+      "🎬",
+      "🎵"
+    ],
+    "text": "            'tabImg': '🖼 画像', 'tabVideo': '🎬 動画', 'tabAudio': '🎵 音声',"
+  },
+  {
+    "line": 1081,
+    "emojis": [
+      "📺",
+      "📖"
+    ],
+    "text": "            'tabM3u8': '📺 ストリーム', 'tabTranslate': '📖 翻訳',"
+  },
+  {
+    "line": 1082,
+    "emojis": [
+      "🍪",
+      "💾"
+    ],
+    "text": "            'tabCookie': '🍪 Cookie', 'tabStorage': '💾 ストレージ',"
+  },
+  {
+    "line": 1083,
+    "emojis": [
+      "⚙"
+    ],
+    "text": "            'tabSettings': '⚙️ 設定',"
+  },
+  {
+    "line": 1086,
+    "emojis": [
+      "🔧"
+    ],
+    "text": "            'advFilterTitle': '🔧 詳細フィルター設定',"
+  },
+  {
+    "line": 1096,
+    "emojis": [
+      "🔍"
+    ],
+    "text": "            'searchPlaceholder': '🔍 URLまたはファイル名を検索…',"
+  },
+  {
+    "line": 1097,
+    "emojis": [
+      "🔧"
+    ],
+    "text": "            'advFilter': '🔧 詳細フィルター',"
+  },
+  {
+    "line": 1099,
+    "emojis": [
+      "📋"
+    ],
+    "text": "            'copyCookieStr': '📋 Cookie文字列コピー',"
+  },
+  {
+    "line": 1100,
+    "emojis": [
+      "📋"
+    ],
+    "text": "            'copyJson': '📋 JSONコピー',"
+  },
+  {
+    "line": 1101,
+    "emojis": [
+      "➕"
+    ],
+    "text": "            'addCookie': '➕ Cookie追加',"
+  },
+  {
+    "line": 1102,
+    "emojis": [
+      "🗑"
+    ],
+    "text": "            'clearSite': '🗑 サイトをクリア',"
+  },
+  {
+    "line": 1107,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'clearedRefresh': '✅ クリアしました、更新してください',"
+  },
+  {
+    "line": 1108,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'added': '✅ 追加しました',"
+  },
+  {
+    "line": 1113,
+    "emojis": [
+      "📤"
+    ],
+    "text": "            'exportLs': '📤 localStorageをエクスポート',"
+  },
+  {
+    "line": 1114,
+    "emojis": [
+      "📤"
+    ],
+    "text": "            'exportSs': '📤 sessionStorageをエクスポート',"
+  },
+  {
+    "line": 1115,
+    "emojis": [
+      "➕"
+    ],
+    "text": "            'addItem': '➕ 項目を追加',"
+  },
+  {
+    "line": 1116,
+    "emojis": [
+      "🗑"
+    ],
+    "text": "            'clearAll': '🗑 すべてクリア',"
+  },
+  {
+    "line": 1120,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'cleared': '✅ クリアしました',"
+  },
+  {
+    "line": 1121,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'addToLs': '✅ localStorageに追加しました',"
+  },
+  {
+    "line": 1122,
+    "emojis": [
+      "📦"
+    ],
+    "text": "            'lsTitle': '📦 localStorage',"
+  },
+  {
+    "line": 1123,
+    "emojis": [
+      "💾"
+    ],
+    "text": "            'ssTitle': '💾 sessionStorage',"
+  },
+  {
+    "line": 1124,
+    "emojis": [
+      "📦",
+      "💾"
+    ],
+    "text": "            'lsCount': '📦 localStorage {n}件 · 💾 sessionStorage {m}件',"
+  },
+  {
+    "line": 1125,
+    "emojis": [
+      "🌐"
+    ],
+    "text": "            'transTitle': '🌐 テキスト翻訳',"
+  },
+  {
+    "line": 1133,
+    "emojis": [
+      "📋"
+    ],
+    "text": "            'copyResult': '📋 結果をコピー',"
+  },
+  {
+    "line": 1134,
+    "emojis": [
+      "🔁"
+    ],
+    "text": "            'resultAsInput': '🔁 結果を入力に',"
+  },
+  {
+    "line": 1135,
+    "emojis": [
+      "⚠"
+    ],
+    "text": "            'plsInputText': '⚠ 翻訳するテキストを入力してください',"
+  },
+  {
+    "line": 1136,
+    "emojis": [
+      "⏳"
+    ],
+    "text": "            'translating': '⏳ 翻訳中（{from} → {to}）…',"
+  },
+  {
+    "line": 1137,
+    "emojis": [
+      "⏳"
+    ],
+    "text": "            'translatingShort': '⏳ 翻訳中、しばらくお待ちください…',"
+  },
+  {
+    "line": 1138,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'transDone': '✅ 翻訳完了 · ',"
+  },
+  {
+    "line": 1139,
+    "emojis": [
+      "❌"
+    ],
+    "text": "            'transFail': '❌ 翻訳失敗',"
+  },
+  {
+    "line": 1155,
+    "emojis": [
+      "⬇"
+    ],
+    "text": "            'downloadSelBtn': '⬇ ダウンロード',"
+  },
+  {
+    "line": 1158,
+    "emojis": [
+      "📝"
+    ],
+    "text": "            'genScript': '📝 スクリプト生成',"
+  },
+  {
+    "line": 1159,
+    "emojis": [
+      "🔄"
+    ],
+    "text": "            'rescan': '🔄 再スキャン',"
+  },
+  {
+    "line": 1161,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'scriptCopied': '✅ aria2スクリプト生成・コピー完了',"
+  },
+  {
+    "line": 1162,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'rescanDone': '✅ 再スキャン完了',"
+  },
+  {
+    "line": 1163,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'copiedN': '✅ {n}文字コピーしました',"
+  },
+  {
+    "line": 1166,
+    "emojis": [
+      "⏳"
+    ],
+    "text": "            'downloading': '⏳ ダウンロード中です',"
+  },
+  {
+    "line": 1167,
+    "emojis": [
+      "⬇"
+    ],
+    "text": "            'batchStart': '⬇ 一括DL開始：{n}件（同時{c}件）',"
+  },
+  {
+    "line": 1168,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'batchDone': '✅ 一括DL完了：成功{ok}/{total}件、失敗{fail}件、{t}秒',"
+  },
+  {
+    "line": 1169,
+    "emojis": [
+      "⏹"
+    ],
+    "text": "            'dlStopped': '⏹ DL停止しました',"
+  },
+  {
+    "line": 1170,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'scanDoneToast': '✅ スキャン完了',"
+  },
+  {
+    "line": 1171,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'filterAppliedToast': '✅ フィルター適用済み',"
+  },
+  {
+    "line": 1176,
+    "emojis": [
+      "⏳"
+    ],
+    "text": "            'm3u8Start': '⏳ m3u8のDLを開始...',"
+  },
+  {
+    "line": 1178,
+    "emojis": [
+      "❌"
+    ],
+    "text": "            'm3u8Fail': '❌ DL失敗',"
+  },
+  {
+    "line": 1179,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'm3u8Done': '✅ m3u8 結合・DL完了',"
+  },
+  {
+    "line": 1182,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'logLevelChanged': '✅ ログレベル変更',"
+  },
+  {
+    "line": 1183,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'resetDone': '✅ リセット完了',"
+  },
+  {
+    "line": 1185,
+    "emojis": [
+      "🌐"
+    ],
+    "text": "            'transSelText': '🌐 選択を翻訳',"
+  },
+  {
+    "line": 1190,
+    "emojis": [
+      "📺"
+    ],
+    "text": "            'm3u8Title': '📺 ストリーム：{n} m3u8',"
+  },
+  {
+    "line": 1192,
+    "emojis": [
+      "⬇"
+    ],
+    "text": "            'dlMerge': '⬇ DLして結合',"
+  },
+  {
+    "line": 1193,
+    "emojis": [
+      "📝"
+    ],
+    "text": "            'genScriptBtn': '📝 スクリプト生成',"
+  },
+  {
+    "line": 1194,
+    "emojis": [
+      "👁"
+    ],
+    "text": "            'detailBtn': '👁 詳細',"
+  },
+  {
+    "line": 1195,
+    "emojis": [
+      "📺"
+    ],
+    "text": "            'm3u8Detail': '📺 m3u8ストリーム詳細',"
+  },
+  {
+    "line": 1207,
+    "emojis": [
+      "📊"
+    ],
+    "text": "            'logLevelTitle': '📊 ログレベル（デバッグ用）',"
+  },
+  {
+    "line": 1212,
+    "emojis": [
+      "🎨"
+    ],
+    "text": "            'otherOps': '🎨 その他の操作',"
+  },
+  {
+    "line": 1213,
+    "emojis": [
+      "📤"
+    ],
+    "text": "            'exportAllConfig': '📤 全設定エクスポート',"
+  },
+  {
+    "line": 1214,
+    "emojis": [
+      "📥"
+    ],
+    "text": "            'importConfig': '📥 設定インポート',"
+  },
+  {
+    "line": 1216,
+    "emojis": [
+      "📦"
+    ],
+    "text": "            'batchTitle': '📦 一括DL設定',"
+  },
+  {
+    "line": 1227,
+    "emojis": [
+      "🔧"
+    ],
+    "text": "            'requestHeaders': '🔧 リクエストヘッダー',"
+  },
+  {
+    "line": 1318,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'enabled': '✅ 활성', 'disabled': '○ 비활성',"
+  },
+  {
+    "line": 1325,
+    "emojis": [
+      "☀",
+      "🌙"
+    ],
+    "text": "            'themeAuto': '시스템', 'themeLight': '☀ 라이트', 'themeDark': '🌙 다크',"
+  },
+  {
+    "line": 1337,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'coverExtracted': '✅ 썸네일 추출됨',"
+  },
+  {
+    "line": 1345,
+    "emojis": [
+      "🖼",
+      "🎬",
+      "🎵"
+    ],
+    "text": "            'tabImg': '🖼 이미지', 'tabVideo': '🎬 영상', 'tabAudio': '🎵 오디오',"
+  },
+  {
+    "line": 1346,
+    "emojis": [
+      "📺",
+      "📖"
+    ],
+    "text": "            'tabM3u8': '📺 스트림', 'tabTranslate': '📖 번역',"
+  },
+  {
+    "line": 1347,
+    "emojis": [
+      "🍪",
+      "💾"
+    ],
+    "text": "            'tabCookie': '🍪 쿠키', 'tabStorage': '💾 저장소',"
+  },
+  {
+    "line": 1348,
+    "emojis": [
+      "⚙"
+    ],
+    "text": "            'tabSettings': '⚙️ 설정',"
+  },
+  {
+    "line": 1351,
+    "emojis": [
+      "🔧"
+    ],
+    "text": "            'advFilterTitle': '🔧 고급 필터 설정',"
+  },
+  {
+    "line": 1361,
+    "emojis": [
+      "🔍"
+    ],
+    "text": "            'searchPlaceholder': '🔍 URL 또는 파일명 검색…',"
+  },
+  {
+    "line": 1362,
+    "emojis": [
+      "🔧"
+    ],
+    "text": "            'advFilter': '🔧 고급 필터',"
+  },
+  {
+    "line": 1364,
+    "emojis": [
+      "📋"
+    ],
+    "text": "            'copyCookieStr': '📋 쿠키 문자열 복사',"
+  },
+  {
+    "line": 1365,
+    "emojis": [
+      "📋"
+    ],
+    "text": "            'copyJson': '📋 JSON 복사',"
+  },
+  {
+    "line": 1366,
+    "emojis": [
+      "➕"
+    ],
+    "text": "            'addCookie': '➕ 쿠키 추가',"
+  },
+  {
+    "line": 1367,
+    "emojis": [
+      "🗑"
+    ],
+    "text": "            'clearSite': '🗑 사이트 비우기',"
+  },
+  {
+    "line": 1372,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'clearedRefresh': '✅ 지워졌습니다, 새로고침하세요',"
+  },
+  {
+    "line": 1373,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'added': '✅ 추가됨',"
+  },
+  {
+    "line": 1378,
+    "emojis": [
+      "📤"
+    ],
+    "text": "            'exportLs': '📤 localStorage 내보내기',"
+  },
+  {
+    "line": 1379,
+    "emojis": [
+      "📤"
+    ],
+    "text": "            'exportSs': '📤 sessionStorage 내보내기',"
+  },
+  {
+    "line": 1380,
+    "emojis": [
+      "➕"
+    ],
+    "text": "            'addItem': '➕ 항목 추가',"
+  },
+  {
+    "line": 1381,
+    "emojis": [
+      "🗑"
+    ],
+    "text": "            'clearAll': '🗑 모두 비우기',"
+  },
+  {
+    "line": 1385,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'cleared': '✅ 비워졌습니다',"
+  },
+  {
+    "line": 1386,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'addToLs': '✅ localStorage에 추가됨',"
+  },
+  {
+    "line": 1387,
+    "emojis": [
+      "📦"
+    ],
+    "text": "            'lsTitle': '📦 localStorage',"
+  },
+  {
+    "line": 1388,
+    "emojis": [
+      "💾"
+    ],
+    "text": "            'ssTitle': '💾 sessionStorage',"
+  },
+  {
+    "line": 1389,
+    "emojis": [
+      "📦",
+      "💾"
+    ],
+    "text": "            'lsCount': '📦 localStorage {n}개 · 💾 sessionStorage {m}개',"
+  },
+  {
+    "line": 1390,
+    "emojis": [
+      "🌐"
+    ],
+    "text": "            'transTitle': '🌐 텍스트 번역',"
+  },
+  {
+    "line": 1398,
+    "emojis": [
+      "📋"
+    ],
+    "text": "            'copyResult': '📋 결과 복사',"
+  },
+  {
+    "line": 1399,
+    "emojis": [
+      "🔁"
+    ],
+    "text": "            'resultAsInput': '🔁 결과를 입력으로',"
+  },
+  {
+    "line": 1400,
+    "emojis": [
+      "⚠"
+    ],
+    "text": "            'plsInputText': '⚠ 번역할 텍스트를 입력하세요',"
+  },
+  {
+    "line": 1401,
+    "emojis": [
+      "⏳"
+    ],
+    "text": "            'translating': '⏳ 번역 중（{from} → {to}）…',"
+  },
+  {
+    "line": 1402,
+    "emojis": [
+      "⏳"
+    ],
+    "text": "            'translatingShort': '⏳ 번역 중입니다…',"
+  },
+  {
+    "line": 1403,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'transDone': '✅ 번역 완료 · ',"
+  },
+  {
+    "line": 1404,
+    "emojis": [
+      "❌"
+    ],
+    "text": "            'transFail': '❌ 번역 실패',"
+  },
+  {
+    "line": 1420,
+    "emojis": [
+      "⬇"
+    ],
+    "text": "            'downloadSelBtn': '⬇ 다운로드',"
+  },
+  {
+    "line": 1423,
+    "emojis": [
+      "📝"
+    ],
+    "text": "            'genScript': '📝 스크립트 생성',"
+  },
+  {
+    "line": 1424,
+    "emojis": [
+      "🔄"
+    ],
+    "text": "            'rescan': '🔄 재스캔',"
+  },
+  {
+    "line": 1426,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'scriptCopied': '✅ aria2 스크립트 생성 및 복사됨',"
+  },
+  {
+    "line": 1427,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'rescanDone': '✅ 재스캔 완료',"
+  },
+  {
+    "line": 1428,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'copiedN': '✅ {n}자 복사됨',"
+  },
+  {
+    "line": 1431,
+    "emojis": [
+      "⏳"
+    ],
+    "text": "            'downloading': '⏳ 이미 다운로드 중입니다',"
+  },
+  {
+    "line": 1432,
+    "emojis": [
+      "⬇"
+    ],
+    "text": "            'batchStart': '⬇ 일괄 다운로드 시작: {n}개（동시 {c}개）',"
+  },
+  {
+    "line": 1433,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'batchDone': '✅ 일괄 완료: 성공 {ok}/{total}, 실패 {fail}, {t}초',"
+  },
+  {
+    "line": 1434,
+    "emojis": [
+      "⏹"
+    ],
+    "text": "            'dlStopped': '⏹ 다운로드 중지됨',"
+  },
+  {
+    "line": 1435,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'scanDoneToast': '✅ 스캔 완료',"
+  },
+  {
+    "line": 1436,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'filterAppliedToast': '✅ 필터 적용됨',"
+  },
+  {
+    "line": 1441,
+    "emojis": [
+      "⏳"
+    ],
+    "text": "            'm3u8Start': '⏳ m3u8 다운로드 시작...',"
+  },
+  {
+    "line": 1443,
+    "emojis": [
+      "❌"
+    ],
+    "text": "            'm3u8Fail': '❌ 다운로드 실패',"
+  },
+  {
+    "line": 1444,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'm3u8Done': '✅ m3u8 병합 및 다운로드 완료',"
+  },
+  {
+    "line": 1447,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'logLevelChanged': '✅ 로그 레벨 변경됨',"
+  },
+  {
+    "line": 1448,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            'resetDone': '✅ 재설정됨',"
+  },
+  {
+    "line": 1450,
+    "emojis": [
+      "🌐"
+    ],
+    "text": "            'transSelText': '🌐 선택 번역',"
+  },
+  {
+    "line": 1455,
+    "emojis": [
+      "📺"
+    ],
+    "text": "            'm3u8Title': '📺 스트림: {n} m3u8',"
+  },
+  {
+    "line": 1457,
+    "emojis": [
+      "⬇"
+    ],
+    "text": "            'dlMerge': '⬇ 다운로드 및 병합',"
+  },
+  {
+    "line": 1458,
+    "emojis": [
+      "📝"
+    ],
+    "text": "            'genScriptBtn': '📝 스크립트 생성',"
+  },
+  {
+    "line": 1459,
+    "emojis": [
+      "👁"
+    ],
+    "text": "            'detailBtn': '👁 세부정보',"
+  },
+  {
+    "line": 1460,
+    "emojis": [
+      "📺"
+    ],
+    "text": "            'm3u8Detail': '📺 m3u8 스트림 세부정보',"
+  },
+  {
+    "line": 1472,
+    "emojis": [
+      "📊"
+    ],
+    "text": "            'logLevelTitle': '📊 로그 레벨（디버그용）',"
+  },
+  {
+    "line": 1477,
+    "emojis": [
+      "🎨"
+    ],
+    "text": "            'otherOps': '🎨 기타 작업',"
+  },
+  {
+    "line": 1478,
+    "emojis": [
+      "📤"
+    ],
+    "text": "            'exportAllConfig': '📤 전체 설정 내보내기',"
+  },
+  {
+    "line": 1479,
+    "emojis": [
+      "📥"
+    ],
+    "text": "            'importConfig': '📥 설정 가져오기',"
+  },
+  {
+    "line": 1481,
+    "emojis": [
+      "📦"
+    ],
+    "text": "            'batchTitle': '📦 일괄 다운로드 설정',"
+  },
+  {
+    "line": 1492,
+    "emojis": [
+      "🔧"
+    ],
+    "text": "            'requestHeaders': '🔧 요청 헤더',"
+  },
+  {
+    "line": 1584,
+    "emojis": [
+      "🛡"
+    ],
+    "text": "        // 🛡 模块 2：安全 (Security) + AES-128 解密"
+  },
+  {
+    "line": 1669,
+    "emojis": [
+      "📺"
+    ],
+    "text": "            icon: '📺',"
+  },
+  {
+    "line": 1687,
+    "emojis": [
+      "🎵"
+    ],
+    "text": "            icon: '🎵',"
+  },
+  {
+    "line": 1703,
+    "emojis": [
+      "⚡"
+    ],
+    "text": "            icon: '⚡',"
+  },
+  {
+    "line": 1719,
+    "emojis": [
+      "📕"
+    ],
+    "text": "            icon: '📕',"
+  },
+  {
+    "line": 1736,
+    "emojis": [
+      "🌐"
+    ],
+    "text": "            icon: '🌐',"
+  },
+  {
+    "line": 1752,
+    "emojis": [
+      "💡"
+    ],
+    "text": "            icon: '💡',"
+  },
+  {
+    "line": 1769,
+    "emojis": [
+      "💬"
+    ],
+    "text": "            icon: '💬',"
+  },
+  {
+    "line": 2299,
+    "emojis": [
+      "💾"
+    ],
+    "text": "    // 💾 模块 4：状态管理 (State) + 配置校验"
+  },
+  {
+    "line": 2602,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            return { ok: true, msg: '✅ 配置已导入并校验通过' };"
+  },
+  {
+    "line": 2638,
+    "emojis": [
+      "🕵"
+    ],
+    "text": "    // 🕵 模块 5：网络拦截 (Net Hook) + 防抖聚合"
+  },
+  {
+    "line": 2707,
+    "emojis": [
+      "📣"
+    ],
+    "text": "    // 📣 模块 6：Toast + 状态条"
+  },
+  {
+    "line": 2780,
+    "emojis": [
+      "🎬"
+    ],
+    "text": "    // 🎬 模块 6b：视频平台地址解析 (Video Resolver)"
+  },
+  {
+    "line": 2952,
+    "emojis": [
+      "📺"
+    ],
+    "text": "                        siteIcon: '📺',"
+  },
+  {
+    "line": 3100,
+    "emojis": [
+      "🎵"
+    ],
+    "text": "                                siteIcon: '🎵',"
+  },
+  {
+    "line": 3224,
+    "emojis": [
+      "⚡"
+    ],
+    "text": "                                siteIcon: '⚡',"
+  },
+  {
+    "line": 3368,
+    "emojis": [
+      "📕"
+    ],
+    "text": "                                siteIcon: '📕',"
+  },
+  {
+    "line": 3416,
+    "emojis": [
+      "🌐"
+    ],
+    "text": "                                siteIcon: '🌐',"
+  },
+  {
+    "line": 3464,
+    "emojis": [
+      "💡"
+    ],
+    "text": "                                siteIcon: '💡',"
+  },
+  {
+    "line": 3512,
+    "emojis": [
+      "💬"
+    ],
+    "text": "                                siteIcon: '💬',"
+  },
+  {
+    "line": 3772,
+    "emojis": [
+      "🔌"
+    ],
+    "text": "    // 🔌 模块 6c+：脚本市场 / 插件系统 (Plugins)"
+  },
+  {
+    "line": 3907,
+    "emojis": [
+      "🔌"
+    ],
+    "text": "                            siteIcon: '🔌',"
+  },
+  {
+    "line": 4010,
+    "emojis": [
+      "🔄"
+    ],
+    "text": "    // 🔄 模块 6d：自动更新器 (AutoUpdater)"
+  },
+  {
+    "line": 4111,
+    "emojis": [
+      "🎉"
+    ],
+    "text": "                    '<span style=\"font-size:24px;\">🎉</span>' +"
+  },
+  {
+    "line": 4254,
+    "emojis": [
+      "🎬"
+    ],
+    "text": "    // 🎬 模块 6c：视频链接预览 (Video Link Preview)"
+  },
+  {
+    "line": 4288,
+    "emojis": [
+      "⚠"
+    ],
+    "text": "                    siteIcon: '⚠️',"
+  },
+  {
+    "line": 4332,
+    "emojis": [
+      "📺"
+    ],
+    "text": "        var siteIcon = data.siteIcon || '📺';"
+  },
+  {
+    "line": 4362,
+    "emojis": [
+      "▶"
+    ],
+    "text": "            if (data.viewCount !== undefined) stats.push('<span title=\"播放量\">▶️ ' + _formatNumber(data.viewCount) + '</span>');"
+  },
+  {
+    "line": 4363,
+    "emojis": [
+      "👍"
+    ],
+    "text": "            if (data.likeCount !== undefined) stats.push('<span title=\"点赞\">👍 ' + _formatNumber(data.likeCount) + '</span>');"
+  },
+  {
+    "line": 4364,
+    "emojis": [
+      "🪙"
+    ],
+    "text": "            if (data.coinCount !== undefined) stats.push('<span title=\"投币\">🪙 ' + _formatNumber(data.coinCount) + '</span>');"
+  },
+  {
+    "line": 4365,
+    "emojis": [
+      "⭐"
+    ],
+    "text": "            if (data.favoriteCount !== undefined) stats.push('<span title=\"收藏\">⭐ ' + _formatNumber(data.favoriteCount) + '</span>');"
+  },
+  {
+    "line": 4366,
+    "emojis": [
+      "💬"
+    ],
+    "text": "            if (data.replyCount !== undefined) stats.push('<span title=\"评论\">💬 ' + _formatNumber(data.replyCount) + '</span>');"
+  },
+  {
+    "line": 4380,
+    "emojis": [
+      "📅"
+    ],
+    "text": "                parts.push('<span style=\"font-size:11px;color:' + c.sub + ';\">📅 ' + _formatPubDate(data.pubdate) + '</span>');"
+  },
+  {
+    "line": 4389,
+    "emojis": [
+      "📺"
+    ],
+    "text": "                rows.push('<span>📺 BV号: <code style=\"background:' + c.bg + ';padding:2px 6px;border-radius:4px;\">' + data.bvid + '</code></span>');"
+  },
+  {
+    "line": 4392,
+    "emojis": [
+      "⏱"
+    ],
+    "text": "                rows.push('<span>⏱ 时长: ' + Math.floor(data.duration / 60) + ':' + String(data.duration % 60).padStart(2, '0') + '</span>');"
+  },
+  {
+    "line": 4414,
+    "emojis": [
+      "⚠"
+    ],
+    "text": "                '<div style=\"font-size:32px;margin-bottom:8px;\">⚠️</div>' +"
+  },
+  {
+    "line": 4417,
+    "emojis": [
+      "🔄"
+    ],
+    "text": "                (originalUrl ? '<button id=\"_ms_vlp_retry\" style=\"padding:8px 20px;border:none;border-radius:8px;background:#ef4444;color:#fff;font-size:13px;font-weight:500;cursor:pointer;\">🔄 重试</bu"
+  },
+  {
+    "line": 4450,
+    "emojis": [
+      "⚠"
+    ],
+    "text": "                        '<div style=\"font-size:32px;margin-bottom:8px;\">⚠️</div>' +"
+  },
+  {
+    "line": 4452,
+    "emojis": [
+      "🔄"
+    ],
+    "text": "                        '<button id=\"_ms_vlp_video_retry\" style=\"padding:6px 16px;border:none;border-radius:6px;background:#ef4444;color:#fff;font-size:12px;cursor:pointer;\">🔄 重试</button>' +"
+  },
+  {
+    "line": 4468,
+    "emojis": [
+      "🔊"
+    ],
+    "text": "                        '<span>🔊</span>自动播放' +"
+  },
+  {
+    "line": 4477,
+    "emojis": [
+      "▶"
+    ],
+    "text": "                        '<span style=\"font-size:22px;\">▶️</span><span>播放</span>' +"
+  },
+  {
+    "line": 4480,
+    "emojis": [
+      "📥"
+    ],
+    "text": "                        '<span style=\"font-size:22px;\">📥</span><span>下载</span>' +"
+  },
+  {
+    "line": 4483,
+    "emojis": [
+      "📋"
+    ],
+    "text": "                        '<span style=\"font-size:22px;\">📋</span><span>复制</span>' +"
+  },
+  {
+    "line": 4487,
+    "emojis": [
+      "▶"
+    ],
+    "text": "                    '<button id=\"_ms_vlp_play\" style=\"flex:1;min-width:120px;padding:12px 20px;border:none;border-radius:10px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:14"
+  },
+  {
+    "line": 4488,
+    "emojis": [
+      "📥"
+    ],
+    "text": "                    '<button id=\"_ms_vlp_dl\" style=\"flex:1;min-width:120px;padding:12px 20px;border:none;border-radius:10px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:14px"
+  },
+  {
+    "line": 4489,
+    "emojis": [
+      "📋"
+    ],
+    "text": "                    '<button id=\"_ms_vlp_copy\" style=\"flex:1;min-width:120px;padding:12px 20px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-size:14"
+  },
+  {
+    "line": 4855,
+    "emojis": [
+      "📊"
+    ],
+    "text": "    // 📊 模块 7：元信息提取 (Meta Fetcher - P1-2)"
+  },
+  {
+    "line": 5000,
+    "emojis": [
+      "🌐"
+    ],
+    "text": "    // 🌐 模块 8：翻译引擎 (TranslateEngine) - 多引擎架构"
+  },
+  {
+    "line": 5024,
+    "emojis": [
+      "🌐"
+    ],
+    "text": "            icon: config.icon || '🌐',"
+  },
+  {
+    "line": 5215,
+    "emojis": [
+      "🌍"
+    ],
+    "text": "        icon: '🌍',"
+  },
+  {
+    "line": 5257,
+    "emojis": [
+      "🔷"
+    ],
+    "text": "        icon: '🔷',"
+  },
+  {
+    "line": 5287,
+    "emojis": [
+      "🟦"
+    ],
+    "text": "        icon: '🟦',"
+  },
+  {
+    "line": 5313,
+    "emojis": [
+      "🔵"
+    ],
+    "text": "        icon: '🔵',"
+  },
+  {
+    "line": 5347,
+    "emojis": [
+      "🟩"
+    ],
+    "text": "        icon: '🟩',"
+  },
+  {
+    "line": 5462,
+    "emojis": [
+      "🔎"
+    ],
+    "text": "    // 🔎 模块 9：DOM 扫描器 (Scanner) + requestIdleCallback 分批处理"
+  },
+  {
+    "line": 5842,
+    "emojis": [
+      "⬇"
+    ],
+    "text": "    // ⬇ 模块 9.6：新版扫描服务 (ScannerService) - 增量扫描 + Worker + 平台适配器"
+  },
+  {
+    "line": 6289,
+    "emojis": [
+      "⬇"
+    ],
+    "text": "    // ⬇ 模块 9.5：下载管理器 (DownloadManager) - 统一下载队列 + backend 扩展"
+  },
+  {
+    "line": 7352,
+    "emojis": [
+      "⬇"
+    ],
+    "text": "    // ⬇ 模块 10：下载引擎 (Downloader) + 进度可视化 (P0-3)"
+  },
+  {
+    "line": 7724,
+    "emojis": [
+      "✅",
+      "❌"
+    ],
+    "text": "            script += '\\nfor i, url in enumerate(urls):\\n    name = \"' + domain + '_' + timestamp + '_{:03d}.bin\".format(i+1)\\n    try:\\n        req = urllib.request.Request(url, headers=headers)\\n   "
+  },
+  {
+    "line": 7743,
+    "emojis": [
+      "🖼"
+    ],
+    "text": "    // 🖼 模块 10.5：选择管理器 (SelectionManager) - 方案三吸收方案二"
+  },
+  {
+    "line": 8078,
+    "emojis": [
+      "🖼"
+    ],
+    "text": "    // 🖼 模块 11：UI 面板 + 虚拟列表 (P0-2) + 进度条 + 媒体预览 (P1-1)"
+  },
+  {
+    "line": 8224,
+    "emojis": [
+      "▶"
+    ],
+    "text": "                                d.textContent = '▶';"
+  },
+  {
+    "line": 8284,
+    "emojis": [
+      "🎬"
+    ],
+    "text": "            var isPlaceholder = firstChild && firstChild.tagName === 'DIV' && firstChild.textContent === '🎬' && firstChild.style.width === '100%';"
+  },
+  {
+    "line": 8295,
+    "emojis": [
+      "🎬"
+    ],
+    "text": "                    d.textContent = '🎬';"
+  },
+  {
+    "line": 8311,
+    "emojis": [
+      "✅"
+    ],
+    "text": "                resolveBtn.textContent = '✅ 已解析';"
+  },
+  {
+    "line": 8639,
+    "emojis": [
+      "✓"
+    ],
+    "text": "            LOG.info('浮动按钮创建成功 ✓');"
+  },
+  {
+    "line": 9508,
+    "emojis": [
+      "📂"
+    ],
+    "text": "            { icon: '📂', label: LANG.t('ctxOpenPanel'), action: function () { UI.openPanel(); } },"
+  },
+  {
+    "line": 9509,
+    "emojis": [
+      "📥"
+    ],
+    "text": "            { icon: '📥', label: LANG.t('ctxQuickDownload'), action: function () { UI.quickDownload(); } },"
+  },
+  {
+    "line": 9510,
+    "emojis": [
+      "🌐"
+    ],
+    "text": "            { icon: '🌐', label: LANG.t('ctxTranslate'), action: function () { UI.openPanel(); UI.switchTab('translate'); } },"
+  },
+  {
+    "line": 9511,
+    "emojis": [
+      "⚙"
+    ],
+    "text": "            { icon: '⚙️', label: LANG.t('ctxSettings'), action: function () { UI.openPanel(); UI.switchTab('settings'); } },"
+  },
+  {
+    "line": 9512,
+    "emojis": [
+      "✖"
+    ],
+    "text": "            { icon: '✖️', label: LANG.t('ctxClose'), action: function () {} }"
+  },
+  {
+    "line": 9629,
+    "emojis": [
+      "✕"
+    ],
+    "text": "            closeBtn.textContent = '✕';"
+  },
+  {
+    "line": 9794,
+    "emojis": [
+      "🖼",
+      "🎬",
+      "🎵",
+      "📺"
+    ],
+    "text": "        var icon = kind === 'img' ? '🖼' : kind === 'video' ? '🎬' : kind === 'audio' ? '🎵' : '📺';"
+  },
+  {
+    "line": 9795,
+    "emojis": [
+      "🖼",
+      "🎬",
+      "🎵",
+      "📺",
+      "🖼",
+      "🎬",
+      "🎵",
+      "📺",
+      "🖼",
+      "🎬",
+      "🎵",
+      "📺",
+      "🖼",
+      "🎬",
+      "🎵",
+      "📺"
+    ],
+    "text": "        var label = kind === 'img' ? LANG.t('tabImg').replace(/^[🖼🎬🎵📺]/, '') : kind === 'video' ? LANG.t('tabVideo').replace(/^[🖼🎬🎵📺]/, '') : kind === 'audio' ? LANG.t('tabAudio').replace(/^[\ud83d"
+  },
+  {
+    "line": 9809,
+    "emojis": [
+      "🔗"
+    ],
+    "text": "                '<div><span style=\"font-size:' + (isMobile ? '18px' : '16px') + ';margin-right:4px;\">' + icon + '</span><b style=\"color:' + c.txt + ';\">' + label + '</b>：' + LANG.t('showing', {shown: "
+  },
+  {
+    "line": 9813,
+    "emojis": [
+      "📥"
+    ],
+    "text": "                    '<button id=\"_ms_dl_sel\" style=\"padding:' + btnPadding + ';border:none;border-radius:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:' + btnFontSize + '"
+  },
+  {
+    "line": 9814,
+    "emojis": [
+      "📥"
+    ],
+    "text": "                    '<button id=\"_ms_dl_all\" style=\"padding:' + btnPadding + ';border:none;border-radius:8px;background:linear-gradient(135deg,#10b981,#34d399);color:#fff;font-size:' + btnFontSize + '"
+  },
+  {
+    "line": 9815,
+    "emojis": [
+      "📋"
+    ],
+    "text": "                    '<button id=\"_ms_copy_sel\" style=\"padding:' + btnPadding + ';border:none;border-radius:8px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:' + btnFontSize + ';cursor:pointer"
+  },
+  {
+    "line": 9816,
+    "emojis": [
+      "📋"
+    ],
+    "text": "                    '<button id=\"_ms_copy_all\" style=\"padding:' + btnPadding + ';border:none;border-radius:8px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:' + btnFontSize + ';cursor:pointer"
+  },
+  {
+    "line": 9817,
+    "emojis": [
+      "🔧"
+    ],
+    "text": "                    '<button id=\"_ms_show_filter\" style=\"padding:' + btnPadding + ';border:none;border-radius:8px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:' + btnFontSize + ';cursor:poin"
+  },
+  {
+    "line": 9839,
+    "emojis": [
+      "🔗"
+    ],
+    "text": "                '<span>🔗 视频页面链接（点击解析获取下载地址）</span>' +"
+  },
+  {
+    "line": 9840,
+    "emojis": [
+      "🔄"
+    ],
+    "text": "                '<button id=\"_ms_batch_resolve\" style=\"padding:' + (isMobile ? '10px 16px' : '6px 12px') + ';border:none;border-radius:8px;background:linear-gradient(135deg,#8b5cf6,#a855f7);color:#fff"
+  },
+  {
+    "line": 9874,
+    "emojis": [
+      "▶"
+    ],
+    "text": "                    { icon: '▶️', label: '预览视频', action: function() { VideoLinkPreview.preview(vData.url); } },"
+  },
+  {
+    "line": 9875,
+    "emojis": [
+      "📋"
+    ],
+    "text": "                    { icon: '📋', label: '复制链接', action: function() { copyText(vData.url); } },"
+  },
+  {
+    "line": 9876,
+    "emojis": [
+      "📥"
+    ],
+    "text": "                    { icon: '📥', label: '下载视频', action: function() { VideoLinkPreview.preview(vData.url); } },"
+  },
+  {
+    "line": 9877,
+    "emojis": [
+      "🔗"
+    ],
+    "text": "                    { icon: '🔗', label: '打开原网页', action: function() { window.open(vData.url, '_blank'); } },"
+  },
+  {
+    "line": 9919,
+    "emojis": [
+      "🎬"
+    ],
+    "text": "                    vCoverHtml = '<img src=\"' + vItem.cover + '\" loading=\"lazy\" style=\"width:100%;height:' + coverHeight + ';object-fit:cover;display:block;\" onerror=\"var d=document.createElement(\\'di"
+  },
+  {
+    "line": 9922,
+    "emojis": [
+      "🎬"
+    ],
+    "text": "                    vCoverHtml = '<div style=\"width:100%;height:' + coverHeight + ';background:linear-gradient(135deg,#1e293b,#334155);display:flex;align-items:center;justify-content:center;color:#fff"
+  },
+  {
+    "line": 9925,
+    "emojis": [
+      "✅",
+      "⬇"
+    ],
+    "text": "                var resolveBtnText = isResolved ? '✅ 已解析' : '解析 ⬇';"
+  },
+  {
+    "line": 9990,
+    "emojis": [
+      "⏳"
+    ],
+    "text": "                    batchBtn.textContent = '⏳ 解析中...';"
+  },
+  {
+    "line": 10000,
+    "emojis": [
+      "🔄"
+    ],
+    "text": "                        batchBtn.textContent = '🔄 一键解析全部';"
+  },
+  {
+    "line": 10462,
+    "emojis": [
+      "✕"
+    ],
+    "text": "            closeBtn.textContent = '✕';"
+  },
+  {
+    "line": 10628,
+    "emojis": [
+      "⬇"
+    ],
+    "text": "            mkBtn('⬇ ' + LANG.t('download'), '#6366f1,#8b5cf6', function () {"
+  },
+  {
+    "line": 10639,
+    "emojis": [
+      "📋"
+    ],
+    "text": "            mkBtn('📋 ' + LANG.t('copyUrl'), '#10b981,#34d399', function () { copyText(url); });"
+  },
+  {
+    "line": 10640,
+    "emojis": [
+      "🌐"
+    ],
+    "text": "            mkBtn('🌐 ' + LANG.t('openTab'), '#f59e0b,#fbbf24', function () { try { window.open(url, '_blank'); } catch (e) {} });"
+  },
+  {
+    "line": 10642,
+    "emojis": [
+      "⏺"
+    ],
+    "text": "                mkBtn('⏺ 录制媒体流', '#ef4444,#f87171', function () {"
+  },
+  {
+    "line": 10652,
+    "emojis": [
+      "🎞"
+    ],
+    "text": "                mkBtn('🎞 ' + LANG.t('extractCover'), '#ec4899,#f472b6', function () {"
+  },
+  {
+    "line": 10853,
+    "emojis": [
+      "✕"
+    ],
+    "text": "            btn('✕ ' + LANG.t('close'), '#ef4444', function () {"
+  },
+  {
+    "line": 10864,
+    "emojis": [
+      "☑"
+    ],
+    "text": "            btn('☑ ' + LANG.t('selectBtn'), 'linear-gradient(135deg,#6366f1,#8b5cf6)', function () {"
+  },
+  {
+    "line": 11064,
+    "emojis": [
+      "🔊"
+    ],
+    "text": "                toast('🔊 ' + LANG.t('saved'));"
+  },
+  {
+    "line": 11293,
+    "emojis": [
+      "▶"
+    ],
+    "text": "            arrow.textContent = expanded ? '▼' : '▶';"
+  },
+  {
+    "line": 11313,
+    "emojis": [
+      "🖥",
+      "☀",
+      "🌙"
+    ],
+    "text": "        var themes = [['auto', '🖥 ' + LANG.t('themeAuto')], ['light', '☀ ' + LANG.t('themeLight')], ['dark', '🌙 ' + LANG.t('themeDark')]];"
+  },
+  {
+    "line": 11424,
+    "emojis": [
+      "💾"
+    ],
+    "text": "        cpSave.textContent = '💾 ' + LANG.t('ok');"
+  },
+  {
+    "line": 11572,
+    "emojis": [
+      "✅"
+    ],
+    "text": "            if (res.ok) { toast('✅ ' + res.msg); applyPanelThemeNow(); UI.renderSettings(); }"
+  },
+  {
+    "line": 11573,
+    "emojis": [
+      "❌"
+    ],
+    "text": "            else toast('❌ ' + res.msg, '#ef4444');"
+  },
+  {
+    "line": 11622,
+    "emojis": [
+      "💾"
+    ],
+    "text": "        drBtn.textContent = '💾 ' + LANG.t('saveRules');"
+  },
+  {
+    "line": 11743,
+    "emojis": [
+      "➕"
+    ],
+    "text": "        ruleFormTitle.textContent = '➕ ' + LANG.t('addRule');"
+  },
+  {
+    "line": 11787,
+    "emojis": [
+      "➕"
+    ],
+    "text": "            ruleFormTitle.textContent = '➕ ' + LANG.t('addRule');"
+  },
+  {
+    "line": 11796,
+    "emojis": [
+      "✏"
+    ],
+    "text": "            ruleFormTitle.textContent = '✏️ ' + LANG.t('edit') + ' ' + (rule.name || rule.pattern);"
+  },
+  {
+    "line": 11807,
+    "emojis": [
+      "💾"
+    ],
+    "text": "        ruleSaveBtn.textContent = '💾 ' + LANG.t('ok');"
+  },
+  {
+    "line": 11887,
+    "emojis": [
+      "➕"
+    ],
+    "text": "        parserFormTitle.textContent = '➕ ' + LANG.t('addParser');"
+  },
+  {
+    "line": 11933,
+    "emojis": [
+      "➕"
+    ],
+    "text": "            parserFormTitle.textContent = '➕ ' + LANG.t('addParser');"
+  },
+  {
+    "line": 11944,
+    "emojis": [
+      "✏"
+    ],
+    "text": "            parserFormTitle.textContent = '✏️ ' + LANG.t('edit') + ' ' + (parser.name || parser.matchPattern);"
+  },
+  {
+    "line": 11957,
+    "emojis": [
+      "💾"
+    ],
+    "text": "        parserSaveBtn.textContent = '💾 ' + LANG.t('ok');"
+  },
+  {
+    "line": 11999,
+    "emojis": [
+      "🎞"
+    ],
+    "text": "        thumbInfo.innerHTML = '<div style=\"font-size:13px;font-weight:700;color:' + c.txt + ';\">🎞 ' + LANG.t('autoThumb') + '</div><div style=\"font-size:11px;color:' + c.sub + ';margin-top:2px;\">' + "
+  },
+  {
+    "line": 12014,
+    "emojis": [
+      "🔄"
+    ],
+    "text": "        updInfo.innerHTML = '<div style=\"font-size:13px;font-weight:700;color:' + c.txt + ';\">🔄 ' + LANG.t('autoCheckUpdate') + '</div><div style=\"font-size:11px;color:' + c.sub + ';margin-top:2px;\">"
+  },
+  {
+    "line": 12070,
+    "emojis": [
+      "💾"
+    ],
+    "text": "        persistInfo.innerHTML = '<div style=\"font-size:13px;font-weight:700;color:' + c.txt + ';\">💾 ' + LANG.t('persistSelection') + '</div><div style=\"font-size:11px;color:' + c.sub + ';margin-top:2"
+  },
+  {
+    "line": 12149,
+    "emojis": [
+      "🖼"
+    ],
+    "text": "            if (kind === 'image') return '🖼 ' + LANG.t('img');"
+  },
+  {
+    "line": 12150,
+    "emojis": [
+      "🎵"
+    ],
+    "text": "            if (kind === 'audio') return '🎵 ' + LANG.t('audio');"
+  },
+  {
+    "line": 12151,
+    "emojis": [
+      "📺"
+    ],
+    "text": "            if (kind === 'm3u8') return '📺 ' + LANG.t('m3u8');"
+  },
+  {
+    "line": 12152,
+    "emojis": [
+      "🔗"
+    ],
+    "text": "            if (kind === 'stream') return '🔗 ' + LANG.t('video');"
+  },
+  {
+    "line": 12153,
+    "emojis": [
+      "🎬"
+    ],
+    "text": "            return '🎬 ' + LANG.t('video');"
+  },
+  {
+    "line": 12247,
+    "emojis": [
+      "✅",
+      "❌"
+    ],
+    "text": "                    left.textContent = (item.success ? '✅ ' : '❌ ') + (item.name || item.url);"
+  },
+  {
+    "line": 12344,
+    "emojis": [
+      "❌"
+    ],
+    "text": "                        toast(err ? '❌ 翻译失败' : LANG.t('transDone'));"
+  },
+  {
+    "line": 12364,
+    "emojis": [
+      "💬"
+    ],
+    "text": "    // 💬 模块 14：选中文字翻译浮窗"
+  },
+  {
+    "line": 12436,
+    "emojis": [
+      "🚀"
+    ],
+    "text": "    // 🚀 模块 15：初始化 + 轮询守护 + 动态内容适配"
+  }
+]

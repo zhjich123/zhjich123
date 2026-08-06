@@ -45,17 +45,85 @@
 
 
     // =========================================================================
-    // 🎨 全局配置（图标 / 颜色 / 尺寸 / 配色板）
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.045a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.01 17.461 2 12 2z"></path></svg></svg> 全局配置（图标 / 颜色 / 尺寸 / 配色板）
     // =========================================================================
     var MS_CONFIG = {
         VERSION: '1.0.6',
         ICONS: {
             chevronLeft: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 1px 2px rgba(0,0,0,.2));"><polyline points="15 18 9 12 15 6"></polyline></svg>',
             play: '<svg width="22" height="22" viewBox="0 0 24 24" fill="#ffffff" style="filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));"><polygon points="5 3 21 12 5 21 5 3"></polygon></svg>',
+            playSmall: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:middle;"><polygon points="5 3 21 12 5 21 5 3"></polygon></svg>',
             music: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>',
             target: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,.35));"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4" fill="#ffffff"></circle><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line></svg>',
             check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
-            film: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>'
+            checkBig: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+            checkWhite: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+            film: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>',
+            image: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>',
+            video: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>',
+            audio: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>',
+            stream: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>',
+            download: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',
+            downloadWhite: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',
+            copy: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
+            filter: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>',
+            wrench: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>',
+            link: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>',
+            trash: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>',
+            plus: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
+            package: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>',
+            globe: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>',
+            cross: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+            crossWhite: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+            warning: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+            warningWhite: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+            edit: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>',
+            sun: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>',
+            moon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>',
+            palette: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.045a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.01 17.461 2 12 2z"></path></svg>',
+            settings: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
+            cookie: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="9" cy="9" r="1.5" fill="currentColor"></circle><circle cx="15" cy="8" r="1.5" fill="currentColor"></circle><circle cx="15" cy="15" r="1.5" fill="currentColor"></circle><circle cx="9" cy="16" r="1.5" fill="currentColor"></circle></svg>',
+            book: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>',
+            chart: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>',
+            refresh: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>',
+            volume: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>',
+            speech: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>',
+            search: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
+            eye: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>',
+            plug: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 11V7a4 4 0 0 0-8 0v4"></path><rect x="8" y="11" width="8" height="10" rx="1"></rect></svg>',
+            shield: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>',
+            info: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+            monitor: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>',
+            arrowDown: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>',
+            arrowRight: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="8 5 8 19 19 12 8 5"></polygon></svg>',
+            stop: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>',
+            hourglass: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>',
+            calendar: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
+            timer: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
+            star: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
+            thumbsUp: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>',
+            coin: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="6" x2="12" y2="12"></line><path d="M12 16h.01"></path></svg>',
+            lightning: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>',
+            bulb: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z"></path></svg>',
+            folder: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>',
+            rocket: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>',
+            keyboard: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="6" y1="8" x2="6" y2="8.01"></line><line x1="10" y1="8" x2="10" y2="8.01"></line><line x1="14" y1="8" x2="14" y2="8.01"></line><line x1="18" y1="8" x2="18" y2="8.01"></line><line x1="6" y1="12" x2="6" y2="12.01"></line><line x1="10" y1="12" x2="10" y2="12.01"></line><line x1="14" y1="12" x2="14" y2="12.01"></line><line x1="18" y1="12" x2="18" y2="12.01"></line><line x1="6" y1="16" x2="18" y2="16"></line></svg>',
+            lock: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>',
+            unlock: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>',
+            detective: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 11c.57.57 1.33.89 2.12.89s1.58-.32 2.12-.89"></path><circle cx="12" cy="11" r="6"></circle><path d="M4 4l2 2"></path><path d="M20 4l-2 2"></path></svg>',
+            megaphone: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>',
+            party: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a3 3 0 1 0-6 0 3 3 0 0 0 6 0z"></path><path d="M6 15l2.5-2.5"></path><path d="M16.5 11.5L22 16"></path><path d="M12 18v4"></path><path d="M2 22l4-10 5.5 5.5L22 2"></path></svg>',
+            checkMark: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+            diamond: '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2L2 8l10 14L22 8l-4-6H6z"></path></svg>',
+            square: '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>',
+            circle: '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"></circle></svg>',
+            searchBig: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
+            checkBox: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>',
+            record: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"></circle></svg>',
+            reload: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>',
+            save: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>',
+            monitorBig: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>',
+            streamBig: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>'
         },
         COLORS: {
             primary: '#6366f1',
@@ -392,7 +460,7 @@
     // =========================================================================
 
     // =========================================================================
-    // 🌍 模块 1b：国际化系统 (i18n)
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></svg> 模块 1b：国际化系统 (i18n)
     // =========================================================================
     var LANG = {};
     LANG.strings = {
@@ -440,7 +508,7 @@
             'autoMerge': '自动合并分片',
             'autoThumb': '自动提取视频封面',
             'autoThumbDesc': '自动尝试加载视频首帧作为缩略图',
-            'enabled': '✅ 已启用',
+            'enabled': '已启用',
             'disabled': '○ 已禁用',
             'domainRules': '自定义域名规则',
             'domainRulesDesc': '为特定域名设置扫描策略（一行一条：域名,图片扫描,视频扫描,音频扫描,深度，例如: baidu.com,1,0,0,1）',
@@ -485,7 +553,7 @@
             'updateCheckFail': '检查更新失败',
             'nameTpl': '下载文件名模板', 'saveRules': '保存域名规则',
             'rulesSaved': '已保存 {n} 条域名规则',
-            'coverExtracted': '✅ 封面已提取并下载',
+            'coverExtracted': '封面已提取并下载',
             'coverFail': '封面提取失败', 'coverWait': '正在提取封面，请稍候...',
             'loadingMeta': '加载中...',
             'copied': '已复制', 'noFiles': '无下载文件',
@@ -493,13 +561,13 @@
             'done': '完成', 'stopped': '已停止', 'scanning': '正在扫描...',
             'scanDone': '扫描完成', 'filterApplied': '筛选已应用',
             'appTitle': '媒体嗅探器 Pro',
-            'tabImg': '🖼 图片', 'tabVideo': '🎬 视频', 'tabAudio': '🎵 音频',
+            'tabImg':  + MS_CONFIG.ICONS.image + '图片, 'tabVideo': '🎬 视频', 'tabAudio': '🎵 音频',
             'tabM3u8': '📺 流媒体', 'tabTranslate': '📖 翻译',
-            'tabCookie': '🍪 Cookie', 'tabStorage': '💾 存储',
+            'tabCookie':  + MS_CONFIG.ICONS.cookie + 'Cookie, 'tabStorage': '💾 存储',
             'tabSettings': '⚙️ 设置',
             'btnSelAll': '全选', 'btnSelNone': '取消全选',
             'extractCover': '提取封面', 'filterPanel': '筛选设置',
-            'advFilterTitle': '🔧 高级筛选设置',
+            'advFilterTitle':  + MS_CONFIG.ICONS.wrench + '高级筛选设置,
             'advFilterDesc': '设置阈值后，点击"应用筛选"重新过滤资源列表',
             'minImageSize': '最小图片大小（字节）',
             'minImageWidth': '最小图片宽度（px）',
@@ -512,10 +580,10 @@
             'searchPlaceholder': '搜索...',
             'advFilter': '高级筛选',
             'noCookie': '暂无 Cookie',
-            'copyCookieStr': '📋 复制 Cookie 字符串',
+            'copyCookieStr':  + MS_CONFIG.ICONS.copy + '复制 Cookie 字符串,
             'copyJson': '📋 复制 JSON',
-            'addCookie': '➕ 新增 Cookie',
-            'clearSite': '🗑 清空本站',
+            'addCookie':  + MS_CONFIG.ICONS.plus + '新增 Cookie,
+            'clearSite':  + MS_CONFIG.ICONS.trash + '清空本站,
             'delete': '删除',
             'cookieName': 'Cookie 名称',
             'cookieValue': '请输入 Cookie 值：',
@@ -526,18 +594,18 @@
             'delFail': '删除失败',
             'clearFail': '清空失败',
             'readCookieFail': '读取 Cookie 失败',
-            'exportLs': '📤 导出 localStorage',
+            'exportLs': 导出 localStorage,
             'exportSs': '📤 导出 sessionStorage',
-            'addItem': '➕ 新增项',
-            'clearAll': '🗑 清空全部',
+            'addItem':  + MS_CONFIG.ICONS.plus + '新增项,
+            'clearAll':  + MS_CONFIG.ICONS.trash + '清空全部,
             'keyName': '键名',
             'keyValue': '键值',
             'confirmClearStorage': '确认清空存储？',
             'cleared': '已清空',
             'addToLs': '添加到 localStorage',
-            'lsTitle': '📦 localStorage',
+            'lsTitle':  + MS_CONFIG.ICONS.package + 'localStorage,
             'ssTitle': '💾 sessionStorage',
-            'lsCount': '📦 localStorage {n} 条 · 💾 sessionStorage {m} 条',
+            'lsCount':  + MS_CONFIG.ICONS.package + 'localStorage {n} 条 · 💾 sessionStorage {m} 条,
             'transTitle': '📖 翻译工具',
             'transIntro': '· 使用 MyMemory 免费 API（国内可用）· 一次最多 500 字符<br/>· 快捷键 Alt+T 翻译当前页选中文字',
             'transInputPh': '请输入要翻译的文本...',
@@ -546,12 +614,12 @@
             'zhToEn': '中→英',
             'enToZh': '英→中',
             'clearBtn': '清空',
-            'copyResult': '📋 复制结果',
+            'copyResult':  + MS_CONFIG.ICONS.copy + '复制结果,
             'resultAsInput': '🔁 结果当输入',
             'plsInputText': '请输入文本',
-            'translating': '⏳ 正在翻译（{from} → {to}）…',
+            'translating': '正在翻译（{from} → {to}）…',
             'translatingShort': '正在翻译...',
-            'transDone': '✅ 翻译完成 · ',
+            'transDone': '翻译完成 · ',
             'transFail': '❌ 翻译失败',
             'transFailShort': '（翻译失败）',
             'transEngine': '翻译引擎',
@@ -561,7 +629,7 @@
             'transTimeout': '请求超时',
             'transAllFail': '所有翻译引擎均失败',
             'transPartialFail': '部分分段翻译失败',
-            'speakBtn': '🔊 发音',
+            'speakBtn':  + MS_CONFIG.ICONS.volume + '发音,
             'transHistory': '翻译历史',
             'transNoHistory': '暂无翻译历史',
             'transClearHistory': '清空历史',
@@ -592,11 +660,11 @@
             'plsCheck': '请至少选择一项',
             'scriptCopied': '脚本已复制到剪贴板',
             'rescanDone': '重新扫描完成',
-            'copiedN': '✅ 已复制 {n} 字符',
+            'copiedN': '已复制 {n} 字符',
             'copyFail': '复制失败',
             'noDlResource': '无下载资源',
             'downloading': '下载中...',
-            'batchStart': '⬇ 开始批量下载 {n} 项（并发 {c}）',
+            'batchStart': '开始批量下载 {n} 项（并发 {c}）',
             'batchDone': '✅ 批量下载完成：成功 {ok} / {total}，失败 {fail}，耗时 {t}秒',
             'dlStopped': '下载已停止',
             'scanDoneToast': '扫描完成',
@@ -607,7 +675,7 @@
             'noCopyUrl': '无链接可复制',
             'm3u8Start': '开始处理 m3u8',
             'm3u8Progress': '下载进度: {d}/{t}',
-            'm3u8Fail': '❌ 下载失败',
+            'm3u8Fail': '下载失败',
             'm3u8Done': 'm3u8 下载完成',
             'previewFail': '预览失败',
             'extractFail': '提取失败',
@@ -619,33 +687,33 @@
             'confirmDlAll': '开始下载 {n} 个文件？',
             'confirmReset': '确认重置所有配置？',
             'pasteJson': '粘贴 JSON 配置',
-            'm3u8Title': '📺 流媒体：{n} 个 m3u8',
+            'm3u8Title':  + MS_CONFIG.ICONS.stream + '流媒体：{n} 个 m3u8,
             'noM3u8': '暂无 m3u8 资源',
             'dlMerge': '下载并合并',
             'genScriptBtn': '生成脚本',
             'detailBtn': '详情',
-            'm3u8Detail': '📺 m3u8 流媒体详情',
+            'm3u8Detail':  + MS_CONFIG.ICONS.stream + 'm3u8 流媒体详情,
             'parsing': '解析中...',
             'parseResult': '解析结果：{n} 个分片',
             'masterStreams': '多码率流，共 {n} 个子流：',
             'segmentsInfo': '分片列表，共 {n} 个分片，总时长 {t}',
-            'encrypted': '🔐 AES 加密',
+            'encrypted':  + MS_CONFIG.ICONS.lock + 'AES 加密,
             'notEncrypted': '🔓 未加密',
             'yes': '是',
             'no': '否',
             'parseFailNet': '网络请求失败',
             'parseFailTimeout': '请求超时',
             'm3u8PreviewHint': 'm3u8 不可直接预览，请下载',
-            'logLevelTitle': '📊 日志级别（调试用）',
+            'logLevelTitle':  + MS_CONFIG.ICONS.chart + '日志级别（调试用）,
             'logDebug': '调试',
             'logInfo': '信息',
             'logWarn': '警告',
             'logError': '错误',
-            'otherOps': '🎨 其他操作',
+            'otherOps':  + MS_CONFIG.ICONS.palette + '其他操作,
             'exportAllConfig': '📤 导出全部配置',
-            'importConfig': '📥 导入配置',
+            'importConfig':  + MS_CONFIG.ICONS.download + '导入配置,
             'resetAll': '↺ 重置全部设置',
-            'batchTitle': '📦 批量下载设置',
+            'batchTitle':  + MS_CONFIG.ICONS.package + '批量下载设置,
             'concurrency': '并发数：',
             'intervalMs': '间隔(ms)：',
             'retries': '重试次数：',
@@ -656,7 +724,7 @@
             'qualityHigh': '最高清晰度',
             'qualityMedium': '中等清晰度',
             'qualityLow': '最低清晰度',
-            'requestHeaders': '🔧 请求头设置',
+            'requestHeaders':  + MS_CONFIG.ICONS.wrench + '请求头设置,
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
@@ -665,7 +733,7 @@
             'clickTabScan': '点击标签扫描',
             'dlProgress': '下载进度',
             'dlProgressText': '{done} / {total}（失败 {fail}）· {speed} · 预计剩余 {eta}',
-            'shortcutTitle': '⌨️ 快捷键设置',
+            'shortcutTitle':  + MS_CONFIG.ICONS.keyboard + '️ 快捷键设置,
             'shortcutToggle': '开关面板',
             'shortcutTranslate': '翻译选中',
             'shortcutClose': '关闭面板',
@@ -748,7 +816,7 @@
             'lang': 'UI Language', 'theme': 'Theme', 'system': 'System',
             'light': 'Light', 'dark': 'Dark', 'autoMerge': 'Auto Merge',
             'autoThumb': 'Extract Video Thumbnails', 'autoThumbDesc': 'Auto load first video frame as thumbnail',
-            'enabled': '✅ Enabled', 'disabled': '○ Disabled',
+            'enabled': 'Enabled', 'disabled': '○ Disabled',
             'domainRules': 'Domain Rules',
             'domainRulesDesc': 'One per line: domain,img,video,audio,depth (e.g. baidu.com,1,0,0,1)',
             'clearCache': 'Clear Cache', 'saved': 'Saved', 'ok': 'OK',
@@ -785,7 +853,7 @@
             'updateCheckFail': 'Update check failed',
             'nameTpl': 'Download Filename Template', 'saveRules': 'Save Domain Rules',
             'rulesSaved': 'Saved {n} domain rules',
-            'coverExtracted': '✅ Cover extracted',
+            'coverExtracted': 'Cover extracted',
             'coverFail': 'Cover extraction failed', 'coverWait': 'Extracting cover...',
             'loadingMeta': 'Loading...',
             'copied': 'Copied', 'noFiles': 'No downloadable files',
@@ -793,13 +861,13 @@
             'done': 'Done', 'stopped': 'Stopped', 'scanning': 'Scanning...',
             'scanDone': 'Scan complete', 'filterApplied': 'Filter applied',
             'appTitle': 'Media Sniffer Pro',
-            'tabImg': '🖼 Images', 'tabVideo': '🎬 Videos', 'tabAudio': '🎵 Audio',
+            'tabImg':  + MS_CONFIG.ICONS.image + 'Images, 'tabVideo': '🎬 Videos', 'tabAudio': '🎵 Audio',
             'tabM3u8': '📺 Streams', 'tabTranslate': '📖 Translate',
-            'tabCookie': '🍪 Cookies', 'tabStorage': '💾 Storage',
+            'tabCookie':  + MS_CONFIG.ICONS.cookie + 'Cookies, 'tabStorage': '💾 Storage',
             'tabSettings': '⚙️ Settings',
             'btnSelAll': 'Select All', 'btnSelNone': 'Deselect All',
             'extractCover': 'Extract Cover', 'filterPanel': 'Filter Settings',
-            'advFilterTitle': '🔧 Advanced Filter Settings',
+            'advFilterTitle':  + MS_CONFIG.ICONS.wrench + 'Advanced Filter Settings,
             'advFilterDesc': 'Set thresholds, then click "Apply" to re-filter the resource list',
             'minImageSize': 'Min Image Size (bytes)',
             'minImageWidth': 'Min Image Width (px)',
@@ -809,35 +877,35 @@
             'minKb': 'Min Size (KB)', 'maxKb': 'Max Size (KB, 0=unlimited)',
             'apply': 'Apply', 'reset': 'Reset'
         ,
-            'searchPlaceholder': '🔍 Search URL or filename…',
+            'searchPlaceholder': 'Search URL or filename…',
             'advFilter': '🔧 Advanced Filter',
             'noCookie': 'No cookies on this page',
-            'copyCookieStr': '📋 Copy Cookie String',
+            'copyCookieStr':  + MS_CONFIG.ICONS.copy + 'Copy Cookie String,
             'copyJson': '📋 Copy JSON',
-            'addCookie': '➕ Add Cookie',
-            'clearSite': '🗑 Clear Site',
+            'addCookie':  + MS_CONFIG.ICONS.plus + 'Add Cookie,
+            'clearSite':  + MS_CONFIG.ICONS.trash + 'Clear Site,
             'delete': 'Delete',
             'cookieName': 'Enter cookie name:',
             'cookieValue': 'Enter cookie value:',
             'confirmClearCookie': 'Clear all cookies for this site?',
-            'clearedRefresh': '✅ Cleared, please refresh',
+            'clearedRefresh': 'Cleared, please refresh',
             'added': '✅ Added',
             'addFail': 'Add failed',
             'delFail': 'Delete failed',
             'clearFail': 'Clear failed',
             'readCookieFail': 'Cannot read cookies',
-            'exportLs': '📤 Export localStorage',
+            'exportLs': Export localStorage,
             'exportSs': '📤 Export sessionStorage',
-            'addItem': '➕ Add Item',
-            'clearAll': '🗑 Clear All',
+            'addItem':  + MS_CONFIG.ICONS.plus + 'Add Item,
+            'clearAll':  + MS_CONFIG.ICONS.trash + 'Clear All,
             'keyName': 'Key:',
             'keyValue': 'Value:',
             'confirmClearStorage': 'Clear localStorage and sessionStorage?',
-            'cleared': '✅ Cleared',
+            'cleared': 'Cleared',
             'addToLs': '✅ Added to localStorage',
-            'lsTitle': '📦 localStorage',
+            'lsTitle':  + MS_CONFIG.ICONS.package + 'localStorage,
             'ssTitle': '💾 sessionStorage',
-            'lsCount': '📦 localStorage {n} · 💾 sessionStorage {m}',
+            'lsCount':  + MS_CONFIG.ICONS.package + 'localStorage {n} · 💾 sessionStorage {m},
             'transTitle': '🌐 Text Translation',
             'transIntro': '· MyMemory free API · Max 500 chars<br/>· Shortcut: Alt+T to translate selected text',
             'transInputPh': 'Enter or paste text to translate…',
@@ -846,13 +914,13 @@
             'zhToEn': 'ZH→EN',
             'enToZh': 'EN→ZH',
             'clearBtn': 'Clear',
-            'copyResult': '📋 Copy Result',
+            'copyResult':  + MS_CONFIG.ICONS.copy + 'Copy Result,
             'resultAsInput': '🔁 Use as Input',
-            'plsInputText': '⚠ Please enter text to translate',
+            'plsInputText': 'Please enter text to translate',
             'translating': '⏳ Translating ({from} → {to})…',
-            'translatingShort': '⏳ Translating, please wait…',
+            'translatingShort': 'Translating, please wait…',
             'transDone': '✅ Translated · ',
-            'transFail': '❌ Translation failed',
+            'transFail': 'Translation failed',
             'transFailShort': '(failed)',
             'transEngine': 'Engine',
             'transEngineSelect': 'Select Engine',
@@ -861,7 +929,7 @@
             'transTimeout': 'Request timeout',
             'transAllFail': 'All translation engines failed',
             'transPartialFail': 'Some segments failed',
-            'speakBtn': '🔊 Speak',
+            'speakBtn':  + MS_CONFIG.ICONS.volume + 'Speak,
             'transHistory': 'History',
             'transNoHistory': 'No translation history',
             'transClearHistory': 'Clear History',
@@ -885,34 +953,34 @@
             'invertSel': 'Invert',
             'clearSel': 'Clear',
             'copySelBtn': 'Copy',
-            'downloadSelBtn': '⬇ Download',
+            'downloadSelBtn':  + MS_CONFIG.ICONS.arrowDown + 'Download,
             'copyN': 'Copy ({n})',
             'downloadN': 'Download ({n})',
-            'genScript': '📝 Generate Script',
+            'genScript':  + MS_CONFIG.ICONS.edit + 'Generate Script,
             'rescan': '🔄 Rescan',
             'plsCheck': 'Please select resources first',
-            'scriptCopied': '✅ aria2 script generated and copied',
+            'scriptCopied': 'aria2 script generated and copied',
             'rescanDone': '✅ Rescanned',
-            'copiedN': '✅ Copied {n} chars',
+            'copiedN': 'Copied {n} chars',
             'copyFail': 'Copy failed',
             'noDlResource': 'No downloadable resources',
-            'downloading': '⏳ Download already in progress',
+            'downloading': 'Download already in progress',
             'batchStart': '⬇ Starting batch download of {n} items ({c} concurrent)',
-            'batchDone': '✅ Batch done: {ok}/{total} success, {fail} failed, {t}s',
+            'batchDone': 'Batch done: {ok}/{total} success, {fail} failed, {t}s',
             'dlStopped': '⏹ Download stopped',
-            'scanDoneToast': '✅ Scan complete',
+            'scanDoneToast': 'Scan complete',
             'filterAppliedToast': '✅ Filter applied',
             'noSelFile': 'No files selected',
             'startDlToast': 'Starting download of {n} files...',
             'noDlFile': 'No downloadable files',
             'noCopyUrl': 'No URLs to copy',
-            'm3u8Start': '⏳ Starting m3u8 download...',
+            'm3u8Start': 'Starting m3u8 download...',
             'm3u8Progress': 'Progress: {d}/{t}',
-            'm3u8Fail': '❌ Download failed',
+            'm3u8Fail': 'Download failed',
             'm3u8Done': '✅ m3u8 merged and downloaded',
             'previewFail': 'Preview failed',
             'extractFail': 'Extraction failed',
-            'logLevelChanged': '✅ Log level changed',
+            'logLevelChanged': 'Log level changed',
             'resetDone': '✅ Reset',
             'plsSelectText': 'Please select text to translate first',
             'transSelText': '🌐 Translate Selection',
@@ -920,12 +988,12 @@
             'confirmDlAll': 'Download all {n} files?',
             'confirmReset': 'Reset all settings?',
             'pasteJson': 'Paste config JSON:',
-            'm3u8Title': '📺 Streams: {n} m3u8',
+            'm3u8Title':  + MS_CONFIG.ICONS.stream + 'Streams: {n} m3u8,
             'noM3u8': 'No m3u8 streams found',
-            'dlMerge': '⬇ Download & Merge',
-            'genScriptBtn': '📝 Generate Script',
+            'dlMerge':  + MS_CONFIG.ICONS.arrowDown + 'Download & Merge,
+            'genScriptBtn':  + MS_CONFIG.ICONS.edit + 'Generate Script,
             'detailBtn': '👁 Details',
-            'm3u8Detail': '📺 m3u8 Stream Details',
+            'm3u8Detail':  + MS_CONFIG.ICONS.stream + 'm3u8 Stream Details,
             'parsing': 'Parsing...',
             'parseResult': 'Parse result:',
             'masterStreams': 'Master playlist, {n} variants:',
@@ -937,16 +1005,16 @@
             'parseFailNet': 'Parse failed: network error',
             'parseFailTimeout': 'Parse failed: timeout',
             'm3u8PreviewHint': 'Stream (m3u8): use download function',
-            'logLevelTitle': '📊 Log Level (debug)',
+            'logLevelTitle':  + MS_CONFIG.ICONS.chart + 'Log Level (debug),
             'logDebug': 'DEBUG (verbose)',
             'logInfo': 'INFO (default)',
             'logWarn': 'WARN',
             'logError': 'ERROR (errors only)',
-            'otherOps': '🎨 Other Actions',
+            'otherOps':  + MS_CONFIG.ICONS.palette + 'Other Actions,
             'exportAllConfig': '📤 Export All Config',
-            'importConfig': '📥 Import Config',
+            'importConfig':  + MS_CONFIG.ICONS.download + 'Import Config,
             'resetAll': '↺ Reset All Settings',
-            'batchTitle': '📦 Batch Download Settings',
+            'batchTitle':  + MS_CONFIG.ICONS.package + 'Batch Download Settings,
             'concurrency': 'Concurrency:',
             'intervalMs': 'Interval (ms):',
             'retries': 'Retries:',
@@ -957,7 +1025,7 @@
             'qualityHigh': 'Best Quality',
             'qualityMedium': 'Medium',
             'qualityLow': 'Low',
-            'requestHeaders': '🔧 Request Headers',
+            'requestHeaders':  + MS_CONFIG.ICONS.wrench + 'Request Headers,
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
@@ -966,7 +1034,7 @@
             'clickTabScan': 'Click a tab above to start scanning',
             'dlProgress': 'Download Progress',
             'dlProgressText': '{done} / {total} ({fail} failed) · {speed} · ETA {eta}',
-            'shortcutTitle': '⌨️ Shortcuts',
+            'shortcutTitle':  + MS_CONFIG.ICONS.keyboard + '️ Shortcuts,
             'shortcutToggle': 'Toggle Panel',
             'shortcutTranslate': 'Translate Selection',
             'shortcutClose': 'Close Panel',
@@ -1050,7 +1118,7 @@
             'theme': 'テーマ', 'system': 'システムに従う', 'light': 'ライト',
             'dark': 'ダーク', 'autoMerge': '自動結合', 'autoThumb': '動画サムネイル抽出',
             'autoThumbDesc': '動画フレームをサムネイルとして自動読み込み',
-            'enabled': '✅ 有効', 'disabled': '○ 無効',
+            'enabled': '有効', 'disabled': '○ 無効',
             'domainRules': 'ドメインルール', 'domainRulesDesc': '1行1ルール: ドメイン,画像,動画,音声,深度 (例: baidu.com,1,0,0,1)',
             'clearCache': 'キャッシュをクリア', 'saved': '保存しました', 'ok': 'OK',
             'fail': '失敗', 'loading': '読み込み中...', 'confirm': '確認',
@@ -1069,7 +1137,7 @@
             'updateCheckFail': '更新チェックに失敗しました',
             'nameTpl': 'ダウンロードファイル名テンプレート', 'saveRules': 'ドメインルールを保存',
             'rulesSaved': '{n} 件のルールを保存しました',
-            'coverExtracted': '✅ カバーを抽出しました',
+            'coverExtracted': 'カバーを抽出しました',
             'coverFail': 'カバー抽出に失敗しました', 'coverWait': 'カバー抽出中...',
             'loadingMeta': '読み込み中...',
             'copied': 'コピーしました', 'noFiles': 'ダウンロード可能なファイルはありません',
@@ -1077,13 +1145,13 @@
             'done': '完了', 'stopped': '停止しました', 'scanning': 'スキャン中...',
             'scanDone': 'スキャン完了', 'filterApplied': 'フィルターを適用しました',
             'appTitle': 'メディアスニッファー Pro',
-            'tabImg': '🖼 画像', 'tabVideo': '🎬 動画', 'tabAudio': '🎵 音声',
+            'tabImg':  + MS_CONFIG.ICONS.image + '画像, 'tabVideo': '🎬 動画', 'tabAudio': '🎵 音声',
             'tabM3u8': '📺 ストリーム', 'tabTranslate': '📖 翻訳',
-            'tabCookie': '🍪 Cookie', 'tabStorage': '💾 ストレージ',
+            'tabCookie':  + MS_CONFIG.ICONS.cookie + 'Cookie, 'tabStorage': '💾 ストレージ',
             'tabSettings': '⚙️ 設定',
             'btnSelAll': 'すべて選択', 'btnSelNone': '選択解除',
             'extractCover': 'カバー抽出', 'filterPanel': 'フィルター設定',
-            'advFilterTitle': '🔧 詳細フィルター設定',
+            'advFilterTitle':  + MS_CONFIG.ICONS.wrench + '詳細フィルター設定,
             'advFilterDesc': 'しきい値を設定し、「適用」をクリックしてリストを再フィルター',
             'minImageSize': '最小画像サイズ（バイト）',
             'minImageWidth': '最小画像幅（px）',
@@ -1093,35 +1161,35 @@
             'minKb': '最小サイズ (KB)', 'maxKb': '最大サイズ (KB, 0=制限なし)',
             'apply': '適用', 'reset': 'リセット'
         ,
-            'searchPlaceholder': '🔍 URLまたはファイル名を検索…',
+            'searchPlaceholder': 'URLまたはファイル名を検索…',
             'advFilter': '🔧 詳細フィルター',
             'noCookie': 'このページにCookieはありません',
-            'copyCookieStr': '📋 Cookie文字列コピー',
+            'copyCookieStr':  + MS_CONFIG.ICONS.copy + 'Cookie文字列コピー,
             'copyJson': '📋 JSONコピー',
-            'addCookie': '➕ Cookie追加',
-            'clearSite': '🗑 サイトをクリア',
+            'addCookie':  + MS_CONFIG.ICONS.plus + 'Cookie追加,
+            'clearSite':  + MS_CONFIG.ICONS.trash + 'サイトをクリア,
             'delete': '削除',
             'cookieName': 'Cookie名を入力：',
             'cookieValue': 'Cookie値を入力：',
             'confirmClearCookie': 'このサイトのCookieをすべて削除しますか？',
-            'clearedRefresh': '✅ クリアしました、更新してください',
+            'clearedRefresh': 'クリアしました、更新してください',
             'added': '✅ 追加しました',
             'addFail': '追加失敗',
             'delFail': '削除失敗',
             'clearFail': 'クリア失敗',
             'readCookieFail': 'Cookieを読み込めません',
-            'exportLs': '📤 localStorageをエクスポート',
+            'exportLs': localStorageをエクスポート,
             'exportSs': '📤 sessionStorageをエクスポート',
-            'addItem': '➕ 項目を追加',
-            'clearAll': '🗑 すべてクリア',
+            'addItem':  + MS_CONFIG.ICONS.plus + '項目を追加,
+            'clearAll':  + MS_CONFIG.ICONS.trash + 'すべてクリア,
             'keyName': 'キー：',
             'keyValue': '値：',
             'confirmClearStorage': 'localStorageとsessionStorageをクリアしますか？',
-            'cleared': '✅ クリアしました',
+            'cleared': 'クリアしました',
             'addToLs': '✅ localStorageに追加しました',
-            'lsTitle': '📦 localStorage',
+            'lsTitle':  + MS_CONFIG.ICONS.package + 'localStorage,
             'ssTitle': '💾 sessionStorage',
-            'lsCount': '📦 localStorage {n}件 · 💾 sessionStorage {m}件',
+            'lsCount':  + MS_CONFIG.ICONS.package + 'localStorage {n}件 · 💾 sessionStorage {m}件,
             'transTitle': '🌐 テキスト翻訳',
             'transIntro': '・MyMemory無料API ・最大500文字<br/>・ショートカット: Alt+Tで選択テキスト翻訳',
             'transInputPh': '翻訳するテキストを入力または貼り付け…',
@@ -1130,13 +1198,13 @@
             'zhToEn': '中→英',
             'enToZh': '英→中',
             'clearBtn': 'クリア',
-            'copyResult': '📋 結果をコピー',
+            'copyResult':  + MS_CONFIG.ICONS.copy + '結果をコピー,
             'resultAsInput': '🔁 結果を入力に',
-            'plsInputText': '⚠ 翻訳するテキストを入力してください',
+            'plsInputText': '翻訳するテキストを入力してください',
             'translating': '⏳ 翻訳中（{from} → {to}）…',
-            'translatingShort': '⏳ 翻訳中、しばらくお待ちください…',
+            'translatingShort': '翻訳中、しばらくお待ちください…',
             'transDone': '✅ 翻訳完了 · ',
-            'transFail': '❌ 翻訳失敗',
+            'transFail': '翻訳失敗',
             'transFailShort': '（失敗）',
             'autoDetect': '自動検出',
             'zhLang': '中国語',
@@ -1152,34 +1220,34 @@
             'invertSel': '反転',
             'clearSel': 'クリア',
             'copySelBtn': 'コピー',
-            'downloadSelBtn': '⬇ ダウンロード',
+            'downloadSelBtn':  + MS_CONFIG.ICONS.arrowDown + 'ダウンロード,
             'copyN': 'コピー({n})',
             'downloadN': 'ダウンロード({n})',
-            'genScript': '📝 スクリプト生成',
+            'genScript':  + MS_CONFIG.ICONS.edit + 'スクリプト生成,
             'rescan': '🔄 再スキャン',
             'plsCheck': 'リソースを選択してください',
-            'scriptCopied': '✅ aria2スクリプト生成・コピー完了',
+            'scriptCopied': 'aria2スクリプト生成・コピー完了',
             'rescanDone': '✅ 再スキャン完了',
-            'copiedN': '✅ {n}文字コピーしました',
+            'copiedN': '{n}文字コピーしました',
             'copyFail': 'コピー失敗',
             'noDlResource': 'ダウンロード可能なリソースはありません',
-            'downloading': '⏳ ダウンロード中です',
+            'downloading': 'ダウンロード中です',
             'batchStart': '⬇ 一括DL開始：{n}件（同時{c}件）',
-            'batchDone': '✅ 一括DL完了：成功{ok}/{total}件、失敗{fail}件、{t}秒',
+            'batchDone': '一括DL完了：成功{ok}/{total}件、失敗{fail}件、{t}秒',
             'dlStopped': '⏹ DL停止しました',
-            'scanDoneToast': '✅ スキャン完了',
+            'scanDoneToast': 'スキャン完了',
             'filterAppliedToast': '✅ フィルター適用済み',
             'noSelFile': 'ファイルが選択されていません',
             'startDlToast': '{n}ファイルのDLを開始...',
             'noDlFile': 'ダウンロード可能なファイルはありません',
             'noCopyUrl': 'コピーするURLはありません',
-            'm3u8Start': '⏳ m3u8のDLを開始...',
+            'm3u8Start': 'm3u8のDLを開始...',
             'm3u8Progress': '進捗: {d}/{t}',
-            'm3u8Fail': '❌ DL失敗',
+            'm3u8Fail': 'DL失敗',
             'm3u8Done': '✅ m3u8 結合・DL完了',
             'previewFail': 'プレビュー失敗',
             'extractFail': '抽出失敗',
-            'logLevelChanged': '✅ ログレベル変更',
+            'logLevelChanged': 'ログレベル変更',
             'resetDone': '✅ リセット完了',
             'plsSelectText': '翻訳するテキストを選択してください',
             'transSelText': '🌐 選択を翻訳',
@@ -1187,12 +1255,12 @@
             'confirmDlAll': '全{n}ファイルをDLしますか？',
             'confirmReset': 'すべての設定をリセットしますか？',
             'pasteJson': '設定JSONを貼り付け：',
-            'm3u8Title': '📺 ストリーム：{n} m3u8',
+            'm3u8Title':  + MS_CONFIG.ICONS.stream + 'ストリーム：{n} m3u8,
             'noM3u8': 'm3u8ストリームはありません',
-            'dlMerge': '⬇ DLして結合',
-            'genScriptBtn': '📝 スクリプト生成',
+            'dlMerge':  + MS_CONFIG.ICONS.arrowDown + 'DLして結合,
+            'genScriptBtn':  + MS_CONFIG.ICONS.edit + 'スクリプト生成,
             'detailBtn': '👁 詳細',
-            'm3u8Detail': '📺 m3u8ストリーム詳細',
+            'm3u8Detail':  + MS_CONFIG.ICONS.stream + 'm3u8ストリーム詳細,
             'parsing': '解析中...',
             'parseResult': '解析結果：',
             'masterStreams': 'マスタープレイリスト、{n}ストリーム：',
@@ -1204,16 +1272,16 @@
             'parseFailNet': '解析失敗：ネットワークエラー',
             'parseFailTimeout': '解析失敗：タイムアウト',
             'm3u8PreviewHint': 'ストリーム (m3u8)：ダウンロード機能を使ってください',
-            'logLevelTitle': '📊 ログレベル（デバッグ用）',
+            'logLevelTitle':  + MS_CONFIG.ICONS.chart + 'ログレベル（デバッグ用）,
             'logDebug': 'DEBUG（詳細）',
             'logInfo': 'INFO（デフォルト）',
             'logWarn': 'WARN（警告）',
             'logError': 'ERROR（エラーのみ）',
-            'otherOps': '🎨 その他の操作',
+            'otherOps':  + MS_CONFIG.ICONS.palette + 'その他の操作,
             'exportAllConfig': '📤 全設定エクスポート',
-            'importConfig': '📥 設定インポート',
+            'importConfig':  + MS_CONFIG.ICONS.download + '設定インポート,
             'resetAll': '↺ 全設定リセット',
-            'batchTitle': '📦 一括DL設定',
+            'batchTitle':  + MS_CONFIG.ICONS.package + '一括DL設定,
             'concurrency': '同時実行数:',
             'intervalMs': '間隔(ms):',
             'retries': 'リトライ:',
@@ -1224,7 +1292,7 @@
             'qualityHigh': '最高',
             'qualityMedium': '中',
             'qualityLow': '低',
-            'requestHeaders': '🔧 リクエストヘッダー',
+            'requestHeaders':  + MS_CONFIG.ICONS.wrench + 'リクエストヘッダー,
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
@@ -1315,7 +1383,7 @@
             'theme': '테마', 'system': '시스템 설정', 'light': '라이트',
             'dark': '다크', 'autoMerge': '자동 병합', 'autoThumb': '영상 썸네일 추출',
             'autoThumbDesc': '동영상 첫 프레임을 썸네일로',
-            'enabled': '✅ 활성', 'disabled': '○ 비활성',
+            'enabled': '활성', 'disabled': '○ 비활성',
             'domainRules': '도메인 규칙', 'domainRulesDesc': '줄당 1규칙: 도메인,이미지,영상,음성,깊이',
             'clearCache': '캐시 지우기', 'saved': '저장됨', 'ok': 'OK',
             'fail': '실패', 'loading': '로딩 중...', 'confirm': '확인',
@@ -1334,7 +1402,7 @@
             'updateCheckFail': '업데이트 확인 실패',
             'nameTpl': '다운로드 파일명 템플릿', 'saveRules': '도메인 규칙 저장',
             'rulesSaved': '{n}개의 규칙이 저장됨',
-            'coverExtracted': '✅ 썸네일 추출됨',
+            'coverExtracted': '썸네일 추출됨',
             'coverFail': '썸네일 추출 실패', 'coverWait': '썸네일 추출 중...',
             'loadingMeta': '로딩 중...',
             'copied': '복사됨', 'noFiles': '다운로드할 파일 없음',
@@ -1342,13 +1410,13 @@
             'done': '완료', 'stopped': '중지됨', 'scanning': '스캔 중...',
             'scanDone': '스캔 완료', 'filterApplied': '필터 적용됨',
             'appTitle': '미디어 스니퍼 Pro',
-            'tabImg': '🖼 이미지', 'tabVideo': '🎬 영상', 'tabAudio': '🎵 오디오',
+            'tabImg':  + MS_CONFIG.ICONS.image + '이미지, 'tabVideo': '🎬 영상', 'tabAudio': '🎵 오디오',
             'tabM3u8': '📺 스트림', 'tabTranslate': '📖 번역',
-            'tabCookie': '🍪 쿠키', 'tabStorage': '💾 저장소',
+            'tabCookie':  + MS_CONFIG.ICONS.cookie + '쿠키, 'tabStorage': '💾 저장소',
             'tabSettings': '⚙️ 설정',
             'btnSelAll': '전체 선택', 'btnSelNone': '선택 해제',
             'extractCover': '썸네일 추출', 'filterPanel': '필터 설정',
-            'advFilterTitle': '🔧 고급 필터 설정',
+            'advFilterTitle':  + MS_CONFIG.ICONS.wrench + '고급 필터 설정,
             'advFilterDesc': '임계값을 설정한 후 "적용"을 클릭하여 리스트를 다시 필터링',
             'minImageSize': '최소 이미지 크기（바이트）',
             'minImageWidth': '최소 이미지 너비（px）',
@@ -1358,35 +1426,35 @@
             'minKb': '최소 크기 (KB)', 'maxKb': '최대 크기 (KB, 0=제한없음)',
             'apply': '적용', 'reset': '재설정'
         ,
-            'searchPlaceholder': '🔍 URL 또는 파일명 검색…',
+            'searchPlaceholder': 'URL 또는 파일명 검색…',
             'advFilter': '🔧 고급 필터',
             'noCookie': '이 페이지에 쿠키가 없습니다',
-            'copyCookieStr': '📋 쿠키 문자열 복사',
+            'copyCookieStr':  + MS_CONFIG.ICONS.copy + '쿠키 문자열 복사,
             'copyJson': '📋 JSON 복사',
-            'addCookie': '➕ 쿠키 추가',
-            'clearSite': '🗑 사이트 비우기',
+            'addCookie':  + MS_CONFIG.ICONS.plus + '쿠키 추가,
+            'clearSite':  + MS_CONFIG.ICONS.trash + '사이트 비우기,
             'delete': '삭제',
             'cookieName': '쿠키 이름을 입력하세요:',
             'cookieValue': '쿠키 값을 입력하세요:',
             'confirmClearCookie': '이 사이트의 모든 쿠키를 지우시겠습니까?',
-            'clearedRefresh': '✅ 지워졌습니다, 새로고침하세요',
+            'clearedRefresh': '지워졌습니다, 새로고침하세요',
             'added': '✅ 추가됨',
             'addFail': '추가 실패',
             'delFail': '삭제 실패',
             'clearFail': '비우기 실패',
             'readCookieFail': '쿠키를 읽을 수 없습니다',
-            'exportLs': '📤 localStorage 내보내기',
+            'exportLs': localStorage 내보내기,
             'exportSs': '📤 sessionStorage 내보내기',
-            'addItem': '➕ 항목 추가',
-            'clearAll': '🗑 모두 비우기',
+            'addItem':  + MS_CONFIG.ICONS.plus + '항목 추가,
+            'clearAll':  + MS_CONFIG.ICONS.trash + '모두 비우기,
             'keyName': '키:',
             'keyValue': '값:',
             'confirmClearStorage': 'localStorage와 sessionStorage를 비우시겠습니까?',
-            'cleared': '✅ 비워졌습니다',
+            'cleared': '비워졌습니다',
             'addToLs': '✅ localStorage에 추가됨',
-            'lsTitle': '📦 localStorage',
+            'lsTitle':  + MS_CONFIG.ICONS.package + 'localStorage,
             'ssTitle': '💾 sessionStorage',
-            'lsCount': '📦 localStorage {n}개 · 💾 sessionStorage {m}개',
+            'lsCount':  + MS_CONFIG.ICONS.package + 'localStorage {n}개 · 💾 sessionStorage {m}개,
             'transTitle': '🌐 텍스트 번역',
             'transIntro': '· MyMemory 무료 API · 최대 500자<br/>· 단축키: Alt+T로 선택 텍스트 번역',
             'transInputPh': '번역할 텍스트를 입력하거나 붙여넣으세요…',
@@ -1395,13 +1463,13 @@
             'zhToEn': '중→영',
             'enToZh': '영→중',
             'clearBtn': '비우기',
-            'copyResult': '📋 결과 복사',
+            'copyResult':  + MS_CONFIG.ICONS.copy + '결과 복사,
             'resultAsInput': '🔁 결과를 입력으로',
-            'plsInputText': '⚠ 번역할 텍스트를 입력하세요',
+            'plsInputText': '번역할 텍스트를 입력하세요',
             'translating': '⏳ 번역 중（{from} → {to}）…',
-            'translatingShort': '⏳ 번역 중입니다…',
+            'translatingShort': '번역 중입니다…',
             'transDone': '✅ 번역 완료 · ',
-            'transFail': '❌ 번역 실패',
+            'transFail': '번역 실패',
             'transFailShort': '（실패）',
             'autoDetect': '자동 감지',
             'zhLang': '중국어',
@@ -1417,34 +1485,34 @@
             'invertSel': '반전',
             'clearSel': '비우기',
             'copySelBtn': '복사',
-            'downloadSelBtn': '⬇ 다운로드',
+            'downloadSelBtn':  + MS_CONFIG.ICONS.arrowDown + '다운로드,
             'copyN': '복사({n})',
             'downloadN': '다운로드({n})',
-            'genScript': '📝 스크립트 생성',
+            'genScript':  + MS_CONFIG.ICONS.edit + '스크립트 생성,
             'rescan': '🔄 재스캔',
             'plsCheck': '리소스를 선택하세요',
-            'scriptCopied': '✅ aria2 스크립트 생성 및 복사됨',
+            'scriptCopied': 'aria2 스크립트 생성 및 복사됨',
             'rescanDone': '✅ 재스캔 완료',
-            'copiedN': '✅ {n}자 복사됨',
+            'copiedN': '{n}자 복사됨',
             'copyFail': '복사 실패',
             'noDlResource': '다운로드 가능한 리소스가 없습니다',
-            'downloading': '⏳ 이미 다운로드 중입니다',
+            'downloading': '이미 다운로드 중입니다',
             'batchStart': '⬇ 일괄 다운로드 시작: {n}개（동시 {c}개）',
-            'batchDone': '✅ 일괄 완료: 성공 {ok}/{total}, 실패 {fail}, {t}초',
+            'batchDone': '일괄 완료: 성공 {ok}/{total}, 실패 {fail}, {t}초',
             'dlStopped': '⏹ 다운로드 중지됨',
-            'scanDoneToast': '✅ 스캔 완료',
+            'scanDoneToast': '스캔 완료',
             'filterAppliedToast': '✅ 필터 적용됨',
             'noSelFile': '선택된 파일이 없습니다',
             'startDlToast': '{n}개 파일 다운로드 시작...',
             'noDlFile': '다운로드할 파일이 없습니다',
             'noCopyUrl': '복사할 URL이 없습니다',
-            'm3u8Start': '⏳ m3u8 다운로드 시작...',
+            'm3u8Start': 'm3u8 다운로드 시작...',
             'm3u8Progress': '진행률: {d}/{t}',
-            'm3u8Fail': '❌ 다운로드 실패',
+            'm3u8Fail': '다운로드 실패',
             'm3u8Done': '✅ m3u8 병합 및 다운로드 완료',
             'previewFail': '미리보기 실패',
             'extractFail': '추출 실패',
-            'logLevelChanged': '✅ 로그 레벨 변경됨',
+            'logLevelChanged': '로그 레벨 변경됨',
             'resetDone': '✅ 재설정됨',
             'plsSelectText': '번역할 텍스트를 먼저 선택하세요',
             'transSelText': '🌐 선택 번역',
@@ -1452,12 +1520,12 @@
             'confirmDlAll': '총 {n}개 파일을 다운로드하시겠습니까?',
             'confirmReset': '모든 설정을 재설정하시겠습니까?',
             'pasteJson': '설정 JSON 붙여넣기:',
-            'm3u8Title': '📺 스트림: {n} m3u8',
+            'm3u8Title':  + MS_CONFIG.ICONS.stream + '스트림: {n} m3u8,
             'noM3u8': 'm3u8 스트림이 없습니다',
-            'dlMerge': '⬇ 다운로드 및 병합',
-            'genScriptBtn': '📝 스크립트 생성',
+            'dlMerge':  + MS_CONFIG.ICONS.arrowDown + '다운로드 및 병합,
+            'genScriptBtn':  + MS_CONFIG.ICONS.edit + '스크립트 생성,
             'detailBtn': '👁 세부정보',
-            'm3u8Detail': '📺 m3u8 스트림 세부정보',
+            'm3u8Detail':  + MS_CONFIG.ICONS.stream + 'm3u8 스트림 세부정보,
             'parsing': '분석 중...',
             'parseResult': '분석 결과:',
             'masterStreams': '마스터 플레이리스트, {n}개 스트림:',
@@ -1469,16 +1537,16 @@
             'parseFailNet': '분석 실패: 네트워크 오류',
             'parseFailTimeout': '분석 실패: 시간 초과',
             'm3u8PreviewHint': '스트림 (m3u8): 다운로드 기능을 사용하세요',
-            'logLevelTitle': '📊 로그 레벨（디버그용）',
+            'logLevelTitle':  + MS_CONFIG.ICONS.chart + '로그 레벨（디버그용）,
             'logDebug': 'DEBUG（상세）',
             'logInfo': 'INFO（기본）',
             'logWarn': 'WARN（경고）',
             'logError': 'ERROR（오류만）',
-            'otherOps': '🎨 기타 작업',
+            'otherOps':  + MS_CONFIG.ICONS.palette + '기타 작업,
             'exportAllConfig': '📤 전체 설정 내보내기',
-            'importConfig': '📥 설정 가져오기',
+            'importConfig':  + MS_CONFIG.ICONS.download + '설정 가져오기,
             'resetAll': '↺ 모든 설정 재설정',
-            'batchTitle': '📦 일괄 다운로드 설정',
+            'batchTitle':  + MS_CONFIG.ICONS.package + '일괄 다운로드 설정,
             'concurrency': '동시 실행:',
             'intervalMs': '간격(ms):',
             'retries': '재시도:',
@@ -1489,7 +1557,7 @@
             'qualityHigh': '최고 화질',
             'qualityMedium': '중간 화질',
             'qualityLow': '최저 화질',
-            'requestHeaders': '🔧 요청 헤더',
+            'requestHeaders':  + MS_CONFIG.ICONS.wrench + '요청 헤더,
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
@@ -1581,7 +1649,7 @@
     })();
     var SEC = (function () {
         'use strict';
-        // 🛡 模块 2：安全 (Security) + AES-128 解密
+        // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></svg> 模块 2：安全 (Security) + AES-128 解密
     // =========================================================================
     var SEC = {};
     SEC.ALLOWED_PROTOCOLS = { 'http:': 1, 'https:': 1 };
@@ -1666,7 +1734,7 @@
     SEC.VIDEO_SITES = {
         'bilibili': {
             name: '哔哩哔哩',
-            icon: '📺',
+            icon: MS_CONFIG.ICONS.stream,
             match: function(url) {
                 try {
                     var u = new URL(url);
@@ -1684,7 +1752,7 @@
         },
         'douyin': {
             name: '抖音',
-            icon: '🎵',
+            icon: MS_CONFIG.ICONS.audio,
             match: function(url) {
                 try {
                     var u = new URL(url);
@@ -1700,7 +1768,7 @@
         },
         'kuaishou': {
             name: '快手',
-            icon: '⚡',
+            icon: MS_CONFIG.ICONS.lightning,
             match: function(url) {
                 try {
                     var u = new URL(url);
@@ -1716,7 +1784,7 @@
         },
         'xiaohongshu': {
             name: '小红书',
-            icon: '📕',
+            icon: MS_CONFIG.ICONS.book,
             match: function(url) {
                 try {
                     var u = new URL(url);
@@ -1733,7 +1801,7 @@
         },
         'weibo': {
             name: '微博',
-            icon: '🌐',
+            icon: MS_CONFIG.ICONS.globe,
             match: function(url) {
                 try {
                     var u = new URL(url);
@@ -1749,7 +1817,7 @@
         },
         'zhihu': {
             name: '知乎',
-            icon: '💡',
+            icon: MS_CONFIG.ICONS.bulb,
             match: function(url) {
                 try {
                     var u = new URL(url);
@@ -1766,7 +1834,7 @@
         },
         'weixin': {
             name: '微信视频号',
-            icon: '💬',
+            icon: MS_CONFIG.ICONS.speech,
             match: function(url) {
                 try {
                     var u = new URL(url);
@@ -2296,7 +2364,7 @@
     var State = (function () {
         'use strict';
     // =========================================================================
-    // 💾 模块 4：状态管理 (State) + 配置校验
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg></svg> 模块 4：状态管理 (State) + 配置校验
     // =========================================================================
     var DEFAULT_CONFIG = {
         theme: 'auto',
@@ -2599,7 +2667,7 @@
             State.config = State._mergeDefault(parsed);
             State.save();
             LOG.setLevel(State.config.logLevel);
-            return { ok: true, msg: '✅ 配置已导入并校验通过' };
+            return { ok: true, msg: '配置已导入并校验通过' };
         } catch (e) { return { ok: false, msg: '解析失败: ' + e.message }; }
     };
     State.resetConfig = function () {
@@ -2635,7 +2703,7 @@
     var NetHook = (function () {
         'use strict';
     // =========================================================================
-    // 🕵 模块 5：网络拦截 (Net Hook) + 防抖聚合
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 11c.57.57 1.33.89 2.12.89s1.58-.32 2.12-.89"></path><circle cx="12" cy="11" r="6"></circle><path d="M4 4l2 2"></path><path d="M20 4l-2 2"></path></svg></svg> 模块 5：网络拦截 (Net Hook) + 防抖聚合
     // =========================================================================
     var NetState = { hits: new Set(), queue: [], flushing: false };
     NetState._flush = function () {
@@ -2704,7 +2772,7 @@
     var Toast = (function () {
         'use strict';
     // =========================================================================
-    // 📣 模块 6：Toast + 状态条
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg></svg> 模块 6：Toast + 状态条
     // =========================================================================
     var STATUS_BAR = null;
     function showStatus(text, color, autoHideMs) {
@@ -2777,7 +2845,7 @@
     var Resolver = (function () {
         'use strict';
     // =========================================================================
-    // 🎬 模块 6b：视频平台地址解析 (Video Resolver)
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg></svg> 模块 6b：视频平台地址解析 (Video Resolver)
     // =========================================================================
     var VideoResolver = {};
     VideoResolver._cache = {};
@@ -2949,7 +3017,7 @@
                         cid: videoData.cid,
                         desc: videoData.desc || '',
                         pages: videoData.pages || [],
-                        siteIcon: '📺',
+                        siteIcon: MS_CONFIG.ICONS.stream,
                         siteName: '哔哩哔哩',
                         viewCount: stat.view || 0,
                         likeCount: stat.like || 0,
@@ -3097,7 +3165,7 @@
                                 videoUrl: '',
                                 duration: 0,
                                 author: '',
-                                siteIcon: '🎵',
+                                siteIcon: MS_CONFIG.ICONS.audio,
                                 siteName: '抖音',
                                 videoId: videoId,
                                 viewCount: 0,
@@ -3221,7 +3289,7 @@
                                 videoUrl: '',
                                 duration: 0,
                                 author: '',
-                                siteIcon: '⚡',
+                                siteIcon: MS_CONFIG.ICONS.lightning,
                                 siteName: '快手',
                                 videoId: videoId,
                                 viewCount: 0,
@@ -3365,7 +3433,7 @@
                                 videoUrl: '',
                                 duration: 0,
                                 author: '',
-                                siteIcon: '📕',
+                                siteIcon: MS_CONFIG.ICONS.book,
                                 siteName: '小红书'
                             };
                             var titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
@@ -3413,7 +3481,7 @@
                                 videoUrl: '',
                                 duration: 0,
                                 author: '',
-                                siteIcon: '🌐',
+                                siteIcon: MS_CONFIG.ICONS.globe,
                                 siteName: '微博'
                             };
                             var titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
@@ -3461,7 +3529,7 @@
                                 videoUrl: '',
                                 duration: 0,
                                 author: '',
-                                siteIcon: '💡',
+                                siteIcon: MS_CONFIG.ICONS.bulb,
                                 siteName: '知乎'
                             };
                             var titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
@@ -3509,7 +3577,7 @@
                                 videoUrl: '',
                                 duration: 0,
                                 author: '',
-                                siteIcon: '💬',
+                                siteIcon: MS_CONFIG.ICONS.speech,
                                 siteName: '微信视频号'
                             };
                             var titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
@@ -3769,7 +3837,7 @@
     var Plugins = (function () {
         'use strict';
     // =========================================================================
-    // 🔌 模块 6c+：脚本市场 / 插件系统 (Plugins)
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 11V7a4 4 0 0 0-8 0v4"></path><rect x="8" y="11" width="8" height="10" rx="1"></rect></svg></svg> 模块 6c+：脚本市场 / 插件系统 (Plugins)
     // =========================================================================
     var Plugins = {};
 
@@ -3904,7 +3972,7 @@
                             videoUrls: videoUrls,
                             qualityList: qualityList,
                             siteName: plugin.name,
-                            siteIcon: '🔌',
+                            siteIcon: MS_CONFIG.ICONS.plug,
                             duration: src.duration || 0,
                             author: src.author || src.uploader || ''
                         };
@@ -4007,7 +4075,7 @@
     var AutoUpdater = (function () {
         'use strict';
     // =========================================================================
-    // 🔄 模块 6d：自动更新器 (AutoUpdater)
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg></svg> 模块 6d：自动更新器 (AutoUpdater)
     // =========================================================================
     var AutoUpdater = {};
     AutoUpdater._lastCheckKey = '_ms_last_update_check';
@@ -4108,7 +4176,7 @@
             header.style.cssText = 'padding:20px 24px 16px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;position:relative;';
             header.innerHTML =
                 '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">' +
-                    '<span style="font-size:24px;">🎉</span>' +
+                    '<span style="font-size:24px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a3 3 0 1 0-6 0 3 3 0 0 0 6 0z"></path><path d="M6 15l2.5-2.5"></path><path d="M16.5 11.5L22 16"></path><path d="M12 18v4"></path><path d="M2 22l4-10 5.5 5.5L22 2"></path></svg></span>' +
                     '<span style="font-size:18px;font-weight:700;">发现新版本</span>' +
                 '</div>' +
                 '<div style="font-size:13px;opacity:.9;">' + LANG.t('mediaSniffer') + ' v' + info.version.replace(/^v/i, '') + '</div>';
@@ -4251,7 +4319,7 @@
     var VideoPreview = (function () {
         'use strict';
     // =========================================================================
-    // 🎬 模块 6c：视频链接预览 (Video Link Preview)
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg></svg> 模块 6c：视频链接预览 (Video Link Preview)
     // =========================================================================
     var VideoLinkPreview = {};
     VideoLinkPreview._cache = {};
@@ -4329,7 +4397,7 @@
         modal.id = '_ms_vlp_modal';
         modal.style.cssText = 'background:' + c.bg + ';border-radius:' + (isMobile ? '16px 16px 0 0' : '16px') + ';max-width:' + width + 'px;width:100%;max-height:' + (isMobile ? '92vh' : '90vh') + ';overflow-y:auto;box-shadow:0 25px 80px rgba(0,0,0,0.5);transition:transform 0.3s ease, opacity 0.3s ease;' + (isMobile ? 'padding-bottom:env(safe-area-inset-bottom);' : '');
 
-        var siteIcon = data.siteIcon || '📺';
+        var siteIcon = data.siteIcon || MS_CONFIG.ICONS.stream;
         var siteName = data.siteName || '';
         var title = data.title || '未知标题';
         var owner = data.owner || '';
@@ -4359,11 +4427,11 @@
 
         function buildStatsHtml() {
             var stats = [];
-            if (data.viewCount !== undefined) stats.push('<span title="播放量">▶️ ' + _formatNumber(data.viewCount) + '</span>');
-            if (data.likeCount !== undefined) stats.push('<span title="点赞">👍 ' + _formatNumber(data.likeCount) + '</span>');
-            if (data.coinCount !== undefined) stats.push('<span title="投币">🪙 ' + _formatNumber(data.coinCount) + '</span>');
-            if (data.favoriteCount !== undefined) stats.push('<span title="收藏">⭐ ' + _formatNumber(data.favoriteCount) + '</span>');
-            if (data.replyCount !== undefined) stats.push('<span title="评论">💬 ' + _formatNumber(data.replyCount) + '</span>');
+            if (data.viewCount !== undefined) stats.push('<span title="播放量"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="8 5 8 19 19 12 8 5"></polygon></svg> ' + _formatNumber(data.viewCount) + '</span>');
+            if (data.likeCount !== undefined) stats.push('<span title="点赞"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg> ' + _formatNumber(data.likeCount) + '</span>');
+            if (data.coinCount !== undefined) stats.push('<span title="投币"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="6" x2="12" y2="12"></line><path d="M12 16h.01"></path></svg> ' + _formatNumber(data.coinCount) + '</span>');
+            if (data.favoriteCount !== undefined) stats.push('<span title="收藏"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> ' + _formatNumber(data.favoriteCount) + '</span>');
+            if (data.replyCount !== undefined) stats.push('<span title="评论"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> ' + _formatNumber(data.replyCount) + '</span>');
             if (stats.length === 0) return '';
             return '<div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:' + c.sub + ';margin-bottom:10px;">' + stats.join('') + '</div>';
         }
@@ -4377,7 +4445,7 @@
                 parts.push('<span style="font-size:13px;color:' + c.txt + ';font-weight:500;">' + owner + '</span>');
             }
             if (data.pubdate) {
-                parts.push('<span style="font-size:11px;color:' + c.sub + ';">📅 ' + _formatPubDate(data.pubdate) + '</span>');
+                parts.push('<span style="font-size:11px;color:' + c.sub + ';"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ' + _formatPubDate(data.pubdate) + '</span>');
             }
             if (parts.length === 0) return '';
             return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid ' + c.border + ';margin-top:8px;">' + parts.join('') + '</div>';
@@ -4386,10 +4454,10 @@
         function buildVideoInfoHtml() {
             var rows = [];
             if (data.bvid) {
-                rows.push('<span>📺 BV号: <code style="background:' + c.bg + ';padding:2px 6px;border-radius:4px;">' + data.bvid + '</code></span>');
+                rows.push('<span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg> BV号: <code style="background:' + c.bg + ';padding:2px 6px;border-radius:4px;">' + data.bvid + '</code></span>');
             }
             if (data.duration) {
-                rows.push('<span>⏱ 时长: ' + Math.floor(data.duration / 60) + ':' + String(data.duration % 60).padStart(2, '0') + '</span>');
+                rows.push('<span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 时长: ' + Math.floor(data.duration / 60) + ':' + String(data.duration % 60).padStart(2, '0') + '</span>');
             }
             if (rows.length === 0) return '';
             return '<div style="background:' + c.bg2 + ';border-radius:10px;padding:12px 16px;font-size:12px;color:' + c.sub + ';line-height:1.8;">' +
@@ -4411,10 +4479,10 @@
         function buildErrorHtml() {
             if (!resolveError) return '';
             return '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:16px;margin-bottom:16px;text-align:center;">' +
-                '<div style="font-size:32px;margin-bottom:8px;">⚠️</div>' +
+                '<div style="font-size:32px;margin-bottom:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>' +
                 '<div style="font-size:14px;color:#dc2626;font-weight:500;margin-bottom:4px;">解析失败</div>' +
                 '<div style="font-size:12px;color:#ef4444;margin-bottom:12px;">' + resolveError + '</div>' +
-                (originalUrl ? '<button id="_ms_vlp_retry" style="padding:8px 20px;border:none;border-radius:8px;background:#ef4444;color:#fff;font-size:13px;font-weight:500;cursor:pointer;">🔄 重试</button>' : '') +
+                (originalUrl ? '<button id="_ms_vlp_retry" style="padding:8px 20px;border:none;border-radius:8px;background:#ef4444;color:#fff;font-size:13px;font-weight:500;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg> 重试</button>' : '') +
             '</div>';
         }
 
@@ -4447,9 +4515,9 @@
                     (cover ? '<img id="_ms_vlp_cover" src="' + cover + '" style="width:100%;display:block;max-height:360px;object-fit:contain;">' : '') +
                     '<div id="_ms_vlp_loading" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:14px;">加载中...</div>' +
                     '<div id="_ms_vlp_video_error" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);flex-direction:column;align-items:center;justify-content:center;color:#fff;padding:20px;text-align:center;">' +
-                        '<div style="font-size:32px;margin-bottom:8px;">⚠️</div>' +
+                        '<div style="font-size:32px;margin-bottom:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>' +
                         '<div id="_ms_vlp_error_msg" style="font-size:13px;margin-bottom:12px;">视频加载失败</div>' +
-                        '<button id="_ms_vlp_video_retry" style="padding:6px 16px;border:none;border-radius:6px;background:#ef4444;color:#fff;font-size:12px;cursor:pointer;">🔄 重试</button>' +
+                        '<button id="_ms_vlp_video_retry" style="padding:6px 16px;border:none;border-radius:6px;background:#ef4444;color:#fff;font-size:12px;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg> 重试</button>' +
                     '</div>' +
                 '</div>' +
 
@@ -4465,7 +4533,7 @@
                 // 操作按钮
                 '<div id="_ms_vlp_autoplay_row" style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding:10px 14px;background:' + c.bg2 + ';border-radius:10px;">' +
                     '<span style="font-size:13px;color:' + c.txt + ';display:flex;align-items:center;gap:6px;">' +
-                        '<span>🔊</span>自动播放' +
+                        '<span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></span>自动播放' +
                     '</span>' +
                     '<div id="_ms_vlp_autoplay_toggle" style="position:relative;width:44px;height:24px;border-radius:12px;cursor:pointer;transition:background 0.2s;background:' + (State.config.autoPlayPreview ? '#6366f1' : c.bg3) + ';">' +
                         '<div style="position:absolute;top:2px;left:' + (State.config.autoPlayPreview ? '22px' : '2px') + ';width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>' +
@@ -4474,19 +4542,19 @@
                 (isMobile ?
                 '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;margin-bottom:16px;">' +
                     '<button id="_ms_vlp_play" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px;border:none;border-radius:12px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:12px;font-weight:600;cursor:pointer;">' +
-                        '<span style="font-size:22px;">▶️</span><span>播放</span>' +
+                        '<span style="font-size:22px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="8 5 8 19 19 12 8 5"></polygon></svg></span><span>播放</span>' +
                     '</button>' +
                     '<button id="_ms_vlp_dl" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px;border:none;border-radius:12px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:12px;font-weight:600;cursor:pointer;">' +
-                        '<span style="font-size:22px;">📥</span><span>下载</span>' +
+                        '<span style="font-size:22px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span><span>下载</span>' +
                     '</button>' +
                     '<button id="_ms_vlp_copy" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px;border:none;border-radius:12px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-size:12px;font-weight:600;cursor:pointer;">' +
-                        '<span style="font-size:22px;">📋</span><span>复制</span>' +
+                        '<span style="font-size:22px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span><span>复制</span>' +
                     '</button>' +
                 '</div>' :
                 '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;margin-bottom:16px;">' +
                     '<button id="_ms_vlp_play" style="flex:1;min-width:120px;padding:12px 20px;border:none;border-radius:10px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:14px;font-weight:600;cursor:pointer;">▶ 播放视频</button>' +
-                    '<button id="_ms_vlp_dl" style="flex:1;min-width:120px;padding:12px 20px;border:none;border-radius:10px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:14px;font-weight:600;cursor:pointer;">📥 下载视频</button>' +
-                    '<button id="_ms_vlp_copy" style="flex:1;min-width:120px;padding:12px 20px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-size:14px;font-weight:600;cursor:pointer;">📋 复制链接</button>' +
+                    '<button id="_ms_vlp_dl" style="flex:1;min-width:120px;padding:12px 20px;border:none;border-radius:10px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:14px;font-weight:600;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> 下载视频</button>' +
+                    '<button id="_ms_vlp_copy" style="flex:1;min-width:120px;padding:12px 20px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-size:14px;font-weight:600;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> 复制链接</button>' +
                 '</div>') +
 
                 // 链接显示
@@ -4852,7 +4920,7 @@
     var Meta = (function () {
         'use strict';
     // =========================================================================
-    // 📊 模块 7：元信息提取 (Meta Fetcher - P1-2)
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></svg> 模块 7：元信息提取 (Meta Fetcher - P1-2)
     // =========================================================================
     var Meta = {};
     // 获取文件大小（通过 HEAD 请求 Content-Length）
@@ -5021,7 +5089,7 @@
             key: key,
             name: config.name || key,
             label: config.label || key,
-            icon: config.icon || '🌐',
+            icon: config.icon || MS_CONFIG.ICONS.globe,
             maxChars: config.maxChars || 500,
             timeout: config.timeout || 25000,
             supportedLangs: config.supportedLangs || ['zh-CN', 'en', 'ja', 'ko', 'fr', 'de', 'es', 'ru'],
@@ -5212,7 +5280,7 @@
     TranslateEngine.register('mymemory', {
         name: 'MyMemory',
         label: 'MyMemory（免费）',
-        icon: '🌍',
+        icon: MS_CONFIG.ICONS.globe,
         maxChars: 500,
         supportedLangs: ['zh-CN', 'zh-TW', 'en', 'ja', 'ko', 'fr', 'de', 'es', 'ru', 'pt', 'it', 'ar'],
         translate: function (text, from, to, cb) {
@@ -5254,7 +5322,7 @@
     TranslateEngine.register('google', {
         name: 'Google',
         label: 'Google 翻译',
-        icon: '🔷',
+        icon: MS_CONFIG.ICONS.diamond,
         maxChars: 5000,
         supportedLangs: ['zh-CN', 'zh-TW', 'en', 'ja', 'ko', 'fr', 'de', 'es', 'ru', 'pt', 'it', 'ar', 'th', 'vi'],
         translate: function (text, from, to, cb) {
@@ -5284,7 +5352,7 @@
     TranslateEngine.register('bing', {
         name: 'Bing',
         label: 'Bing 翻译',
-        icon: '🟦',
+        icon: MS_CONFIG.ICONS.square,
         maxChars: 5000,
         supportedLangs: ['zh-CN', 'zh-TW', 'en', 'ja', 'ko', 'fr', 'de', 'es', 'ru', 'pt', 'it'],
         translate: function (text, from, to, cb) {
@@ -5310,7 +5378,7 @@
     TranslateEngine.register('baidu', {
         name: 'Baidu',
         label: '百度翻译',
-        icon: '🔵',
+        icon: MS_CONFIG.ICONS.circle,
         maxChars: 6000,
         needKey: true,
         supportedLangs: ['zh', 'en', 'ja', 'ko', 'fr', 'de', 'es', 'ru', 'pt', 'it', 'ar', 'th', 'vi'],
@@ -5344,7 +5412,7 @@
     TranslateEngine.register('deepl', {
         name: 'DeepL',
         label: 'DeepL（高质量）',
-        icon: '🟩',
+        icon: MS_CONFIG.ICONS.square,
         maxChars: 5000,
         needKey: true,
         supportedLangs: ['zh', 'en', 'ja', 'de', 'fr', 'es', 'pt', 'it', 'ru'],
@@ -5459,7 +5527,7 @@
     var Scanner = (function () {
         'use strict';
     // =========================================================================
-    // 🔎 模块 9：DOM 扫描器 (Scanner) + requestIdleCallback 分批处理
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></svg> 模块 9：DOM 扫描器 (Scanner) + requestIdleCallback 分批处理
     // =========================================================================
     var Scanner = {};
     Scanner._iframeVideoUrls = new Set();
@@ -5839,7 +5907,7 @@
     var ScannerService = (function () {
         'use strict';
     // =========================================================================
-    // ⬇ 模块 9.6：新版扫描服务 (ScannerService) - 增量扫描 + Worker + 平台适配器
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></svg> 模块 9.6：新版扫描服务 (ScannerService) - 增量扫描 + Worker + 平台适配器
     // =========================================================================
     var ScannerService = (function () {
         function extend(target, source) {
@@ -6286,7 +6354,7 @@
         'use strict';
 
     // =========================================================================
-    // ⬇ 模块 9.5：下载管理器 (DownloadManager) - 统一下载队列 + backend 扩展
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></svg> 模块 9.5：下载管理器 (DownloadManager) - 统一下载队列 + backend 扩展
     // =========================================================================
     var DownloadManager = (function () {
         function extend(target, source) {
@@ -7349,7 +7417,7 @@
     var Dl = (function () {
         'use strict';
     // =========================================================================
-    // ⬇ 模块 10：下载引擎 (Downloader) + 进度可视化 (P0-3)
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></svg> 模块 10：下载引擎 (Downloader) + 进度可视化 (P0-3)
     // =========================================================================
     var Dl = {};
     Dl._usedNames = new Set();
@@ -7721,7 +7789,7 @@
             for (var i = 0; i < urls.length; i++) script += '    "' + urls[i] + '",\n';
             script += ']\n\nheaders = {"User-Agent": "Mozilla/5.0"}\n';
             if (State.config.customHeaders.Referer) script += 'headers["Referer"] = "' + State.config.customHeaders.Referer + '"\n';
-            script += '\nfor i, url in enumerate(urls):\n    name = "' + domain + '_' + timestamp + '_{:03d}.bin".format(i+1)\n    try:\n        req = urllib.request.Request(url, headers=headers)\n        with urllib.request.urlopen(req) as resp:\n            with open(name, "wb") as f: f.write(resp.read())\n        print("✅", name)\n    except Exception as e: print("❌", name, e)\n';
+            script += '\nfor i, url in enumerate(urls):\n    name = "' + domain + '_' + timestamp + '_{:03d}.bin".format(i+1)\n    try:\n        req = urllib.request.Request(url, headers=headers)\n        with urllib.request.urlopen(req) as resp:\n            with open(name, "wb") as f: f.write(resp.read())\n        print("[OK]", name)\n    except Exception as e: print("[ERR]", name, e)\n';
         } else {
             script = '# curl 批量下载脚本\n# 使用方法: bash download.sh\n# 生成时间: ' + timestamp + '\n\n';
             for (var i = 0; i < urls.length; i++) {
@@ -7740,7 +7808,7 @@
         'use strict';
 
     // =========================================================================
-    // 🖼 模块 10.5：选择管理器 (SelectionManager) - 方案三吸收方案二
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></svg> 模块 10.5：选择管理器 (SelectionManager) - 方案三吸收方案二
     // 在面向最常见场景的流式 API 基础上，保留批量操作/分组/去重/收藏夹的扩展注册能力
     // =========================================================================
     var Selection = {};
@@ -8075,7 +8143,7 @@
     var UI = (function () {
         'use strict';
     // =========================================================================
-    // 🖼 模块 11：UI 面板 + 虚拟列表 (P0-2) + 进度条 + 媒体预览 (P1-1)
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></svg> 模块 11：UI 面板 + 虚拟列表 (P0-2) + 进度条 + 媒体预览 (P1-1)
     // =========================================================================
     var UI = {};
 
@@ -8221,7 +8289,7 @@
                             img.onerror = function() {
                                 var d = document.createElement('div');
                                 d.style.cssText = 'width:100%;height:100%;background:linear-gradient(135deg,' + MS_CONFIG.COLORS.darkGradientStart + ',' + MS_CONFIG.COLORS.darkGradientEnd + ');display:flex;align-items:center;justify-content:center;color:' + MS_CONFIG.COLORS.white + ';font-size:28px;';
-                                d.textContent = '▶';
+                                d.innerHTML = MS_CONFIG.ICONS.arrowRight;
                                 elem.parentNode.appendChild(d);
                             };
                             elem.parentNode.replaceChild(img, elem);
@@ -8281,7 +8349,7 @@
             var title = data.title || '';
             var coverEl = card.querySelector('img');
             var firstChild = card.firstElementChild;
-            var isPlaceholder = firstChild && firstChild.tagName === 'DIV' && firstChild.textContent === '🎬' && firstChild.style.width === '100%';
+            var isPlaceholder = firstChild && firstChild.tagName === 'DIV' && firstChild.innerHTML === MS_CONFIG.ICONS.video && firstChild.style.width === '100%';
             if (cover && !coverEl && isPlaceholder) {
                 var img = document.createElement('img');
                 img.src = cover;
@@ -8292,7 +8360,7 @@
                 img.onerror = function() {
                     var d = document.createElement('div');
                     d.style.cssText = 'width:100%;height:' + h + ';background:linear-gradient(135deg,#1e293b,#334155);display:flex;align-items:center;justify-content:center;color:#fff;font-size:' + iconSize + ';';
-                    d.textContent = '🎬';
+                    d.innerHTML = MS_CONFIG.ICONS.video;
                     this.parentNode.replaceChild(d, this);
                 };
                 firstChild.parentNode.replaceChild(img, firstChild);
@@ -8308,7 +8376,7 @@
             }
             var resolveBtn = card.querySelector('._ms_resolve_btn');
             if (resolveBtn) {
-                resolveBtn.textContent = '✅ 已解析';
+                resolveBtn.innerHTML = MS_CONFIG.ICONS.checkBig + ' 已解析';
                 resolveBtn.style.color = MS_CONFIG.COLORS.success;
             }
         } catch (e) {}
@@ -8636,7 +8704,7 @@
                 });
             } catch (e) {}
 
-            LOG.info('浮动按钮创建成功 ✓');
+            LOG.info('浮动按钮创建成功');
         } catch (err) {
             LOG.error('浮动按钮创建失败:', err.message);
         }
@@ -9505,11 +9573,11 @@
         var menu = document.createElement('div');
         menu.id = '_ms_float_ctx_menu';
         var items = [
-            { icon: '📂', label: LANG.t('ctxOpenPanel'), action: function () { UI.openPanel(); } },
-            { icon: '📥', label: LANG.t('ctxQuickDownload'), action: function () { UI.quickDownload(); } },
-            { icon: '🌐', label: LANG.t('ctxTranslate'), action: function () { UI.openPanel(); UI.switchTab('translate'); } },
-            { icon: '⚙️', label: LANG.t('ctxSettings'), action: function () { UI.openPanel(); UI.switchTab('settings'); } },
-            { icon: '✖️', label: LANG.t('ctxClose'), action: function () {} }
+            { icon: MS_CONFIG.ICONS.folder, label: LANG.t('ctxOpenPanel'), action: function () { UI.openPanel(); } },
+            { icon: MS_CONFIG.ICONS.download, label: LANG.t('ctxQuickDownload'), action: function () { UI.quickDownload(); } },
+            { icon: MS_CONFIG.ICONS.globe, label: LANG.t('ctxTranslate'), action: function () { UI.openPanel(); UI.switchTab('translate'); } },
+            { icon: MS_CONFIG.ICONS.settings, label: LANG.t('ctxSettings'), action: function () { UI.openPanel(); UI.switchTab('settings'); } },
+            { icon: MS_CONFIG.ICONS.cross, label: LANG.t('ctxClose'), action: function () {} }
         ];
         var menuH = items.length * 40 + 16;
         var mx = Math.min(Math.max(8, x), window.innerWidth - 180);
@@ -9626,7 +9694,7 @@
             title.style.cssText = 'font-size:16px;font-weight:700;';
             title.textContent = '下载队列';
             var closeBtn = document.createElement('button');
-            closeBtn.textContent = '✕';
+            closeBtn.innerHTML = MS_CONFIG.ICONS.cross;
             closeBtn.style.cssText = 'width:32px;height:32px;border:none;border-radius:50%;background:' + c.bg3 + ';color:' + c.txt + ';font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;';
             function closeQueueOverlay() {
                 clearInterval(timer);
@@ -9791,8 +9859,8 @@
             }) : State.videoLinks.slice();
         }
 
-        var icon = kind === 'img' ? '🖼' : kind === 'video' ? '🎬' : kind === 'audio' ? '🎵' : '📺';
-        var label = kind === 'img' ? LANG.t('tabImg').replace(/^[🖼🎬🎵📺]/, '') : kind === 'video' ? LANG.t('tabVideo').replace(/^[🖼🎬🎵📺]/, '') : kind === 'audio' ? LANG.t('tabAudio').replace(/^[🖼🎬🎵📺]/, '') : LANG.t('tabM3u8').replace(/^[🖼🎬🎵📺]/, '');
+        var icon = kind === 'img' ? MS_CONFIG.ICONS.image : kind === 'video' ? MS_CONFIG.ICONS.video : kind === 'audio' ? MS_CONFIG.ICONS.audio : MS_CONFIG.ICONS.stream;
+        var label = kind === 'img' ? LANG.t('tabImg').replace(/^[\u{1F300}-\u{1F9FF}]/u, '') : kind === 'video' ? LANG.t('tabVideo').replace(/^[\u{1F300}-\u{1F9FF}]/u, '') : kind === 'audio' ? LANG.t('tabAudio').replace(/^[\u{1F300}-\u{1F9FF}]/u, '') : LANG.t('tabM3u8').replace(/^[\u{1F300}-\u{1F9FF}]/u, '');
         var total = all.length;
         var shown = kwList.length;
         var totalLinks = vLinkList.length;
@@ -9810,11 +9878,11 @@
                 '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
                     '<button id="_ms_sel_all" style="padding:' + btnPadding + ';border:none;border-radius:8px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:' + btnFontSize + ';cursor:pointer;">' + LANG.t('btnSelAll') + '</button>' +
                     '<button id="_ms_sel_none" style="padding:' + btnPadding + ';border:none;border-radius:8px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:' + btnFontSize + ';cursor:pointer;">' + LANG.t('btnSelNone') + '</button>' +
-                    '<button id="_ms_dl_sel" style="padding:' + btnPadding + ';border:none;border-radius:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:' + btnFontSize + ';font-weight:600;cursor:pointer;">📥 ' + LANG.t('downloadSel') + '</button>' +
-                    '<button id="_ms_dl_all" style="padding:' + btnPadding + ';border:none;border-radius:8px;background:linear-gradient(135deg,#10b981,#34d399);color:#fff;font-size:' + btnFontSize + ';font-weight:600;cursor:pointer;">📥 ' + LANG.t('downloadAll') + '</button>' +
-                    '<button id="_ms_copy_sel" style="padding:' + btnPadding + ';border:none;border-radius:8px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:' + btnFontSize + ';cursor:pointer;">📋 ' + LANG.t('copySelUrl') + '</button>' +
-                    '<button id="_ms_copy_all" style="padding:' + btnPadding + ';border:none;border-radius:8px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:' + btnFontSize + ';cursor:pointer;">📋 ' + LANG.t('copyAllUrl') + '</button>' +
-                    '<button id="_ms_show_filter" style="padding:' + btnPadding + ';border:none;border-radius:8px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:' + btnFontSize + ';cursor:pointer;">🔧 ' + LANG.t('filter') + '</button>' +
+                    '<button id="_ms_dl_sel" style="padding:' + btnPadding + ';border:none;border-radius:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:' + btnFontSize + ';font-weight:600;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> ' + LANG.t('downloadSel') + '</button>' +
+                    '<button id="_ms_dl_all" style="padding:' + btnPadding + ';border:none;border-radius:8px;background:linear-gradient(135deg,#10b981,#34d399);color:#fff;font-size:' + btnFontSize + ';font-weight:600;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> ' + LANG.t('downloadAll') + '</button>' +
+                    '<button id="_ms_copy_sel" style="padding:' + btnPadding + ';border:none;border-radius:8px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:' + btnFontSize + ';cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> ' + LANG.t('copySelUrl') + '</button>' +
+                    '<button id="_ms_copy_all" style="padding:' + btnPadding + ';border:none;border-radius:8px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:' + btnFontSize + ';cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> ' + LANG.t('copyAllUrl') + '</button>' +
+                    '<button id="_ms_show_filter" style="padding:' + btnPadding + ';border:none;border-radius:8px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:' + btnFontSize + ';cursor:pointer;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg> ' + LANG.t('filter') + '</button>' +
                 '</div>' +
             '</div>' +
             '<div id="_ms_filter_panel" style="display:none;margin-top:10px;padding:10px;border-radius:8px;background:' + c.bg + ';border:1px solid ' + c.border + ';">' +
@@ -9836,7 +9904,7 @@
             var vlinkSection = document.createElement('div');
             vlinkSection.style.cssText = 'border-bottom:1px solid ' + c.border + ';background:' + c.bg2 + ';';
             var headerHtml = '<div style="padding:8px 14px;font-size:' + (isMobile ? '14px' : '12px') + ';color:' + c.sub + ';font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">' +
-                '<span>🔗 视频页面链接（点击解析获取下载地址）</span>' +
+                '<span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg> 视频页面链接（点击解析获取下载地址）</span>' +
                 '<button id="_ms_batch_resolve" style="padding:' + (isMobile ? '10px 16px' : '6px 12px') + ';border:none;border-radius:8px;background:linear-gradient(135deg,#8b5cf6,#a855f7);color:#fff;font-size:' + (isMobile ? '14px' : '11px') + ';font-weight:600;cursor:pointer;flex-shrink:0;">🔄 一键解析全部</button>' +
                 '</div>' +
                 '<div id="_ms_batch_progress" style="display:none;padding:0 14px 10px;">' +
@@ -9871,10 +9939,10 @@
                 var my = Math.min(Math.max(10, y), window.innerHeight - 260);
                 menu.style.cssText = 'position:fixed;left:' + mx + 'px;top:' + my + 'px;z-index:2147483648;background:' + c.bg + ';border:1px solid ' + c.border + ';border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.35);padding:6px;min-width:' + menuW + 'px;';
                 var items = [
-                    { icon: '▶️', label: '预览视频', action: function() { VideoLinkPreview.preview(vData.url); } },
-                    { icon: '📋', label: '复制链接', action: function() { copyText(vData.url); } },
-                    { icon: '📥', label: '下载视频', action: function() { VideoLinkPreview.preview(vData.url); } },
-                    { icon: '🔗', label: '打开原网页', action: function() { window.open(vData.url, '_blank'); } },
+                    { icon: MS_CONFIG.ICONS.arrowRight, label: '预览视频', action: function() { VideoLinkPreview.preview(vData.url); } },
+                    { icon: MS_CONFIG.ICONS.copy, label: '复制链接', action: function() { copyText(vData.url); } },
+                    { icon: MS_CONFIG.ICONS.download, label: '下载视频', action: function() { VideoLinkPreview.preview(vData.url); } },
+                    { icon: MS_CONFIG.ICONS.link, label: '打开原网页', action: function() { window.open(vData.url, '_blank'); } },
                 ];
                 for (var mi = 0; mi < items.length; mi++) {
                     (function(item) {
@@ -9922,7 +9990,7 @@
                     vCoverHtml = '<div style="width:100%;height:' + coverHeight + ';background:linear-gradient(135deg,#1e293b,#334155);display:flex;align-items:center;justify-content:center;color:#fff;font-size:' + iconSize + ';">🎬</div>';
                 }
                 var isResolved = UI._vlinkResolved[vItem.url];
-                var resolveBtnText = isResolved ? '✅ 已解析' : '解析 ⬇';
+                var resolveBtnText = isResolved ? '已解析' : '解析';
                 var resolveBtnColor = isResolved ? '#10b981' : '#8b5cf6';
                 vCard.innerHTML = vCoverHtml +
                     '<div style="padding:' + cardPadding + ';">' +
@@ -9987,7 +10055,7 @@
                     batchBtn.disabled = true;
                     batchBtn.style.opacity = '0.6';
                     batchBtn.style.cursor = 'not-allowed';
-                    batchBtn.textContent = '⏳ 解析中...';
+                    batchBtn.innerHTML = MS_CONFIG.ICONS.hourglass + ' 解析中...';
                     UI.batchResolveVlinks(vLinkList, function(completed, total, successCount, failedCount) {
                         var pct = total > 0 ? (completed / total * 100) : 0;
                         if (progressBar) progressBar.style.width = pct.toFixed(1) + '%';
@@ -9997,7 +10065,7 @@
                         batchBtn.disabled = false;
                         batchBtn.style.opacity = '1';
                         batchBtn.style.cursor = 'pointer';
-                        batchBtn.textContent = '🔄 一键解析全部';
+                        batchBtn.innerHTML = MS_CONFIG.ICONS.refresh + ' 一键解析全部';
                         toast('批量解析完成：成功 ' + successCount + '，失败 ' + failedCount, '#10b981');
                     });
                 });
@@ -10459,7 +10527,7 @@
             title.style.cssText = 'flex:1;font-size:14px;font-weight:700;word-break:break-all;line-height:1.4;';
             title.textContent = U.trunc(SEC.nameFromUrl(url) || url, 60);
             var closeBtn = document.createElement('button');
-            closeBtn.textContent = '✕';
+            closeBtn.innerHTML = MS_CONFIG.ICONS.cross;
             closeBtn.style.cssText = 'border:none;background:' + c.bg3 + ';color:' + c.txt + ';font-size:16px;width:34px;height:34px;border-radius:50%;cursor:pointer;flex-shrink:0;';
             function closePreviewOverlay() {
                 cleanupPreview();
@@ -10625,7 +10693,7 @@
                 b.textContent = label; b.style.cssText = 'padding:12px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,' + gradient + ');color:#fff;font-size:13px;font-weight:600;cursor:pointer;';
                 b.addEventListener('click', handler); btnWrap.appendChild(b);
             }
-            mkBtn('⬇ ' + LANG.t('download'), '#6366f1,#8b5cf6', function () {
+            mkBtn(LANG.t('download'), '#6366f1,#8b5cf6', function () {
                 try {
                     if (url.indexOf('blob:') === 0) {
                         Dl.downloadBlob(url, Dl.buildName(url, 1, 'mp4', State.config.nameTpl));
@@ -10636,10 +10704,10 @@
                 }
                 catch(e) { toast(LANG.t('fail') + ': ' + e.message, '#ef4444'); }
             });
-            mkBtn('📋 ' + LANG.t('copyUrl'), '#10b981,#34d399', function () { copyText(url); });
-            mkBtn('🌐 ' + LANG.t('openTab'), '#f59e0b,#fbbf24', function () { try { window.open(url, '_blank'); } catch (e) {} });
+            mkBtn(LANG.t('copyUrl'), '#10b981,#34d399', function () { copyText(url); });
+            mkBtn(LANG.t('openTab'), '#f59e0b,#fbbf24', function () { try { window.open(url, '_blank'); } catch (e) {} });
             if (kind === 'video') {
-                mkBtn('⏺ 录制媒体流', '#ef4444,#f87171', function () {
+                mkBtn('录制媒体流', '#ef4444,#f87171', function () {
                     var found = UI._findStreamElement(url);
                     if (found && found.el) {
                         Dl.recordStream(found.el, 10000, Dl.buildName(url, 1, 'webm', State.config.nameTpl));
@@ -10649,7 +10717,7 @@
                 });
             }
             if (kind === 'video' || kind === 'm3u8') {
-                mkBtn('🎞 ' + LANG.t('extractCover'), '#ec4899,#f472b6', function () {
+                mkBtn(LANG.t('extractCover'), '#ec4899,#f472b6', function () {
                     try {
                         var video = document.createElement('video');
                         video.crossOrigin = 'anonymous';
@@ -10850,7 +10918,7 @@
                 Scanner.doFull(function () { toast(LANG.t('rescanDone')); UI.renderMedia(kind); });
             });
             // 退出选择
-            btn('✕ ' + LANG.t('close'), '#ef4444', function () {
+            btn(LANG.t('close'), '#ef4444', function () {
                 Selection.exit();
             });
         } else {
@@ -10861,7 +10929,7 @@
             ft.appendChild(info2);
 
             // 选择按钮（主入口）
-            btn('☑ ' + LANG.t('selectBtn'), 'linear-gradient(135deg,#6366f1,#8b5cf6)', function () {
+            btn(LANG.t('selectBtn'), 'linear-gradient(135deg,#6366f1,#8b5cf6)', function () {
                 Selection.enter();
             }, 1.2);
 
@@ -11061,7 +11129,7 @@
         makeBtn(LANG.t('speakBtn'), '#f59e0b', function () {
             if (output.textContent && output.textContent !== LANG.t('transResultPh')) {
                 TranslateEngine.speak(output.textContent, toSel.value);
-                toast('🔊 ' + LANG.t('saved'));
+                toast(LANG.t('saved'));
             }
         }, btnRow2);
         container.appendChild(btnRow2);
@@ -11290,7 +11358,7 @@
             titleEl.style.cssText = 'font-size:13px;font-weight:600;color:' + c.txt + ';';
             titleEl.textContent = title;
             var arrow = document.createElement('span');
-            arrow.textContent = expanded ? '▼' : '▶';
+            arrow.innerHTML = expanded ? '▼' : MS_CONFIG.ICONS.arrowRight;
             arrow.style.cssText = 'font-size:12px;color:' + c.sub + ';';
             header.appendChild(titleEl);
             header.appendChild(arrow);
@@ -11310,7 +11378,7 @@
         // 主题
         var themeRow = document.createElement('div');
         themeRow.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;';
-        var themes = [['auto', '🖥 ' + LANG.t('themeAuto')], ['light', '☀ ' + LANG.t('themeLight')], ['dark', '🌙 ' + LANG.t('themeDark')]];
+        var themes = [['auto', LANG.t('themeAuto')], ['light', LANG.t('themeLight')], ['dark', LANG.t('themeDark')]];
         for (var ti = 0; ti < themes.length; ti++) {
             (function (t) {
                 var b = document.createElement('button');
@@ -11421,7 +11489,7 @@
         customPalForm.appendChild(cpDS.row);
 
         var cpSave = document.createElement('button');
-        cpSave.textContent = '💾 ' + LANG.t('ok');
+        cpSave.innerHTML = MS_CONFIG.ICONS.save + ' ' + LANG.t('ok');
         cpSave.style.cssText = 'width:100%;padding:8px;border:none;border-radius:8px;background:linear-gradient(135deg,' + c.primary + ',' + c.primary2 + ');color:#fff;font-size:12px;font-weight:600;cursor:pointer;margin-top:4px;';
         cpSave.onclick = function () {
             var name = cpName.value.trim();
@@ -11569,8 +11637,8 @@
             var t = prompt(LANG.t('pasteJson'));
             if (!t) return;
             var res = State.importConfig(t);
-            if (res.ok) { toast('✅ ' + res.msg); applyPanelThemeNow(); UI.renderSettings(); }
-            else toast('❌ ' + res.msg, '#ef4444');
+            if (res.ok) { toast(res.msg); applyPanelThemeNow(); UI.renderSettings(); }
+            else toast(res.msg, '#ef4444');
         }, 1.3);
         mkOBtn(LANG.t('resetAll'), '#ef4444', function () {
             if (!confirm(LANG.t('confirmReset'))) return;
@@ -11619,7 +11687,7 @@
         drText.value = drLines.join('\n');
         drContent.appendChild(drText);
         var drBtn = document.createElement('button');
-        drBtn.textContent = '💾 ' + LANG.t('saveRules');
+        drBtn.innerHTML = MS_CONFIG.ICONS.save + ' ' + LANG.t('saveRules');
         drBtn.style.cssText = 'margin-top:8px;padding:8px 14px;border:none;border-radius:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:12px;font-weight:600;cursor:pointer;';
         drBtn.onclick = function () {
             var lines = drText.value.split(/[\r\n]+/).filter(function (l) { return l.trim().length > 0; });
@@ -11740,7 +11808,7 @@
         ruleFormWrap.style.cssText = 'margin-top:10px;padding:12px;border-radius:10px;background:' + c.bg2 + ';border:1px solid ' + c.border + ';';
         var ruleFormTitle = document.createElement('div');
         ruleFormTitle.style.cssText = 'font-size:13px;font-weight:700;color:' + c.txt + ';margin-bottom:10px;';
-        ruleFormTitle.textContent = '➕ ' + LANG.t('addRule');
+        ruleFormTitle.innerHTML = MS_CONFIG.ICONS.plus + ' ' + LANG.t('addRule');
         ruleFormWrap.appendChild(ruleFormTitle);
 
         var ruleNameInp = document.createElement('input');
@@ -11784,7 +11852,7 @@
 
         function resetRuleForm() {
             ruleEditingId = null;
-            ruleFormTitle.textContent = '➕ ' + LANG.t('addRule');
+            ruleFormTitle.innerHTML = MS_CONFIG.ICONS.plus + ' ' + LANG.t('addRule');
             ruleNameInp.value = '';
             rulePatternInp.value = '';
             ruleTypeSel.value = 'host';
@@ -11793,7 +11861,7 @@
         }
         function showRuleForm(rule) {
             ruleEditingId = rule.id;
-            ruleFormTitle.textContent = '✏️ ' + LANG.t('edit') + ' ' + (rule.name || rule.pattern);
+            ruleFormTitle.innerHTML = MS_CONFIG.ICONS.edit + ' ' + LANG.t('edit') + ' ' + (rule.name || rule.pattern);
             ruleNameInp.value = rule.name || '';
             rulePatternInp.value = rule.pattern || '';
             ruleTypeSel.value = rule.type || 'host';
@@ -11804,7 +11872,7 @@
         var ruleFormBtns = document.createElement('div');
         ruleFormBtns.style.cssText = 'display:flex;gap:8px;';
         var ruleSaveBtn = document.createElement('button');
-        ruleSaveBtn.textContent = '💾 ' + LANG.t('ok');
+        ruleSaveBtn.innerHTML = MS_CONFIG.ICONS.save + ' ' + LANG.t('ok');
         ruleSaveBtn.style.cssText = 'flex:1;padding:8px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,' + c.primary + ',' + c.primary2 + ');color:#fff;font-size:12px;font-weight:600;cursor:pointer;';
         ruleSaveBtn.onclick = function () {
             var name = ruleNameInp.value.trim();
@@ -11884,7 +11952,7 @@
         parserFormWrap.style.cssText = 'margin-top:10px;padding:12px;border-radius:10px;background:' + c.bg2 + ';border:1px solid ' + c.border + ';';
         var parserFormTitle = document.createElement('div');
         parserFormTitle.style.cssText = 'font-size:13px;font-weight:700;color:' + c.txt + ';margin-bottom:10px;';
-        parserFormTitle.textContent = '➕ ' + LANG.t('addParser');
+        parserFormTitle.innerHTML = MS_CONFIG.ICONS.plus + ' ' + LANG.t('addParser');
         parserFormWrap.appendChild(parserFormTitle);
 
         function parserInput(placeholder) {
@@ -11930,7 +11998,7 @@
 
         function resetParserForm() {
             parserEditingId = null;
-            parserFormTitle.textContent = '➕ ' + LANG.t('addParser');
+            parserFormTitle.innerHTML = MS_CONFIG.ICONS.plus + ' ' + LANG.t('addParser');
             parserNameInp.value = '';
             parserMatchInp.value = '';
             parserApiInp.value = '';
@@ -11941,7 +12009,7 @@
         }
         function showParserForm(parser) {
             parserEditingId = parser.id;
-            parserFormTitle.textContent = '✏️ ' + LANG.t('edit') + ' ' + (parser.name || parser.matchPattern);
+            parserFormTitle.innerHTML = MS_CONFIG.ICONS.edit + ' ' + LANG.t('edit') + ' ' + (parser.name || parser.matchPattern);
             parserNameInp.value = parser.name || '';
             parserMatchInp.value = parser.matchPattern || '';
             parserApiInp.value = parser.apiUrl || '';
@@ -11954,7 +12022,7 @@
         var parserFormBtns = document.createElement('div');
         parserFormBtns.style.cssText = 'display:flex;gap:8px;';
         var parserSaveBtn = document.createElement('button');
-        parserSaveBtn.textContent = '💾 ' + LANG.t('ok');
+        parserSaveBtn.innerHTML = MS_CONFIG.ICONS.save + ' ' + LANG.t('ok');
         parserSaveBtn.style.cssText = 'flex:1;padding:8px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,' + c.primary + ',' + c.primary2 + ');color:#fff;font-size:12px;font-weight:600;cursor:pointer;';
         parserSaveBtn.onclick = function () {
             var name = parserNameInp.value.trim();
@@ -11996,7 +12064,7 @@
         var thumbInner = document.createElement('div');
         thumbInner.style.cssText = 'display:flex;align-items:center;justify-content:space-between;';
         var thumbInfo = document.createElement('div');
-        thumbInfo.innerHTML = '<div style="font-size:13px;font-weight:700;color:' + c.txt + ';">🎞 ' + LANG.t('autoThumb') + '</div><div style="font-size:11px;color:' + c.sub + ';margin-top:2px;">' + LANG.t('autoThumbDesc') + '</div>';
+        thumbInfo.innerHTML = '<div style="font-size:13px;font-weight:700;color:' + c.txt + ';"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg> ' + LANG.t('autoThumb') + '</div><div style="font-size:11px;color:' + c.sub + ';margin-top:2px;">' + LANG.t('autoThumbDesc') + '</div>';
         var thumbToggle = UI.createToggle(State.config.autoExtractThumb, function (val) {
             State.config.autoExtractThumb = val;
             State.save();
@@ -12011,7 +12079,7 @@
         var updInner = document.createElement('div');
         updInner.style.cssText = 'display:flex;align-items:center;justify-content:space-between;';
         var updInfo = document.createElement('div');
-        updInfo.innerHTML = '<div style="font-size:13px;font-weight:700;color:' + c.txt + ';">🔄 ' + LANG.t('autoCheckUpdate') + '</div><div style="font-size:11px;color:' + c.sub + ';margin-top:2px;">' + LANG.t('autoCheckUpdateDesc') + '</div>';
+        updInfo.innerHTML = '<div style="font-size:13px;font-weight:700;color:' + c.txt + ';"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg> ' + LANG.t('autoCheckUpdate') + '</div><div style="font-size:11px;color:' + c.sub + ';margin-top:2px;">' + LANG.t('autoCheckUpdateDesc') + '</div>';
         var updToggle = UI.createToggle(State.config.autoCheckUpdate, function (val) {
             State.config.autoCheckUpdate = val;
             State.save();
@@ -12067,7 +12135,7 @@
         var persistInner = document.createElement('div');
         persistInner.style.cssText = 'display:flex;align-items:center;justify-content:space-between;';
         var persistInfo = document.createElement('div');
-        persistInfo.innerHTML = '<div style="font-size:13px;font-weight:700;color:' + c.txt + ';">💾 ' + LANG.t('persistSelection') + '</div><div style="font-size:11px;color:' + c.sub + ';margin-top:2px;">' + LANG.t('persistSelectionDesc') + '</div>';
+        persistInfo.innerHTML = '<div style="font-size:13px;font-weight:700;color:' + c.txt + ';"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> ' + LANG.t('persistSelection') + '</div><div style="font-size:11px;color:' + c.sub + ';margin-top:2px;">' + LANG.t('persistSelectionDesc') + '</div>';
         var persistToggle = UI.createToggle(State.config.persistSelection, function (val) {
             State.config.persistSelection = val;
             State.save();
@@ -12146,11 +12214,11 @@
             return LANG.t('historyOlder');
         }
         function historyKindLabel(kind) {
-            if (kind === 'image') return '🖼 ' + LANG.t('img');
-            if (kind === 'audio') return '🎵 ' + LANG.t('audio');
-            if (kind === 'm3u8') return '📺 ' + LANG.t('m3u8');
-            if (kind === 'stream') return '🔗 ' + LANG.t('video');
-            return '🎬 ' + LANG.t('video');
+            if (kind === 'image') return MS_CONFIG.ICONS.image + ' ' + LANG.t('img');
+            if (kind === 'audio') return MS_CONFIG.ICONS.audio + ' ' + LANG.t('audio');
+            if (kind === 'm3u8') return MS_CONFIG.ICONS.stream + ' ' + LANG.t('m3u8');
+            if (kind === 'stream') return MS_CONFIG.ICONS.link + ' ' + LANG.t('video');
+            return MS_CONFIG.ICONS.video + ' ' + LANG.t('video');
         }
         var rhWrap = document.createElement('div');
         var rhToggleRow = document.createElement('div');
@@ -12244,7 +12312,7 @@
                     row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid ' + c.border + ';font-size:12px;';
                     var left = document.createElement('div');
                     left.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:' + c.txt + ';';
-                    left.textContent = (item.success ? '✅ ' : '❌ ') + (item.name || item.url);
+                    left.innerHTML = (item.success ? MS_CONFIG.ICONS.checkBig + ' ' : MS_CONFIG.ICONS.cross + ' ') + (item.name || item.url);
                     left.title = item.url;
                     var timeStr = '';
                     try { timeStr = new Date(item.time).toLocaleString(); } catch (e) {}
@@ -12341,7 +12409,7 @@
                                 break;
                             }
                         }
-                        toast(err ? '❌ 翻译失败' : LANG.t('transDone'));
+                        toast(err ? LANG.t('transFail') : LANG.t('transDone'));
                     });
                 }, 250);
             }
@@ -12361,7 +12429,7 @@
     };
 
     // =========================================================================
-    // 💬 模块 14：选中文字翻译浮窗
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></svg> 模块 14：选中文字翻译浮窗
     // =========================================================================
     UI.buildSelectionPopup = function () {
         if (document.getElementById('_ms_sel_pop')) return;
@@ -12433,7 +12501,7 @@
     var Bootstrap = (function () {
         'use strict';
     // =========================================================================
-    // 🚀 模块 15：初始化 + 轮询守护 + 动态内容适配
+    // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg></svg> 模块 15：初始化 + 轮询守护 + 动态内容适配
     // =========================================================================
     State.init = function () {
         if (window.top !== window.self) return false;
