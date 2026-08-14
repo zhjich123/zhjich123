@@ -10892,7 +10892,7 @@
             btnWrap.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;';
             function mkBtn(label, gradient, handler) {
                 var b = document.createElement('button');
-                b.textContent = label; b.style.cssText = 'padding:12px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,' + gradient + ');color:#fff;font-size:13px;font-weight:600;cursor:pointer;';
+                b.innerHTML = label; b.style.cssText = 'padding:12px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,' + gradient + ');color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;';
                 b.addEventListener('click', handler); btnWrap.appendChild(b);
             }
             mkBtn(LANG.t('download'), '#6366f1,#8b5cf6', function () {
@@ -11302,7 +11302,7 @@
         btnRow.style.cssText = 'display:flex;gap:8px;margin-top:10px;margin-bottom:14px;flex-wrap:wrap;';
         function makeBtn(label, bg, handler, parent) {
             var b = document.createElement('button');
-            b.textContent = label; b.style.cssText = 'flex:1;min-width:110px;padding:10px 12px;border:none;border-radius:10px;background:' + bg + ';color:#fff;font-size:13px;font-weight:600;cursor:pointer;';
+            b.innerHTML = label; b.style.cssText = 'flex:1;min-width:110px;padding:10px 12px;border:none;border-radius:10px;background:' + bg + ';color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;';
             b.addEventListener('click', handler);
             (parent || btnRow).appendChild(b);
         }
@@ -11345,12 +11345,12 @@
             var from = isAuto ? 'auto' : fromSel.value;
             var to = toSel.value;
             var engine = TranslateEngine.current();
-            statusEl.textContent = engine.icon + ' ' + LANG.t('translating', {from: from, to: to});
+            statusEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:4px;">' + engine.icon + '<span>' + LANG.t('translating', {from: from, to: to}) + '</span></span>';
             statusEl.style.color = '#6366f1';
             output.textContent = LANG.t('translatingShort');
             TranslateEngine.translate(text, from, to, function (result, err) {
                 if (err) { statusEl.textContent = LANG.t('transFail') + ': ' + err; statusEl.style.color = '#ef4444'; output.textContent = LANG.t('transFailShort') + err; }
-                else { statusEl.textContent = engine.icon + ' ' + LANG.t('transDone') + new Date().toLocaleTimeString(); statusEl.style.color = '#10b981'; output.textContent = result; }
+                else { statusEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:4px;">' + engine.icon + '<span>' + LANG.t('transDone') + new Date().toLocaleTimeString() + '</span></span>'; statusEl.style.color = '#10b981'; output.textContent = result; }
             });
         }
     };
@@ -11368,8 +11368,8 @@
         btnRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;';
         function mkBtn(label, color, handler, flex) {
             var b = document.createElement('button');
-            b.textContent = label;
-            b.style.cssText = (flex ? 'flex:' + flex + ';' : 'flex:1;') + 'min-width:110px;padding:10px 12px;border:none;border-radius:10px;background:linear-gradient(135deg,' + color + ');color:#fff;font-size:13px;font-weight:600;cursor:pointer;';
+            b.innerHTML = label;
+            b.style.cssText = (flex ? 'flex:' + flex + ';' : 'flex:1;') + 'min-width:110px;padding:10px 12px;border:none;border-radius:10px;background:linear-gradient(135deg,' + color + ');color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;';
             b.addEventListener('click', handler); btnRow.appendChild(b);
         }
         mkBtn(LANG.t('copyCookieStr'), '#6366f1,#8b5cf6', function () { try { copyText(document.cookie || '（空）'); } catch (e) { toast(LANG.t('readCookieFail'), '#ef4444'); } });
@@ -11464,8 +11464,8 @@
         btnRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;';
         function mkBtn(label, color, handler) {
             var b = document.createElement('button');
-            b.textContent = label;
-            b.style.cssText = 'flex:1;min-width:110px;padding:10px 12px;border:none;border-radius:10px;background:linear-gradient(135deg,' + color + ');color:#fff;font-size:13px;font-weight:600;cursor:pointer;';
+            b.innerHTML = label;
+            b.style.cssText = 'flex:1;min-width:110px;padding:10px 12px;border:none;border-radius:10px;background:linear-gradient(135deg,' + color + ');color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;';
             b.addEventListener('click', handler); btnRow.appendChild(b);
         }
         mkBtn(LANG.t('exportLs'), '#6366f1,#8b5cf6', function () { var items = readStorage('ls'); copyText(JSON.stringify(items, null, 2)); });
@@ -11829,8 +11829,8 @@
         ob.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;';
         function mkOBtn(label, color, handler, flex) {
             var b = document.createElement('button');
-            b.textContent = label;
-            b.style.cssText = (flex ? 'flex:' + flex + ';' : 'flex:1;') + 'min-width:100px;padding:10px 12px;border:none;border-radius:10px;background:' + color + ';color:#fff;font-size:13px;cursor:pointer;font-weight:600;';
+            b.innerHTML = label;
+            b.style.cssText = (flex ? 'flex:' + flex + ';' : 'flex:1;') + 'min-width:100px;padding:10px 12px;border:none;border-radius:10px;background:' + color + ';color:#fff;font-size:13px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px;';
             b.addEventListener('click', handler); ob.appendChild(b);
         }
         mkOBtn(LANG.t('rescan'), 'linear-gradient(135deg,#6366f1,#8b5cf6)', function () { Scanner.doFull(function () { toast(LANG.t('rescanDone')); UI.renderMedia(State.tab); }); });
