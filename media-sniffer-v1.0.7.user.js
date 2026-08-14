@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         媒体嗅探器 Media Sniffer Pro v1.0.6
+// @name         媒体嗅探器 Media Sniffer Pro v1.0.7
 // @namespace    http://tampermonkey.net/
-// @version      1.0.6
+// @version      1.0.7
 // @description  图片/视频/音频/m3u8 抓取 · AES-128解密 · 分片合并 · 虚拟列表 · 进度可视化 · 跨域兜底 · Cookie/Storage · 翻译 · 元信息 · 高级筛选
 // @match        *://*/*
 // @exclude      *://*chrome.google.com/*
@@ -40,7 +40,7 @@
     }
 
     try {
-    console.info('[MS] 脚本开始加载，版本:', '1.0.6');
+    console.info('[MS] 脚本开始加载，版本:', '1.0.7');
 
 
 
@@ -48,7 +48,7 @@
     // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.045a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.01 17.461 2 12 2z"></path></svg></svg> 全局配置（图标 / 颜色 / 尺寸 / 配色板）
     // =========================================================================
     var MS_CONFIG = {
-        VERSION: '1.0.6',
+        VERSION: '1.0.7',
         ICONS: {
             chevronLeft: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 1px 2px rgba(0,0,0,.2));"><polyline points="15 18 9 12 15 6"></polyline></svg>',
             play: '<svg width="22" height="22" viewBox="0 0 24 24" fill="#ffffff" style="filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));"><polygon points="5 3 21 12 5 21 5 3"></polygon></svg>',
@@ -287,7 +287,7 @@
     //  模块 1：核心工具 (Utils) + 日志系统
     // =========================================================================
     var U = {};
-    U.VERSION = '1.0.6';
+    U.VERSION = '1.0.7';
     U.toStr = Object.prototype.toString;
     U.isArr = Array.isArray || function (x) { return U.toStr.call(x) === '[object Array]'; };
     U.isStr = function (x) { return typeof x === 'string'; };
@@ -751,7 +751,7 @@
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': '媒体嗅探器 Pro v1.0.6 · SelectionManager · 拖拽排序 · 收藏夹 · 智能去重 · 分组 · 批量操作注册 · 插件系统',
+            'infoLine1': '媒体嗅探器 Pro v1.0.7 · SelectionManager · 拖拽排序 · 收藏夹 · 智能去重 · 分组 · 批量操作注册 · 插件系统',
             'infoLine2': '快捷键：Alt+T 翻译选中 · Alt+B 开关面板 · Esc 关闭',
             'clickTabScan': '点击标签扫描',
             'dlProgress': '下载进度',
@@ -1095,7 +1095,7 @@
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': 'Media Sniffer Pro v1.0.6 · SelectionManager · Drag Sort · Favorites · Smart Dedup · Groups · Batch Actions · Plugin System',
+            'infoLine1': 'Media Sniffer Pro v1.0.7 · SelectionManager · Drag Sort · Favorites · Smart Dedup · Groups · Batch Actions · Plugin System',
             'infoLine2': 'Shortcuts: Alt+T Translate · Alt+B Toggle · Esc Close',
             'clickTabScan': 'Click a tab above to start scanning',
             'dlProgress': 'Download Progress',
@@ -1401,7 +1401,7 @@
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': 'メディアスニッファー Pro v1.0.6 · モジュール設計 · AES-128復号 · 仮想リスト · 進捗可視化 · プラグインシステム',
+            'infoLine1': 'メディアスニッファー Pro v1.0.7 · モジュール設計 · AES-128復号 · 仮想リスト · 進捗可視化 · プラグインシステム',
             'infoLine2': 'ショートカット: Alt+T 翻訳 · Alt+B パネル切替 · Esc 閉じる',
             'clickTabScan': '上のタブをクリックしてスキャン開始',
             'dlProgress': 'ダウンロード進捗',
@@ -1705,7 +1705,7 @@
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': '미디어 스니퍼 Pro v1.0.6 · 모듈 구조 · AES-128 복호화 · 가상 리스트 · 진행률 · 플러그인 시스템',
+            'infoLine1': '미디어 스니퍼 Pro v1.0.7 · 모듈 구조 · AES-128 복호화 · 가상 리스트 · 진행률 · 플러그인 시스템',
             'infoLine2': '단축키: Alt+T 번역 · Alt+B 패널 토글 · Esc 닫기',
             'clickTabScan': '위 탭을 클릭하여 스캔 시작',
             'dlProgress': '다운로드 진행률',
