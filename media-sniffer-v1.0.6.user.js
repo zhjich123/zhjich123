@@ -5313,8 +5313,14 @@
                 // 尝试降级到备用引擎
                 TranslateEngine._fallback(text, f, t, cb, engine.key, cacheKey);
             } else {
-                State.translateCache[cacheKey] = result;
-                if (cb) cb(result, null);
+                // 检测原文返回：如果结果与原文完全相同，视为翻译失败
+                if (result && result.trim() === text.trim() && f !== 'auto') {
+                    LOG.warn('引擎返回原文，触发降级:', engine.key);
+                    TranslateEngine._fallback(text, f, t, cb, engine.key, cacheKey);
+                } else {
+                    State.translateCache[cacheKey] = result;
+                    if (cb) cb(result, null);
+                }
             }
         });
     };
@@ -5344,26 +5350,38 @@
         var results = [];
         var failed = 0;
         var pending = chunks.length;
+        var originalReturns = 0;
 
         for (var j = 0; j < chunks.length; j++) {
-            engine.translate(chunks[j], from, to, function (result, err) {
-                pending--;
-                if (err) {
-                    failed++;
-                    LOG.warn('分段失败:', j, err);
-                } else {
-                    results.push(result);
-                }
-                if (pending === 0) {
-                    if (failed > 0 && results.length === 0) {
-                        if (cb) cb(null, LANG.t('transFail'));
+            (function (chunk, idx) {
+                engine.translate(chunk, from, to, function (result, err) {
+                    pending--;
+                    if (err) {
+                        failed++;
+                        LOG.warn('分段失败:', idx, err);
+                    } else if (result && result.trim() === chunk.trim() && from !== 'auto') {
+                        // 检测到原文返回，视为失败
+                        originalReturns++;
+                        failed++;
+                        LOG.warn('分段返回原文:', idx);
                     } else {
-                        var finalResult = results.join('\n');
-                        State.translateCache[baseCacheKey] = finalResult;
-                        if (cb) cb(finalResult, failed > 0 ? LANG.t('transPartialFail') : null);
+                        results[idx] = result;
                     }
-                }
-            });
+                    if (pending === 0) {
+                        if (failed > 0 && results.length === 0) {
+                            if (cb) cb(null, LANG.t('transFail'));
+                        } else {
+                            var finalResult = results.join('\n');
+                            State.translateCache[baseCacheKey] = finalResult;
+                            if (failed > originalReturns) {
+                                if (cb) cb(finalResult, LANG.t('transPartialFail'));
+                            } else {
+                                if (cb) cb(finalResult, null);
+                            }
+                        }
+                    }
+                });
+            })(chunks[j], j);
         }
     };
 
@@ -5372,9 +5390,23 @@
         var engines = TranslateEngine.list();
         var fallbackEngines = [];
 
+        // 优先选择不需要 API key 的引擎
         for (var i = 0; i < engines.length; i++) {
             if (engines[i].key !== failedKey) {
-                fallbackEngines.push(engines[i]);
+                var eng = engines[i];
+                // 优先使用免费引擎
+                if (!eng.needKey || eng.apiKey) {
+                    fallbackEngines.push(eng);
+                }
+            }
+        }
+
+        // 如果没有合适的引擎，回退到所有引擎
+        if (fallbackEngines.length === 0) {
+            for (var j = 0; j < engines.length; j++) {
+                if (engines[j].key !== failedKey) {
+                    fallbackEngines.push(engines[j]);
+                }
             }
         }
 
@@ -5390,8 +5422,13 @@
                 // 继续尝试下一个
                 TranslateEngine._fallback(text, from, to, cb, nextEngine.key, cacheKey);
             } else {
-                State.translateCache[cacheKey] = result;
-                if (cb) cb(result, null);
+                // 检测原文返回
+                if (result && result.trim() === text.trim() && from !== 'auto') {
+                    TranslateEngine._fallback(text, from, to, cb, nextEngine.key, cacheKey);
+                } else {
+                    State.translateCache[cacheKey] = result;
+                    if (cb) cb(result, null);
+                }
             }
         });
     };
@@ -5447,22 +5484,34 @@
                     return;
                 }
                 var result = '';
-                if (data && data.responseData && data.responseData.translatedText) {
-                    result = data.responseData.translatedText;
-                }
+                // 优先使用 matches 中质量最高的翻译
                 if (data && data.matches && data.matches.length > 0) {
-                    // 使用最高质量的匹配
+                    var bestMatch = null;
                     for (var i = 0; i < data.matches.length; i++) {
-                        if (data.matches[i].quality > 70) {
-                            result = data.matches[i].translation;
-                            break;
+                        var m = data.matches[i];
+                        // 跳过质量为 0 或未识别的匹配
+                        if (!m.translation || m.quality === 0) continue;
+                        if (!bestMatch || m.quality > bestMatch.quality) {
+                            bestMatch = m;
                         }
                     }
+                    if (bestMatch && bestMatch.translation) {
+                        result = bestMatch.translation;
+                    }
+                }
+                // 如果没有高质量匹配，使用 responseData
+                if (!result && data && data.responseData && data.responseData.translatedText) {
+                    result = data.responseData.translatedText;
                 }
                 if (!result) { if (cb) cb(null, LANG.t('transFail')); return; }
                 // 识别 MyMemory 免费额度警告并作为错误返回
                 if (/MYMEMORY WARNING|INVALID LANGUAGE PAIR|NO QUERY SPECIFIED/i.test(result)) {
                     if (cb) cb(null, result);
+                    return;
+                }
+                // 检测原文返回：结果与输入相同视为翻译失败
+                if (result.trim() === text.trim() && from !== 'auto') {
+                    if (cb) cb(null, 'MyMemory returned original text');
                     return;
                 }
                 if (cb) cb(result, null);
