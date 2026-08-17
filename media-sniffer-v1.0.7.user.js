@@ -123,7 +123,9 @@
             reload: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>',
             save: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>',
             monitorBig: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>',
-            streamBig: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>'
+            streamBig: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>',
+            pause: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>',
+            store: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"></path><path d="M4 9v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"></path><path d="M9 22V12h6v10"></path><path d="M3 9h18"></path></svg>'
         },
         COLORS: {
             primary: '#6366f1',
@@ -820,6 +822,48 @@
             'ctxTranslate': '翻译',
             'ctxSettings': '设置',
             'ctxClose': '关闭',
+            'tabPlugins': '插件',
+            'pluginMarket': '插件市场',
+            'pluginInstalled': '已安装',
+            'pluginInstall': '安装',
+            'pluginUninstall': '卸载',
+            'pluginEnable': '启用',
+            'pluginDisable': '禁用',
+            'pluginInstalledN': '已安装 {n} 个插件',
+            'pluginMarketN': '市场共 {n} 个插件',
+            'noInstalledPlugins': '暂无已安装插件，去市场看看吧',
+            'pluginInstalledToast': '插件「{name}」安装成功',
+            'pluginUninstalledToast': '插件「{name}」已卸载',
+            'pluginEnabledToast': '插件「{name}」已启用',
+            'pluginDisabledToast': '插件「{name}」已禁用',
+            'pluginVersion': '版本',
+            'pluginAuthor': '作者',
+            'pluginCategory': '分类',
+            'pluginDesc': '简介',
+            'pluginCatEnhance': '增强功能',
+            'pluginCatDownload': '下载辅助',
+            'pluginCatParse': '解析扩展',
+            'pluginCatUi': '界面美化',
+            'pluginCatTool': '实用工具',
+            'confirmUninstallPlugin': '确认卸载插件「{name}」？该插件的配置数据也会被清除。',
+            'pluginAutoTrans': '自动翻译插件',
+            'pluginAutoTransDesc': '资源列表一键批量翻译文件名，支持多引擎切换',
+            'pluginBatchRename': '批量重命名',
+            'pluginBatchRenameDesc': '按规则对下载文件名进行批量重命名：序号、日期、域名、自定义模板',
+            'pluginNoWatermark': '视频去水印',
+            'pluginNoWatermarkDesc': '对常见视频平台提取无水印直链，支持抖音、快手、小红书等',
+            'pluginAutoCover': '自动封面提取',
+            'pluginAutoCoverDesc': '自动分析视频元数据并提取高清封面，支持自定义尺寸',
+            'pluginQualityBoost': '画质增强',
+            'pluginQualityBoostDesc': '搜索并优先选择更高码率/更高分辨率的媒体资源版本',
+            'pluginShortcutsPlus': '快捷键增强',
+            'pluginShortcutsPlusDesc': '增加更多自定义快捷键：全选、反选、批量下载、快速筛选等',
+            'pluginDarkPro': '暗色主题Pro',
+            'pluginDarkProDesc': '提供更多精致的暗色配色方案，支持毛玻璃和渐变色效果',
+            'pluginExportList': '资源导出助手',
+            'pluginExportListDesc': '把资源列表导出为 HTML/Markdown/CSV/JSON 多种格式，方便分享和存档',
+            'pluginSubTabMarket': '市场',
+            'pluginSubTabInstalled': '已安装',
             },
         'en-US': {
             'scan': 'Scan',
@@ -1164,6 +1208,48 @@
             'ctxTranslate': 'Translate',
             'ctxSettings': 'Settings',
             'ctxClose': 'Close',
+            'tabPlugins': 'Plugins',
+            'pluginMarket': 'Marketplace',
+            'pluginInstalled': 'Installed',
+            'pluginInstall': 'Install',
+            'pluginUninstall': 'Uninstall',
+            'pluginEnable': 'Enable',
+            'pluginDisable': 'Disable',
+            'pluginInstalledN': '{n} plugin(s) installed',
+            'pluginMarketN': '{n} plugin(s) available',
+            'noInstalledPlugins': 'No installed plugins. Browse the Marketplace!',
+            'pluginInstalledToast': 'Plugin "{name}" installed',
+            'pluginUninstalledToast': 'Plugin "{name}" uninstalled',
+            'pluginEnabledToast': 'Plugin "{name}" enabled',
+            'pluginDisabledToast': 'Plugin "{name}" disabled',
+            'pluginVersion': 'Version',
+            'pluginAuthor': 'Author',
+            'pluginCategory': 'Category',
+            'pluginDesc': 'Description',
+            'pluginCatEnhance': 'Enhancement',
+            'pluginCatDownload': 'Download',
+            'pluginCatParse': 'Parser',
+            'pluginCatUi': 'UI Theme',
+            'pluginCatTool': 'Tools',
+            'confirmUninstallPlugin': 'Uninstall plugin "{name}"? All its settings will be cleared.',
+            'pluginAutoTrans': 'Auto Translate',
+            'pluginAutoTransDesc': 'Batch translate filenames in the resource list with multi-engine support',
+            'pluginBatchRename': 'Batch Rename',
+            'pluginBatchRenameDesc': 'Rename downloaded files in batch using customizable patterns: index, date, domain, templates',
+            'pluginNoWatermark': 'No Watermark',
+            'pluginNoWatermarkDesc': 'Extract direct video links without watermark for TikTok, Kuaishou, Xiaohongshu, etc.',
+            'pluginAutoCover': 'Auto Cover Extractor',
+            'pluginAutoCoverDesc': 'Auto analyze video metadata and extract high quality covers with customizable sizes',
+            'pluginQualityBoost': 'Quality Booster',
+            'pluginQualityBoostDesc': 'Search and prefer higher bitrate / higher resolution media versions',
+            'pluginShortcutsPlus': 'Shortcuts Plus',
+            'pluginShortcutsPlusDesc': 'More customizable shortcuts: select all, invert, batch download, quick filter',
+            'pluginDarkPro': 'Dark Theme Pro',
+            'pluginDarkProDesc': 'More exquisite dark color palettes with frosted glass and gradient effects',
+            'pluginExportList': 'Resource Exporter',
+            'pluginExportListDesc': 'Export resource list to HTML / Markdown / CSV / JSON for sharing and archiving',
+            'pluginSubTabMarket': 'Market',
+            'pluginSubTabInstalled': 'Installed',
             },
         'ja-JP': {
             'scan': 'スキャン',
@@ -1468,6 +1554,48 @@
             'ctxTranslate': '翻訳',
             'ctxSettings': '設定',
             'ctxClose': '閉じる',
+            'tabPlugins': 'プラグイン',
+            'pluginMarket': 'マーケット',
+            'pluginInstalled': 'インストール済み',
+            'pluginInstall': 'インストール',
+            'pluginUninstall': 'アンインストール',
+            'pluginEnable': '有効化',
+            'pluginDisable': '無効化',
+            'pluginInstalledN': 'インストール済み {n} 件',
+            'pluginMarketN': 'マーケット合計 {n} 件',
+            'noInstalledPlugins': 'インストール済みプラグインはありません。マーケットをご覧ください',
+            'pluginInstalledToast': 'プラグイン「{name}」をインストールしました',
+            'pluginUninstalledToast': 'プラグイン「{name}」をアンインストールしました',
+            'pluginEnabledToast': 'プラグイン「{name}」を有効化しました',
+            'pluginDisabledToast': 'プラグイン「{name}」を無効化しました',
+            'pluginVersion': 'バージョン',
+            'pluginAuthor': '作者',
+            'pluginCategory': 'カテゴリ',
+            'pluginDesc': '説明',
+            'pluginCatEnhance': '機能拡張',
+            'pluginCatDownload': 'ダウンロード',
+            'pluginCatParse': 'パーサー',
+            'pluginCatUi': 'UIテーマ',
+            'pluginCatTool': 'ツール',
+            'confirmUninstallPlugin': 'プラグイン「{name}」をアンインストールしますか？設定データも削除されます。',
+            'pluginAutoTrans': '自動翻訳プラグイン',
+            'pluginAutoTransDesc': 'リソース一括のファイル名翻訳、複数エンジン切替対応',
+            'pluginBatchRename': '一括リネーム',
+            'pluginBatchRenameDesc': 'ダウンロードファイル名をルールで一括改名：連番、日付、ドメイン、テンプレート',
+            'pluginNoWatermark': '動画透かし除去',
+            'pluginNoWatermarkDesc': '人気動画サイトの透かしなし直リンクを抽出（抖音、快手、小红书など）',
+            'pluginAutoCover': '自動カバー抽出',
+            'pluginAutoCoverDesc': '動画メタデータを自動解析し高画質カバーを抽出、サイズカスタマイズ可',
+            'pluginQualityBoost': '画質ブースト',
+            'pluginQualityBoostDesc': 'より高ビットレート/高解像度のメディアを優先的に検索',
+            'pluginShortcutsPlus': 'ショートカット強化',
+            'pluginShortcutsPlusDesc': '全選、反転、一括DL、クイックフィルタなどのショートカット追加',
+            'pluginDarkPro': 'ダークテーマPro',
+            'pluginDarkProDesc': 'すりガラス・グラデーション対応の高品質ダークテーマ',
+            'pluginExportList': 'リソース出力',
+            'pluginExportListDesc': 'リソース一覧をHTML/Markdown/CSV/JSON形式で出力、共有・保存に便利',
+            'pluginSubTabMarket': 'マーケット',
+            'pluginSubTabInstalled': 'インストール済み',
             },
         'ko-KR': {
             'scan': '스캔',
@@ -1771,7 +1899,49 @@
             'ctxQuickDownload': '빠른 다운로드',
             'ctxTranslate': '번역',
             'ctxSettings': '설정',
-            'ctxClose': '닫기'
+            'ctxClose': '닫기',
+            'tabPlugins': '플러그인',
+            'pluginMarket': '마켓',
+            'pluginInstalled': '설치됨',
+            'pluginInstall': '설치',
+            'pluginUninstall': '제거',
+            'pluginEnable': '활성화',
+            'pluginDisable': '비활성화',
+            'pluginInstalledN': '설치된 플러그인 {n}개',
+            'pluginMarketN': '마켓 플러그인 {n}개',
+            'noInstalledPlugins': '설치된 플러그인이 없습니다. 마켓을 둘러보세요',
+            'pluginInstalledToast': '플러그인 「{name}」 설치 완료',
+            'pluginUninstalledToast': '플러그인 「{name}」 제거됨',
+            'pluginEnabledToast': '플러그인 「{name}」 활성화됨',
+            'pluginDisabledToast': '플러그인 「{name}」 비활성화됨',
+            'pluginVersion': '버전',
+            'pluginAuthor': '제작자',
+            'pluginCategory': '카테고리',
+            'pluginDesc': '설명',
+            'pluginCatEnhance': '기능 향상',
+            'pluginCatDownload': '다운로드',
+            'pluginCatParse': '파서',
+            'pluginCatUi': 'UI 테마',
+            'pluginCatTool': '도구',
+            'confirmUninstallPlugin': '플러그인 「{name}」을 제거하시겠습니까? 모든 설정이 삭제됩니다.',
+            'pluginAutoTrans': '자동 번역',
+            'pluginAutoTransDesc': '리소스 파일명 일괄 번역, 다중 엔진 지원',
+            'pluginBatchRename': '일괄 이름 변경',
+            'pluginBatchRenameDesc': '규칙에 따라 파일명 일괄 변경: 번호, 날짜, 도메인, 템플릿',
+            'pluginNoWatermark': '영상 워터마크 제거',
+            'pluginNoWatermarkDesc': '틱톡, 콰이셔우, 샤오홍슈 등의 워터마크 없는 직접 링크 추출',
+            'pluginAutoCover': '자동 커버 추출',
+            'pluginAutoCoverDesc': '영상 메타데이터 분석 후 고품질 커버 추출, 크기 커스텀 가능',
+            'pluginQualityBoost': '화질 부스트',
+            'pluginQualityBoostDesc': '더 높은 비트레이트/고해상도 미디어 우선 검색',
+            'pluginShortcutsPlus': '단축키 강화',
+            'pluginShortcutsPlusDesc': '전체 선택, 반전, 일괄 다운, 빠른 필터 등의 단축키 추가',
+            'pluginDarkPro': '다크 테마 Pro',
+            'pluginDarkProDesc': '프로스티드 글라스 & 그라데이션 효과의 고품질 다크 테마',
+            'pluginExportList': '리소스 내보내기',
+            'pluginExportListDesc': '리소스 목록을 HTML/Markdown/CSV/JSON으로 내보내기, 공유와 저장에 편리',
+            'pluginSubTabMarket': '마켓',
+            'pluginSubTabInstalled': '설치됨',
             }
     };
     LANG.get = function (key, vars) {
@@ -2573,6 +2743,7 @@
         // 脚本市场 / 插件系统（新增）
         customRules: [],            // [{id, name, pattern, type: 'host'|'url'|'regex', action: 'allow'|'block', enabled}]
         parserPlugins: [],          // [{id, name, matchPattern, apiUrl, method, headers, dataPath, enabled}]
+        plugins: [],                // [{id, name, version, author, category, desc, icon, enabled, installTime, config}]
         // Aria2 RPC 推送设置
         aria2RpcUrl: '',
         aria2RpcSecret: '',
@@ -2641,6 +2812,7 @@
         if (cfg.settingsExpanded !== undefined && (typeof cfg.settingsExpanded !== 'object' || cfg.settingsExpanded === null || Array.isArray(cfg.settingsExpanded))) errors.push('settingsExpanded 必须是对象');
         if (cfg.customRules !== undefined && !U.isArr(cfg.customRules)) errors.push('customRules 必须是数组');
         if (cfg.parserPlugins !== undefined && !U.isArr(cfg.parserPlugins)) errors.push('parserPlugins 必须是数组');
+        if (cfg.plugins !== undefined && !U.isArr(cfg.plugins)) errors.push('plugins 必须是数组');
         if (cfg.customPalettes !== undefined && !U.isArr(cfg.customPalettes)) errors.push('customPalettes 必须是数组');
         return errors;
     };
@@ -8341,6 +8513,218 @@
 
         return Selection;
     })();
+    var PluginManager = (function () {
+        'use strict';
+    // =========================================================================
+    // 插件管理核心模块：安装 / 卸载 / 启用 / 禁用 / 持久化
+    // =========================================================================
+    var PM = {};
+
+    // 内置市场插件（示例/预置）
+    PM.MARKET_PLUGINS = [
+        {
+            id: 'auto-translate',
+            nameKey: 'pluginAutoTrans',
+            descKey: 'pluginAutoTransDesc',
+            version: '1.0.0',
+            author: 'MediaSniffer Team',
+            category: 'enhance',
+            icon: MS_CONFIG.ICONS.speech
+        },
+        {
+            id: 'batch-rename',
+            nameKey: 'pluginBatchRename',
+            descKey: 'pluginBatchRenameDesc',
+            version: '1.0.0',
+            author: 'MediaSniffer Team',
+            category: 'download',
+            icon: MS_CONFIG.ICONS.edit
+        },
+        {
+            id: 'no-watermark',
+            nameKey: 'pluginNoWatermark',
+            descKey: 'pluginNoWatermarkDesc',
+            version: '1.0.0',
+            author: 'MediaSniffer Team',
+            category: 'parse',
+            icon: MS_CONFIG.ICONS.shield
+        },
+        {
+            id: 'auto-cover',
+            nameKey: 'pluginAutoCover',
+            descKey: 'pluginAutoCoverDesc',
+            version: '1.0.1',
+            author: 'MediaSniffer Team',
+            category: 'enhance',
+            icon: MS_CONFIG.ICONS.image
+        },
+        {
+            id: 'quality-boost',
+            nameKey: 'pluginQualityBoost',
+            descKey: 'pluginQualityBoostDesc',
+            version: '1.0.0',
+            author: 'MediaSniffer Team',
+            category: 'enhance',
+            icon: MS_CONFIG.ICONS.rocket
+        },
+        {
+            id: 'shortcuts-plus',
+            nameKey: 'pluginShortcutsPlus',
+            descKey: 'pluginShortcutsPlusDesc',
+            version: '1.0.0',
+            author: 'MediaSniffer Team',
+            category: 'tool',
+            icon: MS_CONFIG.ICONS.keyboard
+        },
+        {
+            id: 'dark-pro',
+            nameKey: 'pluginDarkPro',
+            descKey: 'pluginDarkProDesc',
+            version: '1.1.0',
+            author: 'MediaSniffer Team',
+            category: 'ui',
+            icon: MS_CONFIG.ICONS.moon
+        },
+        {
+            id: 'export-list',
+            nameKey: 'pluginExportList',
+            descKey: 'pluginExportListDesc',
+            version: '1.0.0',
+            author: 'MediaSniffer Team',
+            category: 'tool',
+            icon: MS_CONFIG.ICONS.folder
+        }
+    ];
+
+    PM._plugins = [];
+
+    PM.load = function () {
+        try {
+            PM._plugins = (State.config && State.config.plugins) ? U.deepClone(State.config.plugins) : [];
+        } catch (e) {
+            LOG.warn('PluginManager.load error:', e);
+            PM._plugins = [];
+        }
+    };
+
+    PM.save = function () {
+        try {
+            if (!State.config) State.config = {};
+            State.config.plugins = U.deepClone(PM._plugins);
+            State.save();
+        } catch (e) {
+            LOG.warn('PluginManager.save error:', e);
+        }
+    };
+
+    PM.getInstalled = function () {
+        return PM._plugins.slice();
+    };
+
+    PM.getMarket = function () {
+        var installedIds = {};
+        for (var i = 0; i < PM._plugins.length; i++) installedIds[PM._plugins[i].id] = true;
+        var out = [];
+        for (var j = 0; j < PM.MARKET_PLUGINS.length; j++) {
+            var mp = PM.MARKET_PLUGINS[j];
+            out.push({
+                id: mp.id,
+                nameKey: mp.nameKey,
+                descKey: mp.descKey,
+                version: mp.version,
+                author: mp.author,
+                category: mp.category,
+                icon: mp.icon,
+                installed: !!installedIds[mp.id]
+            });
+        }
+        return out;
+    };
+
+    PM.isInstalled = function (id) {
+        for (var i = 0; i < PM._plugins.length; i++) if (PM._plugins[i].id === id) return true;
+        return false;
+    };
+
+    PM.get = function (id) {
+        for (var i = 0; i < PM._plugins.length; i++) if (PM._plugins[i].id === id) return PM._plugins[i];
+        return null;
+    };
+
+    PM.getMarketPlugin = function (id) {
+        for (var i = 0; i < PM.MARKET_PLUGINS.length; i++) if (PM.MARKET_PLUGINS[i].id === id) return PM.MARKET_PLUGINS[i];
+        return null;
+    };
+
+    PM.install = function (id) {
+        if (PM.isInstalled(id)) return { ok: false, reason: 'already' };
+        var mp = PM.getMarketPlugin(id);
+        if (!mp) return { ok: false, reason: 'notfound' };
+        var plugin = {
+            id: mp.id,
+            nameKey: mp.nameKey,
+            descKey: mp.descKey,
+            version: mp.version,
+            author: mp.author,
+            category: mp.category,
+            icon: mp.icon,
+            enabled: true,
+            installTime: U.now(),
+            config: {}
+        };
+        PM._plugins.push(plugin);
+        PM.save();
+        return { ok: true, plugin: plugin };
+    };
+
+    PM.uninstall = function (id) {
+        var found = -1;
+        for (var i = 0; i < PM._plugins.length; i++) if (PM._plugins[i].id === id) { found = i; break; }
+        if (found === -1) return { ok: false, reason: 'notfound' };
+        var removed = PM._plugins.splice(found, 1)[0];
+        PM.save();
+        return { ok: true, plugin: removed };
+    };
+
+    PM.enable = function (id) {
+        var p = PM.get(id);
+        if (!p) return { ok: false, reason: 'notfound' };
+        if (p.enabled) return { ok: false, reason: 'already' };
+        p.enabled = true;
+        PM.save();
+        return { ok: true, plugin: p };
+    };
+
+    PM.disable = function (id) {
+        var p = PM.get(id);
+        if (!p) return { ok: false, reason: 'notfound' };
+        if (!p.enabled) return { ok: false, reason: 'already' };
+        p.enabled = false;
+        PM.save();
+        return { ok: true, plugin: p };
+    };
+
+    PM.categoryLabel = function (cat) {
+        var map = {
+            enhance: LANG.t('pluginCatEnhance'),
+            download: LANG.t('pluginCatDownload'),
+            parse: LANG.t('pluginCatParse'),
+            ui: LANG.t('pluginCatUi'),
+            tool: LANG.t('pluginCatTool')
+        };
+        return map[cat] || cat;
+    };
+
+    PM.localName = function (p) {
+        return LANG.t(p.nameKey || p.id);
+    };
+
+    PM.localDesc = function (p) {
+        return LANG.t(p.descKey || (p.id + 'Desc'));
+    };
+
+    return PM;
+    })();
     var UI = (function () {
         'use strict';
     // =========================================================================
@@ -9546,7 +9930,7 @@
         var tabBar = document.createElement('div');
         tabBar.id = '_ms_tabs';
         tabBar.style.cssText = 'display:flex;gap:4px;padding:8px 10px;background:' + c.bg2 + ';border-bottom:1px solid ' + c.border + ';overflow-x:auto;flex-shrink:0;transition: background-color 0.3s, color 0.3s;';
-        var tabIconMap = { img: MS_CONFIG.ICONS.image, video: MS_CONFIG.ICONS.video, audio: MS_CONFIG.ICONS.audio, m3u8: MS_CONFIG.ICONS.stream, translate: MS_CONFIG.ICONS.book, cookie: MS_CONFIG.ICONS.cookie, storage: MS_CONFIG.ICONS.package, settings: MS_CONFIG.ICONS.settings };
+        var tabIconMap = { img: MS_CONFIG.ICONS.image, video: MS_CONFIG.ICONS.video, audio: MS_CONFIG.ICONS.audio, m3u8: MS_CONFIG.ICONS.stream, translate: MS_CONFIG.ICONS.book, cookie: MS_CONFIG.ICONS.cookie, storage: MS_CONFIG.ICONS.package, settings: MS_CONFIG.ICONS.settings, plugins: MS_CONFIG.ICONS.plug };
         var tabs = [
             { key: 'img', label: LANG.t('tabImg') },
             { key: 'video', label: LANG.t('tabVideo') },
@@ -9555,6 +9939,7 @@
             { key: 'translate', label: LANG.t('tabTranslate') },
             { key: 'cookie', label: LANG.t('tabCookie') },
             { key: 'storage', label: LANG.t('tabStorage') },
+            { key: 'plugins', label: LANG.t('tabPlugins') },
             { key: 'settings', label: LANG.t('tabSettings') },
         ];
         for (var i = 0; i < tabs.length; i++) {
@@ -9848,6 +10233,7 @@
             else if (tab === 'translate') UI.renderTranslate();
             else if (tab === 'cookie') UI.renderCookie();
             else if (tab === 'storage') UI.renderStorage();
+            else if (tab === 'plugins') UI.renderPlugins();
             else if (tab === 'settings') UI.renderSettings();
         }
 
@@ -11557,6 +11943,228 @@
         renderSection(LANG.t('lsTitle'), ls, 'ls');
         renderSection(LANG.t('ssTitle'), ss, 'ss');
 
+        box.appendChild(container);
+    };
+
+    // ===== 插件 Tab：市场 + 已安装 =====
+    UI.renderPlugins = function () {
+        var box = document.getElementById('_ms_box');
+        if (!box) return;
+        var c = UI.colors();
+        var primary = MS_CONFIG.COLORS.primary;
+        var primary2 = MS_CONFIG.COLORS.primary2;
+
+        // 确保插件已从存储加载
+        try { PluginManager.load(); } catch (e) { LOG.warn('PluginManager.load failed:', e); }
+
+        var container = document.createElement('div');
+        container.style.cssText = 'padding:12px 14px 20px;';
+
+        // 子 Tab 切换栏
+        var subTabBar = document.createElement('div');
+        subTabBar.style.cssText = 'display:flex;gap:8px;margin-bottom:14px;';
+        var subMarketBtn = document.createElement('button');
+        var subInstalledBtn = document.createElement('button');
+        var curSub = 'market';
+
+        function applySubStyle(btn, active) {
+            if (active) {
+                btn.style.cssText = 'flex:1;padding:10px 12px;border:none;border-radius:10px;background:linear-gradient(135deg,' + primary + ',' + primary2 + ');color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 12px rgba(99,102,241,.3);';
+            } else {
+                btn.style.cssText = 'flex:1;padding:10px 12px;border:1px solid ' + c.border + ';border-radius:10px;background:' + c.bg2 + ';color:' + c.sub + ';font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;';
+            }
+        }
+        subMarketBtn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:5px;">' + MS_CONFIG.ICONS.store + '<span>' + LANG.t('pluginSubTabMarket') + '</span></span>';
+        subInstalledBtn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:5px;">' + MS_CONFIG.ICONS.plug + '<span>' + LANG.t('pluginSubTabInstalled') + '</span></span>';
+        applySubStyle(subMarketBtn, true);
+        applySubStyle(subInstalledBtn, false);
+
+        function switchSub(target) {
+            curSub = target;
+            applySubStyle(subMarketBtn, target === 'market');
+            applySubStyle(subInstalledBtn, target === 'installed');
+            renderBody();
+        }
+        subMarketBtn.addEventListener('click', function () { switchSub('market'); });
+        subInstalledBtn.addEventListener('click', function () { switchSub('installed'); });
+        subTabBar.appendChild(subMarketBtn);
+        subTabBar.appendChild(subInstalledBtn);
+        container.appendChild(subTabBar);
+
+        // 统计条
+        var statsBar = document.createElement('div');
+        statsBar.style.cssText = 'font-size:12px;color:' + c.sub + ';margin-bottom:10px;padding:0 2px;';
+        container.appendChild(statsBar);
+
+        // 插件卡片列表容器
+        var listWrap = document.createElement('div');
+        listWrap.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
+        container.appendChild(listWrap);
+
+        function makeCard(plugin, isInstalledView) {
+            var card = document.createElement('div');
+            card.style.cssText = 'padding:14px;border-radius:12px;background:' + c.bg2 + ';border:1px solid ' + c.border + ';';
+
+            var top = document.createElement('div');
+            top.style.cssText = 'display:flex;gap:12px;align-items:flex-start;margin-bottom:10px;';
+
+            // 插件图标
+            var iconWrap = document.createElement('div');
+            var gradMap = {
+                enhance: 'linear-gradient(135deg,#6366f1,#8b5cf6)',
+                download: 'linear-gradient(135deg,#10b981,#14b8a6)',
+                parse: 'linear-gradient(135deg,#f59e0b,#f97316)',
+                ui: 'linear-gradient(135deg,#ec4899,#8b5cf6)',
+                tool: 'linear-gradient(135deg,#0ea5e9,#3b82f6)'
+            };
+            var grad = gradMap[plugin.category] || gradMap.tool;
+            iconWrap.style.cssText = 'flex-shrink:0;width:48px;height:48px;border-radius:12px;background:' + grad + ';color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 10px rgba(99,102,241,.2);';
+            iconWrap.innerHTML = plugin.icon || MS_CONFIG.ICONS.plug;
+            top.appendChild(iconWrap);
+
+            // 插件信息
+            var info = document.createElement('div');
+            info.style.cssText = 'flex:1;min-width:0;';
+
+            var nameRow = document.createElement('div');
+            nameRow.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:4px;';
+            var nameEl = document.createElement('div');
+            nameEl.style.cssText = 'font-size:14px;font-weight:700;color:' + c.txt + ';';
+            nameEl.textContent = PluginManager.localName(plugin);
+            nameRow.appendChild(nameEl);
+
+            // 分类徽章
+            var catBadge = document.createElement('span');
+            catBadge.style.cssText = 'flex-shrink:0;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:' + c.bg3 + ';color:' + c.sub + ';';
+            catBadge.textContent = PluginManager.categoryLabel(plugin.category);
+            nameRow.appendChild(catBadge);
+
+            // 启用状态徽章（已安装视图）
+            if (isInstalledView) {
+                var statusBadge = document.createElement('span');
+                if (plugin.enabled) {
+                    statusBadge.style.cssText = 'flex-shrink:0;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(16,185,129,.15);color:#10b981;';
+                    statusBadge.textContent = LANG.t('enabled');
+                } else {
+                    statusBadge.style.cssText = 'flex-shrink:0;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(100,116,139,.18);color:#64748b;';
+                    statusBadge.textContent = LANG.t('disabled');
+                }
+                nameRow.appendChild(statusBadge);
+            }
+            info.appendChild(nameRow);
+
+            var metaRow = document.createElement('div');
+            metaRow.style.cssText = 'font-size:11px;color:' + c.sub + ';margin-bottom:6px;display:flex;flex-wrap:wrap;gap:8px 12px;';
+            metaRow.innerHTML = '<span>' + MS_CONFIG.ICONS.coin + ' ' + LANG.t('pluginVersion') + ': ' + (plugin.version || '1.0.0') + '</span><span>' + MS_CONFIG.ICONS.thumbsUp + ' ' + LANG.t('pluginAuthor') + ': ' + (plugin.author || 'MediaSniffer') + '</span>';
+            if (isInstalledView && plugin.installTime) {
+                metaRow.innerHTML += '<span>' + MS_CONFIG.ICONS.calendar + ' ' + new Date(plugin.installTime).toLocaleDateString() + '</span>';
+            }
+            info.appendChild(metaRow);
+
+            var descEl = document.createElement('div');
+            descEl.style.cssText = 'font-size:12px;color:' + c.sub + ';line-height:1.5;';
+            descEl.textContent = PluginManager.localDesc(plugin);
+            info.appendChild(descEl);
+
+            top.appendChild(info);
+            card.appendChild(top);
+
+            // 操作按钮
+            var actions = document.createElement('div');
+            actions.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:4px;';
+
+            function mkBtn(label, bgColor, hoverBg, handler, icon) {
+                var b = document.createElement('button');
+                var inner = '';
+                if (icon) inner = '<span style="display:inline-flex;align-items:center;gap:5px;">' + icon + '<span>' + label + '</span></span>';
+                else inner = label;
+                b.innerHTML = inner;
+                b.style.cssText = 'padding:7px 14px;border:none;border-radius:8px;background:' + bgColor + ';color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:filter .15s;';
+                b.addEventListener('mouseenter', function () { b.style.filter = 'brightness(1.08)'; });
+                b.addEventListener('mouseleave', function () { b.style.filter = 'none'; });
+                b.addEventListener('click', handler);
+                return b;
+            }
+
+            if (!isInstalledView) {
+                // 市场视图：安装按钮
+                var installed = PluginManager.isInstalled(plugin.id);
+                if (installed) {
+                    var okBtn = document.createElement('button');
+                    okBtn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:5px;">' + MS_CONFIG.ICONS.checkBig + '<span>' + LANG.t('pluginInstalled') + '</span></span>';
+                    okBtn.style.cssText = 'padding:7px 14px;border:none;border-radius:8px;background:' + c.bg3 + ';color:' + c.sub + ';font-size:12px;font-weight:600;cursor:default;';
+                    okBtn.disabled = true;
+                    actions.appendChild(okBtn);
+                } else {
+                    actions.appendChild(mkBtn(LANG.t('pluginInstall'), MS_CONFIG.COLORS.success, '#059669', function () {
+                        var res = PluginManager.install(plugin.id);
+                        if (res.ok) {
+                            toast(LANG.t('pluginInstalledToast', { name: PluginManager.localName(plugin) }));
+                            renderBody();
+                        }
+                    }, MS_CONFIG.ICONS.downloadWhite));
+                }
+            } else {
+                // 已安装视图：启用/禁用 + 卸载
+                if (plugin.enabled) {
+                    actions.appendChild(mkBtn(LANG.t('pluginDisable'), '#64748b', '#475569', function () {
+                        var res = PluginManager.disable(plugin.id);
+                        if (res.ok) {
+                            toast(LANG.t('pluginDisabledToast', { name: PluginManager.localName(plugin) }));
+                            renderBody();
+                        }
+                    }, MS_CONFIG.ICONS.pause));
+                } else {
+                    actions.appendChild(mkBtn(LANG.t('pluginEnable'), MS_CONFIG.COLORS.success, '#059669', function () {
+                        var res = PluginManager.enable(plugin.id);
+                        if (res.ok) {
+                            toast(LANG.t('pluginEnabledToast', { name: PluginManager.localName(plugin) }));
+                            renderBody();
+                        }
+                    }, MS_CONFIG.ICONS.playSmall));
+                }
+                actions.appendChild(mkBtn(LANG.t('pluginUninstall'), MS_CONFIG.COLORS.danger, MS_CONFIG.COLORS.danger2, function () {
+                    var msg = LANG.t('confirmUninstallPlugin', { name: PluginManager.localName(plugin) });
+                    if (!confirm(msg)) return;
+                    var res = PluginManager.uninstall(plugin.id);
+                    if (res.ok) {
+                        toast(LANG.t('pluginUninstalledToast', { name: PluginManager.localName(plugin) }));
+                        renderBody();
+                    }
+                }, MS_CONFIG.ICONS.trash));
+            }
+            card.appendChild(actions);
+            return card;
+        }
+
+        function renderBody() {
+            listWrap.innerHTML = '';
+            if (curSub === 'market') {
+                var market = PluginManager.getMarket();
+                statsBar.textContent = LANG.t('pluginMarketN', { n: market.length });
+                for (var i = 0; i < market.length; i++) {
+                    listWrap.appendChild(makeCard(market[i], false));
+                }
+            } else {
+                var installed = PluginManager.getInstalled();
+                statsBar.textContent = LANG.t('pluginInstalledN', { n: installed.length });
+                if (installed.length === 0) {
+                    var empty = document.createElement('div');
+                    empty.style.cssText = 'padding:60px 20px;text-align:center;color:' + c.sub + ';font-size:14px;';
+                    empty.innerHTML = '<div style="font-size:48px;margin-bottom:14px;opacity:.4;">' + MS_CONFIG.ICONS.plug + '</div>' + LANG.t('noInstalledPlugins');
+                    listWrap.appendChild(empty);
+                } else {
+                    // 按安装时间倒序
+                    installed.sort(function (a, b) { return (b.installTime || 0) - (a.installTime || 0); });
+                    for (var j = 0; j < installed.length; j++) {
+                        listWrap.appendChild(makeCard(installed[j], true));
+                    }
+                }
+            }
+        }
+
+        renderBody();
+        box.innerHTML = '';
         box.appendChild(container);
     };
 
