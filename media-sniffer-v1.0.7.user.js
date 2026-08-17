@@ -11234,21 +11234,40 @@
         engineLabel.textContent = LANG.t('transEngine') + ':';
         engineRow.appendChild(engineLabel);
 
-        var engineSel = document.createElement('select');
-        engineSel.style.cssText = 'flex:1;padding:8px 10px;border:1px solid ' + c.border + ';border-radius:8px;background:' + c.bg + ';color:' + c.txt + ';font-size:13px;font-family:inherit;';
+        var engineSel = document.createElement('div');
+        engineSel.style.cssText = 'flex:1;position:relative;';
         var engines = TranslateEngine.list();
         var currentEngineKey = State.config.translateEngine || 'mymemory';
+        var currentEngine = null;
+        for (var eii = 0; eii < engines.length; eii++) { if (engines[eii].key === currentEngineKey) { currentEngine = engines[eii]; break; } }
+        if (!currentEngine) currentEngine = engines[0];
+        var engineTrigger = document.createElement('div');
+        engineTrigger.style.cssText = 'padding:8px 10px;border:1px solid ' + c.border + ';border-radius:8px;background:' + c.bg + ';color:' + c.txt + ';font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px;justify-content:space-between;';
+        engineTrigger.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;">' + currentEngine.icon + '<span>' + currentEngine.label + '</span></span><span style="opacity:.6f;font-size:11px;">▼</span>';
+        engineSel.appendChild(engineTrigger);
+        var enginePanel = document.createElement('div');
+        enginePanel.style.cssText = 'display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:' + c.bg + ';border:1px solid ' + c.border + ';border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:999;overflow:hidden;';
         for (var ei = 0; ei < engines.length; ei++) {
-            var eOpt = document.createElement('option');
-            eOpt.value = engines[ei].key;
-            eOpt.textContent = engines[ei].icon + ' ' + engines[ei].label;
-            if (engines[ei].key === currentEngineKey) eOpt.selected = true;
-            engineSel.appendChild(eOpt);
+            (function (eng) {
+                var eItem = document.createElement('div');
+                var isSel = eng.key === currentEngineKey;
+                eItem.style.cssText = 'padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:13px;color:' + c.txt + ';' + (isSel ? 'background:' + (c.accent || '#6366f1') + '22;' : '');
+                eItem.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;flex:1;">' + eng.icon + '<span>' + eng.label + '</span></span>' + (isSel ? '<span style="color:' + (c.accent || '#6366f1') + ';">●</span>' : '');
+                eItem.addEventListener('click', function () {
+                    TranslateEngine.use(eng.key);
+                    engineTrigger.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;">' + eng.icon + '<span>' + eng.label + '</span></span><span style="opacity:.6f;font-size:11px;">▼</span>';
+                    enginePanel.style.display = 'none';
+                    toast(LANG.t('saved'));
+                });
+                enginePanel.appendChild(eItem);
+            })(engines[ei]);
         }
-        engineSel.addEventListener('change', function () {
-            TranslateEngine.use(engineSel.value);
-            toast(LANG.t('saved'));
+        engineSel.appendChild(enginePanel);
+        engineTrigger.addEventListener('click', function (e) {
+            e.stopPropagation();
+            enginePanel.style.display = enginePanel.style.display === 'block' ? 'none' : 'block';
         });
+        document.addEventListener('click', function () { enginePanel.style.display = 'none'; });
         engineRow.appendChild(engineSel);
         container.appendChild(engineRow);
 
