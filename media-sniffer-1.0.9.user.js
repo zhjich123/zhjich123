@@ -430,8 +430,25 @@
     };
 
     // ===== 移动端检测 =====
+    // 三重判定（任一命中即视为移动端）：
+    //   1. UA 含 Mobi|Android|iPhone|iPad|HarmonyOS|Mobile
+    //   2. 存在触屏（ontouchstart in window 或 maxTouchPoints > 0）
+    //   3. 视口宽度 < 820 或 视口高度 < 820 且宽<1100（平板竖屏/手机）
+    //   目的：iPad / 开了"PC 模式"的手机浏览器 / 大屏折叠机（UA 常漏写 Mobi）都能正确命中，不再误当桌面端而面板被挤出左边
     U.isMobile = function () {
-        try { return /Mobi|Android|iPhone|iPad|HarmonyOS/i.test(navigator.userAgent) || window.innerWidth < 700; } catch (e) { return false; }
+        try {
+            var ua = (navigator.userAgent || '') + ' ' + (navigator.platform || '');
+            var uaHit = /Mobi|Android|iPhone|iPad|HarmonyOS|Mobile|Silk|Kindle|BlackBerry|IEMobile|Opera Mini|Fennec|webOS/i.test(ua);
+            var touchHit = false;
+            try {
+                if ('ontouchstart' in window) touchHit = true;
+                if (!touchHit && navigator.maxTouchPoints && navigator.maxTouchPoints > 0) touchHit = true;
+            } catch (e) {}
+            var w = (window.innerWidth || (document.documentElement && document.documentElement.clientWidth) || 0);
+            var h = (window.innerHeight || (document.documentElement && document.documentElement.clientHeight) || 0);
+            var sizeHit = (w < 820) || (w < 1100 && h < 900 && touchHit);
+            return uaHit || touchHit || sizeHit;
+        } catch (e) { return false; }
     };
 
     // ===== 生成随机颜色 =====
@@ -10345,10 +10362,37 @@
                 'z-index:20;transition:background .2s ease;user-select:none;';
             dragBar.onmouseenter = function () { dragBar.style.background = 'linear-gradient(90deg,' + gripBgHi + ' 0%,transparent 100%)'; };
             dragBar.onmouseleave = function () { dragBar.style.background = 'linear-gradient(90deg,' + gripBg + ' 0%,transparent 100%)'; };
-            var dragStartX = 0, dragStartW = 0, draggingPanel = false;
-            dragBar.addEventListener('mousedown', function (e) { draggingPanel = true; dragStartX = e.clientX; dragStartW = State.panel.offsetWidth; e.preventDefault(); });
-            document.addEventListener('mousemove', function (e) { if (!draggingPanel) return; var delta = dragStartX - e.clientX; var newW = Math.max(340, Math.min(900, dragStartW + delta)); State.panel.style.width = newW + 'px'; });
-            document.addEventListener('mouseup', function () { if (draggingPanel) { draggingPanel = false; State.config.panelWidth = State.panel.offsetWidth; State.save(); } });
+            // ===== 竖 grip 改宽度（闭包私有：完全独立，绝不与 FAB 的 btnDragging* 冲突）=====
+            (function (handle, panel) {
+                var sizeDragV = false, svStartX = 0, svStartW = 0;
+                function onDown(e) {
+                    sizeDragV = true;
+                    svStartX = e.clientX; svStartW = panel.offsetWidth;
+                    try { e.stopPropagation(); } catch (e0) {}
+                    if (e.cancelable) { try { e.preventDefault(); } catch (e1) {} }
+                    document.addEventListener('mousemove', onMove, true);
+                    document.addEventListener('mouseup', onUp, true);
+                }
+                function onMove(e) {
+                    if (!sizeDragV) return;
+                    // 安全检查：如果事件源是 FAB / 非 handle 且非 panel，立刻退出（防止误动 FAB）
+                    var t = e.target;
+                    if (t && (t.id === '_ms_float' || (t.getAttribute && t.getAttribute('data-ms-btn') === '1'))) { sizeDragV = false; return; }
+                    var delta = svStartX - e.clientX;
+                    var newW = Math.max(340, Math.min(900, svStartW + delta));
+                    panel.style.width = newW + 'px';
+                }
+                function onUp(e) {
+                    if (!sizeDragV) return;
+                    sizeDragV = false;
+                    document.removeEventListener('mousemove', onMove, true);
+                    document.removeEventListener('mouseup', onUp, true);
+                    try { e && e.stopPropagation && e.stopPropagation(); } catch (e0) {}
+                    State.config.panelWidth = panel.offsetWidth;
+                    try { State.save(); } catch (e2) {}
+                }
+                handle.addEventListener('mousedown', onDown);
+            })(dragBar, State.panel);
             State.panel.appendChild(dragBar);
 
             // 拖动调整高度
@@ -10370,10 +10414,37 @@
                 'z-index:20;transition:background .2s ease;user-select:none;';
             hDragBar.onmouseenter = function () { hDragBar.style.background = 'linear-gradient(180deg,transparent 0%,' + gripBgHi + ' 100%)'; };
             hDragBar.onmouseleave = function () { hDragBar.style.background = 'linear-gradient(180deg,transparent 0%,' + gripBg + ' 100%)'; };
-            var dragStartY2 = 0, dragStartH = 0, draggingH = false;
-            hDragBar.addEventListener('mousedown', function (e) { draggingH = true; dragStartY2 = e.clientY; dragStartH = State.panel.offsetHeight; e.preventDefault(); });
-            document.addEventListener('mousemove', function (e) { if (!draggingH) return; var delta = e.clientY - dragStartY2; var newH = Math.max(300, Math.min(window.innerHeight - 20, dragStartH + delta)); State.panel.style.height = newH + 'px'; State.panel.style.maxHeight = 'none'; });
-            document.addEventListener('mouseup', function () { if (draggingH) { draggingH = false; State.config.panelHeight = State.panel.offsetHeight; State.save(); } });
+            // ===== 横 grip 改高度（闭包私有）=====
+            (function (handle, panel) {
+                var sizeDragH = false, shStartY = 0, shStartH = 0;
+                function onDown(e) {
+                    sizeDragH = true;
+                    shStartY = e.clientY; shStartH = panel.offsetHeight;
+                    try { e.stopPropagation(); } catch (e0) {}
+                    if (e.cancelable) { try { e.preventDefault(); } catch (e1) {} }
+                    document.addEventListener('mousemove', onMove, true);
+                    document.addEventListener('mouseup', onUp, true);
+                }
+                function onMove(e) {
+                    if (!sizeDragH) return;
+                    var t = e.target;
+                    if (t && (t.id === '_ms_float' || (t.getAttribute && t.getAttribute('data-ms-btn') === '1'))) { sizeDragH = false; return; }
+                    var delta = e.clientY - shStartY;
+                    var newH = Math.max(300, Math.min(window.innerHeight - 20, shStartH + delta));
+                    panel.style.height = newH + 'px';
+                    panel.style.maxHeight = 'none';
+                }
+                function onUp(e) {
+                    if (!sizeDragH) return;
+                    sizeDragH = false;
+                    document.removeEventListener('mousemove', onMove, true);
+                    document.removeEventListener('mouseup', onUp, true);
+                    try { e && e.stopPropagation && e.stopPropagation(); } catch (e0) {}
+                    State.config.panelHeight = panel.offsetHeight;
+                    try { State.save(); } catch (e2) {}
+                }
+                handle.addEventListener('mousedown', onDown);
+            })(hDragBar, State.panel);
             State.panel.appendChild(hDragBar);
 
             // 右下角对角线缩放（↘ Grip 把手 —— Apple 式三条斜线，双层绘制模拟描边 + 投影）
@@ -10402,24 +10473,40 @@
                 'z-index:22;transition:background .2s ease;user-select:none;';
             cornerDrag.onmouseenter = function () { cornerDrag.style.background = 'radial-gradient(circle at 100% 100%,' + gripBgHi + ' 0%,transparent 78%)'; };
             cornerDrag.onmouseleave = function () { cornerDrag.style.background = 'radial-gradient(circle at 100% 100%,' + gripBg + ' 0%,transparent 72%)'; };
-            var dragStartX3 = 0, dragStartY3 = 0, dragStartW2 = 0, dragStartH2 = 0, draggingCorner = false;
-            cornerDrag.addEventListener('mousedown', function (e) { draggingCorner = true; dragStartX3 = e.clientX; dragStartY3 = e.clientY; dragStartW2 = State.panel.offsetWidth; dragStartH2 = State.panel.offsetHeight; e.preventDefault(); });
-            document.addEventListener('mousemove', function (e) {
-                if (!draggingCorner) return;
-                var dx = e.clientX - dragStartX3, dy = e.clientY - dragStartY3;
-                var newW = Math.max(340, Math.min(900, dragStartW2 + dx));
-                var newH = Math.max(300, Math.min(window.innerHeight - 20, dragStartH2 + dy));
-                State.panel.style.width = newW + 'px'; State.panel.style.height = newH + 'px';
-                State.panel.style.maxHeight = 'none';
-            });
-            document.addEventListener('mouseup', function () {
-                if (draggingCorner) {
-                    draggingCorner = false;
-                    State.config.panelWidth = State.panel.offsetWidth;
-                    State.config.panelHeight = State.panel.offsetHeight;
-                    State.save();
+            // ===== 角 grip 改宽高（闭包私有）=====
+            (function (handle, panel) {
+                var sizeDragC = false, scStartX = 0, scStartY = 0, scStartW = 0, scStartH = 0;
+                function onDown(e) {
+                    sizeDragC = true;
+                    scStartX = e.clientX; scStartY = e.clientY;
+                    scStartW = panel.offsetWidth; scStartH = panel.offsetHeight;
+                    try { e.stopPropagation(); } catch (e0) {}
+                    if (e.cancelable) { try { e.preventDefault(); } catch (e1) {} }
+                    document.addEventListener('mousemove', onMove, true);
+                    document.addEventListener('mouseup', onUp, true);
                 }
-            });
+                function onMove(e) {
+                    if (!sizeDragC) return;
+                    var t = e.target;
+                    if (t && (t.id === '_ms_float' || (t.getAttribute && t.getAttribute('data-ms-btn') === '1'))) { sizeDragC = false; return; }
+                    var dx = e.clientX - scStartX, dy = e.clientY - scStartY;
+                    var newW = Math.max(340, Math.min(900, scStartW + dx));
+                    var newH = Math.max(300, Math.min(window.innerHeight - 20, scStartH + dy));
+                    panel.style.width = newW + 'px'; panel.style.height = newH + 'px';
+                    panel.style.maxHeight = 'none';
+                }
+                function onUp(e) {
+                    if (!sizeDragC) return;
+                    sizeDragC = false;
+                    document.removeEventListener('mousemove', onMove, true);
+                    document.removeEventListener('mouseup', onUp, true);
+                    try { e && e.stopPropagation && e.stopPropagation(); } catch (e0) {}
+                    State.config.panelWidth = panel.offsetWidth;
+                    State.config.panelHeight = panel.offsetHeight;
+                    try { State.save(); } catch (e2) {}
+                }
+                handle.addEventListener('mousedown', onDown);
+            })(cornerDrag, State.panel);
             State.panel.appendChild(cornerDrag);
         }
 
