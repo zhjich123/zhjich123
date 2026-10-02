@@ -1,5 +1,49 @@
 # 更新日志
 
+## v1.10 · 性能优化 + iOS 27 流体玻璃 · 2026-10-02
+
+- **[性能 · 热路径]** 五个高频函数改为「不构造 URL 对象」的字符串直算并加记忆化，实测提速（3086 条 URL 语料 × 5 轮平均）：
+  - `SEC.isSafeUrl` 首字符分流：3.73 ms → 0.66 ms（**≈5.6×**）
+  - `SEC.absUrl` 规范绝对地址直通 + 结果记忆化：3.03 ms → 0.59 ms（**≈5.1×**）
+  - `SEC.nameFromUrl` 记忆化：4.43 ms → 1.52 ms（≈2.9×）
+  - `SEC.guessKind` 改用扩展名查表（替代 4 条正则）+ 记忆化：1.84 ms → 1.21 ms（≈1.5×）
+  - `SEC.extFromUrl` 记忆化
+  - 等价性：上述函数在 3086 条语料上与旧实现**结果完全一致**（0 差异）
+- **[性能 · 状态与网络]** `U.uniq` 对象键改 `Set`；`State.save` 改为 250 ms 防抖并挂 `pagehide`/`beforeunload`/`visibilitychange` 落盘；
+  `NetState._flush` 去掉冗余全表去重；`installNetHook` / `UI.registerShortcuts` / `State.init` 幂等化（重复注入不再叠加监听器）；
+  `AutoUpdater._checkRaw` 增加 30 s 在途合并。
+- **[性能 · 渲染]** 资源卡片由「每卡片一个 dblclick 监听」改为一次性事件委托；非虚拟网格改单次 `innerHTML` 构建；
+  `UI.VirtualList` 重写为**节点回收池 + 索引→节点 Map + `requestAnimationFrame` 合并滚动 + 签名比对**（仅选中态变化才重渲）
+  \+ `ResizeObserver` 跟踪视口，彻底去掉「每次滚动全量 `innerHTML` 重建」；
+  `UI.applyUiStyle` 按 `style|dark|mobile|palette` 键记忆化，不再重复重建整段 CSS。
+- **[性能 · 动效]** 删除命中所有后代的 `#_ms_panel *` 全局过渡规则（原先每个卡片/按钮都参与合成与样式重算），
+  改为只给面板主要容器挂过渡、切换主题时临时开 `_ms_theming`；面板关闭 / 页面切后台时 `body._ms_glass_idle` 暂停全部无限动画。
+- **[UI · iOS 27 流体玻璃]** 「苹果」风格原地重写为 **iOS 27 流体玻璃（Liquid Glass）**，深/浅色与桌面/移动端四套参数：
+  - **流体色团**：`._ms_gl_wrap` 内三个大色斑以 23 / 29 / 34 秒多段关键帧漂移（位移 + 缩放同时变），静态不对称圆角（非正圆，更接近液滴），
+    只动 `transform` 走合成层，不触发重排重绘；移动端自动减一个色团以省合成开销。
+  - **粘滞跟随**：`UI._bindGlassMotion` 每帧只向指针目标靠 18%（视差 12%）插值，高光、湿润反射与色团是「被拖着流过去」而非硬跟手指；
+    收敛后立即停止 `requestAnimationFrame`（不空转），面板矩形做缓存避免每帧强制布局。
+  - **折射与厚度**：镜面高光 `._ms_gl_spec` + 反向对位的湿润反射 `._ms_gl_wet`（`calc()` 驱动的对位光斑）；
+    顶部高光采用「静态版 + 指针增强版」两条规则渐进增强，后者解析失败自动回退。
+  - **按压反馈**：`._ms_pressing` 触发波纹漾开 + 色团加速（23 s → 11 s）+ 湿润反射增强，控件圆角收紧后弹性回弹。
+  - 材质 `blur(44/38px) saturate(215/185%) brightness(1.07/1.04)` + 顶部强高光 / 两侧渐弱 / 底部弱反光的镜面边缘 + 青品红边缘色散 + 9.5 s 光扫。
+  - 兼容：旧配置 `uiStyle:'apple'` 在 `State.load()` 中于 `validateConfig` **之前**迁移为 `'ios27'`（否则旧用户配置会被整体重置）。
+  - 克制：不改卡片 `border`（保住选中态 2px 主色描边），不直接命中 `[data-url]`（避免误伤视频缩略图占位）；
+    `@supports not (backdrop-filter)` 时退化为高不透明底，`prefers-reduced-motion` 时关闭全部动效；配色跟随用户自选 palette。
+- **[修复]** `UI.createPanel()` / `SEC.absUrl` 等函数被调用但从未定义，导致切换界面语言后面板被移除却无法重建 —— 已改为真实函数。
+- **[修复]** `Selection.getBatchActions()` 缺失，选择模式下「批量」菜单渲染时抛错，导致同排的「重新扫描 / 关闭」按钮一起消失 —— 已补实现。
+- **[清理]** 删除死代码：`U.escHtml` / `U.b64Encode` / `U.b64Decode` / `U.chunk` / `U.uid` / `U.randColor`、`SEC.safeUrl`、
+  `AES.pad16` / `AES.bytesToStr`、`Selection.isFavorite` / `removeFavorite` / `getGroups`、`State.shouldRun`、
+  `unregisterGroupRule` / `getGroupRules` / `unregisterBatchAction`、`UI._unobserveVlinkCards`；清理 18 行混入注释的 SVG（-10.6 KB）。
+- **[清理]** M3U8 的 `GM_xmlhttpRequest` / XHR 双路径合并为 `M3U8._httpGet`（并修掉其 `done` 双回调问题）；
+  5 处重复的 title / `og:image` 抓取块合并为 `VideoResolver.fillFromHtml`。
+- **[已知问题]** 以下为上游遗留、本版未改动：① 分组功能空转——`registerGroupRule` / `toggleGroup` 有 UI 入口，
+  但渲染路径不读分组结果，点「按域名分组」不会改变显示；② 「停止下载」没有 UI 入口——`Dl.stop` / `M3U8.stopDownload`
+  与文案 `dlStopped` 都在，只是没有任何地方调用；③ `ScannerService` / `DownloadManager` 及其各 Backend 原型类为上游框架预留，脚本内从不实例化。
+- **[注意]** 本版基于 **v1.0.8** 分支开发。v1.0.9 的以下改动不在本版范围内：移动端 Tab 条横向滚动修复、`U.isMobile` 三重判定、
+  面板拖拽重构与拖拽把手配色、浮动按钮拖拽加固、按钮 `innerHTML` 图标渲染修复、Tab 标签图标前缀调整、日语/韩语 `selectBtn` 补齐、4 个插件图标更换。
+  如需完整合并请反馈。
+
 ## v1.0.9 · Apple iOS 27 真·液态玻璃版 · 2026-08-29
 - **[UI · Apple 主题 · 核心升级]** 升级为 iOS 27 同款 Liquid Glass 5 层真实液态玻璃物理模型：
   - Layer 1 折射层（中心 blur 28px / 边缘 blur 62px 径向 mask + scale(1.015) 边缘放大）
