@@ -32,12 +32,11 @@
 - `Alt + T`：翻译选中文本
 - `Esc`：关闭面板
 
-
+## bug反馈
 
 如有 bug 或者有什么建议的欢迎反馈！
 
 邮箱：zhengjingchen123456@outlook.com
-
 
 ## 更新日志
 
