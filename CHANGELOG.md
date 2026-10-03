@@ -1,5 +1,105 @@
 # 更新日志
 
+## v1.12
+
+**第三批 17 项缺陷修复 + 6 项代码审查问题 + 版本号统一**
+
+### 🔴 P0 · 严重缺陷
+
+- **修复 · P0**：`HttpBackend._runChunked` 进入时硬清零 `finishedChunks` / `failedChunks`，
+  而 `resume()` 会带着同一批 `chunks` 重新进入 —— 已完成的分片不会再有回调，计数归零后
+  `settle()` 的条件永远凑不齐，**既不合并也不报错，任务永久卡在 running**。
+  改用按分片真实状态重建计数、清掉 pause 遗留的 `running`、复位 `_chunksSettled`。
+
+### 🟡 P2 · 功能性缺陷
+
+- **修复**：`AutoUpdater._getCache` 直接 `JSON.parse(raw)`，假设存储里一定是字符串。
+  手工改过 GM 存储、或旧版本存的是原生对象时会抛错 → 缓存永久失效 → **每次启动都重查 GitHub**。
+  改为先判类型，并对非对象结果返回 `null`。
+- **修复（XSS）**：`UI.previewM3u8` 两处直接拼 `url` 进 `innerHTML`，URL 含 `</` 会**破坏整个弹窗结构**。
+  已加转义；并顺带把同属一类的远端注入面一起堵上 —— `streams[i].label` / `.resolution` / `keyMethod`
+  都来自**攻击者可控**的 m3u8 文本。
+- **修复（XSS）**：`UI.renderMedia` 的 vLink 卡片封面 `'<img src="' + vItem.cover + '"'` 未转义，
+  `cover` 取自页面 `og:image`。已走 `escapeAttr`。
+- **修复**：`MS_FACTORY.mediaCardHtml` 的选中描边硬编码 `MS_CONFIG.COLORS.primary`，
+  切「玫瑰红」等配色后**卡片选中描边仍是靛蓝**。改为跟随当前配色，
+  并补完同类残留 —— 选中光晕同样写死了 `rgba(99,102,241)`。
+- **修复**：`DownloadManager._startTask` 中 `factory(...)` / `controller.start()` 裸调用，
+  同步抛错时 `_running` 不回退 → **队列并发槽永久少一个**，多失败几次队列彻底不动。
+  已用 try/catch 包住并统一走 `abortStart()`（发 onError + `_finish` 释放槽位）。
+
+### 🟢 长期项 · 健壮性与可维护性
+
+- 批量下载完成时连续弹两条 toast，后者**顶掉前者**的显示时机 → 合并为一条（有失败时才补成功数）。
+- `UI._ios27Rgba` 只认 hex：自定义配色写 `rgb()` / `hsl()` 时原样返回，**液态玻璃的染色与折射整体失效**。
+  补上 `rgb()/rgba()/hsl()/hsla()` 解析分支与具名色探测。
+- `State.save` 有 250ms 防抖窗口，App 被系统强杀时可能来不及落盘 → 主题 / 语言这类
+  「刚点完就期待记住」的关键项改为**同步写**，其余仍走防抖。
+- `UI.VirtualList` 返回值被丢弃，同一容器反复 new 会**重复挂 ResizeObserver** →
+  返回带 `destroy()` 的实例句柄；**并且让调用方真的调用**：
+  `renderMedia` 在 `box.innerHTML` 覆盖前显式销毁旧列表（光有 destroy 没人调，泄漏依旧存在）。
+- 资源扫描「拼 all 数组」的逻辑在 `Scanner.doFull` 与 `ScannerService._legacyScan` 里各写一遍，
+  后续改一处漏一处就会让两条路径行为不一致 → 抽出 `Scanner.buildUnifiedList` 与
+  `Scanner.mergeWithNetHits` 统一。
+- 域名规则「只要存在任意一条 allow 规则就整体切换成白名单模式」**语义反直觉** ——
+  用户想「额外放行某个站点」而加一条 allow，结果其它所有站点全被拦下。改为
+  「allow 覆盖 block，都没命中即放行」。
+- 切换语言时 `State.panel.remove()` 全量重建面板 → 拖拽状态、滚动位置、面板位置全丢且会闪一下。
+  改为只就地刷新文案（标题栏 / 标签 / 底栏 / 设置页）。
+- `#_ms_minimized_bar` 用 `box-shadow: ... !important` 硬压内联的按色阴影，内联值永远不生效。
+  改为把配色阴影写进 CSS 变量 `--_ms_bar_shadow`，内联引用变量，两边不再打架。
+  **核查误伤面时发现真 Bug**：`._ms_card` 的 `!important` 阴影会让「资源定位高亮环」完全不可见 ——
+  改用内联 `important`（内联 important 优先级高于作者 important），并在动画结束后
+  `removeProperty`，避免把卡片常态阴影钉死。
+- `window.addEventListener('resize', U.throttle(...))` 绑定后不解绑，面板重建会**累加监听器** →
+  处理器提到模块级 + `UI._unbindGlassMotion()`，重绑前先解绑。
+- `VideoLinkPreview.switchPage` 已定义但 UI 无入口，多 P 切换是半成品 → **接通**：
+  `VideoResolver.switchPage` 用目标分 P 的 `cid` 重新取流，UI 增加分 P 选择器
+  （原先只弹了个 toast 的空壳）。
+- `el.srcObject instanceof Blob` 对 `<video>` 几乎只可能是 MediaStream，分支形同死代码 →
+  保留（成本仅一次 instanceof）并加注说明，避免后人误判删掉。
+- 新增的 `_ms_vlink_paused` 类无对应 CSS，加/删都没差异 → 补上真实样式
+  （`animation-play-state: paused`），让这个类真正具备语义。
+
+### 🔧 代码审查问题修复
+
+- **修复**：JS 块注释被写在**单引号字符串内部**（`'... " + '"   /* N2: ... */ loading=...'`）。
+  因为前后都有 `+` 拼接符所以不是语法错误，但整段注释文字会**原样输出进 HTML**：
+  浏览器把注释起始符当成属性名、`N2:` 当成另一个属性，挂上一堆垃圾属性，
+  注释内容还会泄漏到页面源码里。注释已搬回 JS 层面。
+- **修复**：切语言时 `tabBtns[i].innerHTML = label` 直接整块替换 → **丢失 tab 图标**。
+  语言表里 `tabImg` 在 zh-CN 是纯文字（无 SVG）、en-US 才自带图标，于是
+  从 en 切回 zh 图标消失、从 zh 切到 en 图标出现，且原有的两层 `<span>` 包装被打掉，
+  **切一次语言整个 tab 栏视觉就崩**。已把图标表提到 `UI._tabIconMap`，
+  新增 `UI._tabInnerHtml()` 统一生成「图标 + 文字」结构，创建与刷新共用同一函数。
+  顺带修掉一个**原本就存在**的问题：en / ja / ko 的语言值自带 SVG，叠上图标表后会**双图标**，
+  且经转义后会变成可见乱码 —— 新增 `UI._tabLabel()` 剥离语言值内嵌的 SVG。
+- **修复**：注释推荐的「严格白名单用 `block:'*'`」**根本不生效** ——
+  `type:'regex'` 时 `new RegExp('*')` 抛 `SyntaxError` 被 catch 吞掉（规则完全失效），
+  `type:'host'` 又要求主机名真叫 `*`。已在 `_ruleMatch` 里对 `pattern === '*'` 做
+  always-match 特判，让文档写法和实际行为对上。
+- **修复**：vLink 卡片的 `title`（取自页面 `<a>` 的 textContent / title）与 `siteName` 仍未转义，
+  已一并 escape；`siteIcon` 是内置 SVG 常量，**刻意保持原样**（转义会把标签打坏）。
+- **修复**：`Selection._updateCardMark` / `_updateAllCards` 里的选中主色/光晕硬编码 ——
+  初始渲染跟随配色了，但运行时点选 / Shift 多选仍会变回靛蓝。已统一走 `Selection._primary()`，
+  并带 `UI.colors()` 异常时的兜底。
+
+### 📦 其他
+
+- 全局版本号统一为 **v1.12**：`@name`、`@version`、启动日志、`MS_CONFIG.VERSION`、`U.VERSION`
+  与 4 种语言的 `infoLine1` 显示串。版本一致性体检 27 项断言通过。
+
+### ✅ 验证
+
+- 新增 `t-p0c.js`：**179 项断言全绿**，每条都抽真实实现跑在桩环境里，断言行为而非文本。
+- **反向验证 34/34**：把每处修复逐条还原成缺陷代码，测试全部如实报错 ——
+  证明断言不是空转（这一步抓出了 5 条原本无效的断言）。
+- 回归：`t-p0b` 105 · `t-p0` 49 · `t-panel` 184 · `t-ios27` 144 · `t-version` 27 项全部通过；
+  `t-refs` 无未定义引用；性能回归 5 函数 × 3086 条 URL 语料 **0 差异**。
+- 测试基建同步加固：`stripComments` 由正则改为**词法扫描**（油猴元数据里的
+  `@match` 通配符会被正则误判成块注释开头，曾把 25KB 真实代码整段删掉导致断言假绿），
+  并加了剥注释后的代码哨兵自检。
+
 ## v1.11 · 液态玻璃控件与面板动效 + 6 项 P0 缺陷修复 · 2026-10-02
 
 - **[UI · 液态玻璃]** iOS 27 风格下的两个浮层控件补上真正的玻璃材质（此前仍是近乎实心的旧底色，与面板的流体玻璃不搭）：
