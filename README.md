@@ -2,7 +2,7 @@
 
 一个功能强大的 Tampermonkey / ScriptCat 油猴脚本，用于抓取网页中的图片、视频、音频、m3u8 流媒体资源，支持批量下载、AES-128 解密、翻译、Cookie/Storage 管理等功能。
 
-> **当前版本：v1.11** · [下载最新版](https://github.com/zhjich123/zhjich123/releases/latest)
+> **当前版本：v1.12** · [下载最新版](https://github.com/zhjich123/zhjich123/releases/latest)
 
 ## 功能特性
 
@@ -39,6 +39,47 @@
 邮箱：zhengjingchen123456@outlook.com
 
 ## 更新日志
+
+### v1.12
+**第三批 17 项缺陷修复 + 6 项代码审查问题 + 版本号统一**
+
+- **修复 · P0**：`HttpBackend._runChunked` 进入时硬清零分片计数，而 `resume()` 带的是同一批分片 ——
+  已完成的分片不会再有回调，`settle()` 条件永远凑不齐，**既不合并也不报错，任务永久卡在 running**。
+  改为按分片真实状态重建计数 + 清掉 pause 遗留的 `running` + 复位 `_chunksSettled`
+- **修复 · XSS**：`UI.previewM3u8` 两处直接拼 `url` 进 `innerHTML`，URL 含 `</` 会破坏整个弹窗结构；
+  并顺带堵上同类的远端注入面（m3u8 文本里的 `label` / `resolution` / `keyMethod` 均为攻击者可控）
+- **修复 · XSS**：`UI.renderMedia` 的 vLink 卡片封面未转义（`cover` 取自页面 `og:image`）
+- **修复**：`mediaCardHtml` 选中描边硬编码靛蓝，切「玫瑰红」等配色后仍是旧色；并补完同类残留（选中光晕）
+- **修复**：`_startTask` 里 `factory()` / `controller.start()` 裸调用，同步抛错时并发槽不回退 →
+  **队列并发槽永久少一个**；已统一走 `abortStart()` 释放槽位
+- **修复**：`AutoUpdater._getCache` 假设存储一定是字符串，遇到原生对象/坏 JSON 抛错 → 缓存永久失效 →
+  **每次启动都重查 GitHub**
+- **修复**：域名规则「存在 allow 即进入白名单模式」语义反直觉（加一条 allow 会拦下其它所有站点）→
+  改为「allow 覆盖 block，都没命中即放行」；同时修掉注释推荐的 `block:'*'` **根本不生效**
+  （`new RegExp('*')` 抛错被吞），已对 `pattern === '*'` 做 always-match 特判
+- **修复**：切语言时 `innerHTML = label` 整块替换 → **丢失 tab 图标**（zh-CN 语言值无 SVG，
+  且两层 `<span>` 包装被打掉，切一次语言 tab 栏视觉就崩）→ 图标表提到 `UI._tabIconMap`，
+  新增 `UI._tabInnerHtml()` 统一生成结构；顺带修掉 en/ja/ko **双图标**（语言值自带 SVG）的老问题
+- **修复**：JS 块注释被写在单引号字符串内部 → 整段注释**原样输出进 HTML**，挂上一堆垃圾属性并泄漏到页面源码
+- **修复**：vLink 卡片 `title` / `siteName` 未转义（`siteIcon` 是内置 SVG，刻意不转义）
+- **修复**：`Selection._updateCardMark` / `_updateAllCards` 运行时更新仍写死靛蓝 →
+  初始渲染跟随配色、一按选又变回去；已统一走 `Selection._primary()`
+- **健壮性**：`UI._ios27Rgba` 补 `rgb()/hsl()` 解析（原来非 hex 配色会让液态玻璃染色/折射整体失效）；
+  主题/语言改为**同步落盘**；批量完成合并为一条 toast
+- **内存**：`UI.VirtualList` 返回 `destroy()` 句柄，并**让调用方真的调用**
+  （`renderMedia` 在覆盖 DOM 前显式销毁，否则 ResizeObserver 每轮重渲染累加）
+- **重构**：资源扫描的「拼 all 数组」两处重复逻辑抽成 `Scanner.buildUnifiedList` /
+  `Scanner.mergeWithNetHits`；语言切换不再 remove 重建面板（保留拖拽/滚动位置）
+- **样式**：迷你栏阴影改走 CSS 变量，不再用 `!important` 硬压内联按色阴影；
+  核查误伤面时发现真 Bug —— `._ms_card` 的 `!important` 阴影让**资源定位高亮环完全不可见**，已修
+- **动效**：玻璃动效的 resize 监听改为可解绑（原先面板重建会累加监听）
+- **功能接通**：`VideoLinkPreview` 的多 P 切换从空壳（只弹 toast）接通为真实实现，
+  用目标分 P 的 `cid` 重新取流并加上分 P 选择器
+- **注释**：`srcObject instanceof Blob` 保留并注明原因；`_ms_vlink_paused` 补上真实样式（原本无对应 CSS）
+- **版本**：全局统一 v1.12（`@name` / `@version` / 启动日志 / `MS_CONFIG.VERSION` / `U.VERSION` / 4 语言显示串）
+- **验证**：新增 179 项断言；**反向验证 34/34**（逐条还原缺陷代码确认测试会失败，抓出 5 条无效断言）；
+  回归 105 + 49 + 184 + 144 + 27 项全绿；性能 5 函数 × 3086 条 URL 语料 **0 差异**
+
 
 ### v1.11
 **液态玻璃控件与面板动效 + 6 项 P0 缺陷修复**
