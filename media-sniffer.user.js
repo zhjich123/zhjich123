@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         媒体嗅探器 Media Sniffer Pro
 // @namespace    http://tampermonkey.net/
-// @version      1.14
+// @version      1.15
 // @description  图片/视频/音频/m3u8 抓取 · AES-128解密 · 分片合并 · 虚拟列表 · 进度可视化 · 跨域兜底 · Cookie/Storage · 翻译 · 元信息 · 高级筛选 · iOS 27 液态玻璃界面
 // @license      GPL-3.0-or-later
 // @downloadURL  https://raw.githubusercontent.com/zhjich123/zhjich123/main/media-sniffer.user.js
@@ -43,7 +43,7 @@
     }
 
     try {
-    console.info('[MS] 脚本开始加载，版本:', '1.14');
+    console.info('[MS] 脚本开始加载，版本:', '1.15');
 
 
 
@@ -51,7 +51,12 @@
     // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.045a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.01 17.461 2 12 2z"></path></svg></svg> 全局配置（图标 / 颜色 / 尺寸 / 配色板）
     // =========================================================================
     var MS_CONFIG = {
-        VERSION: '1.14',
+        VERSION: '1.15',
+        // 界面风格白名单（唯一真源）。必须放在 MS_CONFIG 里 —— 它在最外层作用域，
+        // State IIFE 与 UI IIFE 是**并列**的两个 IIFE，写在其中一个里面另一个取不到。
+        // （v1.15 首版曾把它放在 State IIFE 内，导致 UI.applyUiStyle 抛 ReferenceError
+        //   并被三处 try-catch 吞掉：风格系统整体罢工，连 ios27 的玻璃层都不再挂载。）
+        UI_STYLE_IDS: ['normal', 'material', 'ios27', 'neumorph', 'brutal', 'terminal'],
         // 更新地址（固定文件名，永不带版本号）
         //   · 元数据 @downloadURL / @updateURL 用的是同一个常量值，这里写死保持同步
         //   · 内置更新器弹窗的「一键更新」也指向它，点一下就是原地覆盖，
@@ -66,7 +71,7 @@
             check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
             checkBig: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><polyline points="20 6 9 17 4 12"></polyline></svg>',
             checkWhite: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
-            film: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>',
+            // 32：ICONS.film 与 ICONS.video 的路径完全一致，且全篇没有任何使用点 —— 已删除。
             image: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>',
             video: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>',
             audio: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>',
@@ -186,6 +191,62 @@
     };
 
     // =========================================================================
+    //  ⚠ 图标显示方式修正（针对宿主页面的 CSS 重置）
+    //
+    //  很多站点（含 Tailwind Preflight）会写一条
+    //      audio,canvas,embed,iframe,img,object,svg,video{vertical-align:middle;display:block}
+    //  本脚本运行在**别人页面上**，这条规则会把我们所有 <svg> 图标变成块级元素。
+    //  后果非常直观：凡是「图标 + 文字」拼在一个 innerHTML 里的按钮（例如
+    //  设置页「添加自定义配色」的确定按钮、插件页规则表单的保存按钮）都会被拆成
+    //  两行 —— 图标独占第一行并靠左（块级元素不受 text-align 影响），
+    //  文字被挤到第二行居中，按钮高度直接翻倍，看上去就是一大块纯色。
+    //  （脚本里原本只有 playSmall / checkBig 两个图标手写了
+    //    style="display:inline-block;vertical-align:middle"，其余 100 多处都受影响。）
+    //
+    //  这里在**图标定义处**统一补齐，保证任何位置用到的图标都是行内元素；
+    //  另外再注入一条兜底规则，覆盖少数直接写在 HTML 字符串里、不走 ICONS 的 <svg>。
+    // =========================================================================
+    try {
+        (function normalizeIcons() {
+            var NEED = 'display:inline-block;vertical-align:middle';
+            var icons = MS_CONFIG.ICONS;
+            for (var k in icons) {
+                if (!Object.prototype.hasOwnProperty.call(icons, k)) continue;
+                var v = icons[k];
+                if (typeof v !== 'string' || v.indexOf('<svg') !== 0) continue;
+                // 先取出开标签本身。只检查开标签 —— 图标内部元素可能带 display，
+                // 拿整串去判断会误伤；而且插 style 也必须在开标签里。
+                var om = v.match(/^<svg\b[^>]*?>/);
+                if (!om) continue;
+                var open = om[0];
+                if (/display\s*:/.test(open)) continue;              // 已显式声明 → 尊重原值
+                if (/\sstyle="/.test(open)) {
+                    // 已有 style（例如 play 的 filter）→ 合并进去，
+                    // 绝不能另起一个 style 属性：那样是非法 HTML，浏览器只认第一个。
+                    open = open.replace(/\sstyle="/, ' style="' + NEED + ';');
+                } else {
+                    open = open.replace(/^<svg\b/, '<svg style="' + NEED + '"');
+                }
+                icons[k] = open + v.slice(om[0].length);
+            }
+        })();
+
+        (function ensureSvgInlineCss() {
+            var id = '_ms_icon_fix_css';
+            if (document.getElementById(id)) return;
+            var st = document.createElement('style');
+            st.id = id;
+            // 选择器带上我们的容器 / id 前缀，特异性高过宿主那条裸 `svg{}`，
+            // 再加 !important 防住少数站点把重置写成 !important 的情况。
+            st.textContent = '#_ms_panel svg,#_ms_float svg,#_ms_sel_pop svg,#_ms_queue_modal svg,'
+                + '#_ms_vlp_modal svg,#_ms_footer_menu svg,#_ms_float_ctx_menu svg,#_ms_filter_panel svg,'
+                + '._ms_toast svg,#_ms_minimized_bar svg,#_ms_status svg,[id^="_ms_"] svg'
+                + '{display:inline-block !important;vertical-align:middle !important;}';
+            (document.head || document.documentElement).appendChild(st);
+        })();
+    } catch (e) {}
+
+    // =========================================================================
     //  组件工厂（按钮 / 元素 / 卡片 / 最小化栏）
     // =========================================================================
     var MS_FACTORY = {
@@ -302,7 +363,7 @@
     //  模块 1：核心工具 (Utils) + 日志系统
     // =========================================================================
     var U = {};
-    U.VERSION = '1.14';
+    U.VERSION = '1.15';
     U.toStr = Object.prototype.toString;
     U.isArr = Array.isArray || function (x) { return U.toStr.call(x) === '[object Array]'; };
     U.isStr = function (x) { return typeof x === 'string'; };
@@ -399,6 +460,35 @@
 
     // ===== HTML 转义 =====
     // ===== 数组去重（Set 实现，避免对象键与原型链开销）=====
+    // 19：统一的安全执行包装。项目里大量 `try {} catch (e) {}` 会把异常吃得
+    // 一点痕迹都不留 —— v1.15 首版「风格系统整体罢工」正是因为 applyUiStyle
+    // 抛 ReferenceError 被空 catch 吞掉，只在控制台留了一行不起眼的日志。
+    // 关键路径统一改用 safeRun：异常仍然被吞（不打断主流程），但一定会记日志。
+    U.safeRun = function (fn, label) {
+        try {
+            return fn();
+        } catch (e) {
+            try {
+                if (typeof LOG !== 'undefined' && LOG && LOG.error) {
+                    LOG.error('[safeRun] ' + (label || '?') + ' 失败:', e && e.message ? e.message : e);
+                }
+            } catch (e2) {}
+            return undefined;
+        }
+    };
+
+    // 轻量字符串哈希（FNV-1a 32 位）。用于「需要区分长文本、但不想为此把
+    // 全文存进键里」的场景 —— 比截断可靠，也比保留原文省内存。
+    U.hashStr = function (str) {
+        var h = 0x811c9dc5;
+        var t = String(str == null ? '' : str);
+        for (var i = 0; i < t.length; i++) {
+            h ^= t.charCodeAt(i);
+            h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0;
+        }
+        return h.toString(36);
+    };
+
     // 性能 3：SPA 长会话里的几个缓存原来没有任何上限，页面开久了内存只涨不跌：
     //   · UI._thumbCache      —— 缓存的是 dataURL（视频封面），单条可达几十 KB，最要命
     //   · State.translateCache —— 翻译结果字符串
@@ -701,9 +791,11 @@
             'themeAuto': '跟随系统', 'themeLight': '亮色',
             'themeDark': '暗色',
             'uiStyleSelect': '界面风格',
-            'uiStyleDesc': '切换面板整体视觉风格（iOS 27 = 液态玻璃）',
+            'uiStyleDesc': '切换面板整体视觉风格（iOS 27 液态玻璃 / 新拟物 / 粗野主义 / 终端复古）',
             'uiStyleNormal': '普通',
             'uiStyleMaterial': 'Material', 'uiStyleIos27': 'iOS 27',
+            'updateManualHint': '已打开脚本地址：若浏览器显示的是源码，请全选复制后在脚本管理器里新建脚本粘贴',
+            'uiStyleNeumorph': '新拟物', 'uiStyleBrutal': '粗野主义', 'uiStyleTerminal': '终端',
             'paletteSelect': '配色方案',
             'paletteIndigo': '靛蓝',
             'palettePurple': '紫色', 'paletteBlue': '海蓝',
@@ -924,7 +1016,7 @@
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': '媒体嗅探器 Pro v1.14 · SelectionManager · 拖拽排序 · 收藏夹 · 智能去重 · 分组 · 批量操作注册 · 插件系统',
+            'infoLine1': '媒体嗅探器 Pro v1.15 · SelectionManager · 拖拽排序 · 收藏夹 · 智能去重 · 分组 · 批量操作注册 · 插件系统',
             'infoLine2': '快捷键：Alt+T 翻译选中 · Alt+B 开关面板 · Esc 关闭',
             'clickTabScan': '点击标签扫描',
             'dlProgress': '下载进度',
@@ -1083,9 +1175,11 @@
             'themeAuto': 'System', 'themeLight': 'Light',
             'themeDark': 'Dark',
             'uiStyleSelect': 'UI Style',
-            'uiStyleDesc': 'Switch the panel visual style (iOS 27 = Liquid Glass)',
+            'uiStyleDesc': 'Switch the panel visual style (Liquid Glass / Neumorphism / Neo-Brutalism / Terminal)',
             'uiStyleNormal': 'Normal',
             'uiStyleMaterial': 'Material', 'uiStyleIos27': 'iOS 27',
+            'updateManualHint': 'Script URL opened: if the browser shows source code, copy it all and paste into a new userscript',
+            'uiStyleNeumorph': 'Neumorphism', 'uiStyleBrutal': 'Neo-Brutalism', 'uiStyleTerminal': 'Terminal',
             'paletteSelect': 'Color Scheme',
             'paletteIndigo': 'Indigo',
             'palettePurple': 'Purple', 'paletteBlue': 'Blue',
@@ -1134,12 +1228,12 @@
             'scanDone': 'Scan complete',
             'filterApplied': 'Filter applied',
             'appTitle': 'Media Sniffer Pro',
-            'tabImg': MS_CONFIG.ICONS.image + 'Images',
+            'tabImg': 'Images',
             'tabVideo': 'Videos',
             'tabAudio': 'Audio',
             'tabM3u8': 'Streams',
             'tabTranslate': 'Translate',
-            'tabCookie': MS_CONFIG.ICONS.cookie + 'Cookies',
+            'tabCookie': 'Cookies',
             'tabStorage': 'Storage',
             'tabSettings': ' Settings',
             'btnSelAll': 'Select All',
@@ -1310,7 +1404,7 @@
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': 'Media Sniffer Pro v1.14 · SelectionManager · Drag Sort · Favorites · Smart Dedup · Groups · Batch Actions · Plugin System',
+            'infoLine1': 'Media Sniffer Pro v1.15 · SelectionManager · Drag Sort · Favorites · Smart Dedup · Groups · Batch Actions · Plugin System',
             'infoLine2': 'Shortcuts: Alt+T Translate · Alt+B Toggle · Esc Close',
             'clickTabScan': 'Click a tab above to start scanning',
             'dlProgress': 'Download Progress',
@@ -1470,9 +1564,11 @@
             'themeAuto': 'システム', 'themeLight': 'ライト',
             'themeDark': 'ダーク',
             'uiStyleSelect': 'UIスタイル',
-            'uiStyleDesc': 'パネルの外観スタイルを切り替え（iOS 27 = Liquid Glass）',
+            'uiStyleDesc': 'パネルの外観スタイルを切り替え（Liquid Glass / ニューモーフィズム / ネオブルータリズム / ターミナル）',
             'uiStyleNormal': '通常',
             'uiStyleMaterial': 'Material', 'uiStyleIos27': 'iOS 27',
+            'updateManualHint': 'スクリプトURLを開きました：ソースが表示された場合は全選択コピーして新規スクリプトに貼り付けてください',
+            'uiStyleNeumorph': 'ニューモーフィズム', 'uiStyleBrutal': 'ネオブルータリズム', 'uiStyleTerminal': 'ターミナル',
             'paletteSelect': '配色スキーム',
             'paletteIndigo': 'インディゴ',
             'palettePurple': 'パープル', 'paletteBlue': 'ブルー',
@@ -1499,12 +1595,12 @@
             'stopped': '停止しました', 'scanning': 'スキャン中...',
             'scanDone': 'スキャン完了', 'filterApplied': 'フィルターを適用しました',
             'appTitle': 'メディアスニッファー Pro',
-            'tabImg': MS_CONFIG.ICONS.image + '画像',
+            'tabImg': '画像',
             'tabVideo': '動画',
             'tabAudio': '音声',
             'tabM3u8': 'ストリーム',
             'tabTranslate': '翻訳',
-            'tabCookie': MS_CONFIG.ICONS.cookie + 'Cookie',
+            'tabCookie': 'Cookie',
             'tabStorage': 'ストレージ',
             'tabSettings': ' 設定',
             'btnSelAll': 'すべて選択',
@@ -1658,7 +1754,7 @@
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': 'メディアスニッファー Pro v1.14 · モジュール設計 · AES-128復号 · 仮想リスト · 進捗可視化 · プラグインシステム',
+            'infoLine1': 'メディアスニッファー Pro v1.15 · モジュール設計 · AES-128復号 · 仮想リスト · 進捗可視化 · プラグインシステム',
             'infoLine2': 'ショートカット: Alt+T 翻訳 · Alt+B パネル切替 · Esc 閉じる',
             'clickTabScan': '上のタブをクリックしてスキャン開始',
             'dlProgress': 'ダウンロード進捗',
@@ -1816,9 +1912,11 @@
             'themeAuto': '시스템', 'themeLight': '라이트',
             'themeDark': '다크',
             'uiStyleSelect': 'UI 스타일',
-            'uiStyleDesc': '패널 시각 스타일 전환(iOS 27 = Liquid Glass)',
+            'uiStyleDesc': '패널 시각 스타일 전환(Liquid Glass / 뉴모피즘 / 네오 브루탈리즘 / 터미널)',
             'uiStyleNormal': '일반',
             'uiStyleMaterial': 'Material', 'uiStyleIos27': 'iOS 27',
+            'updateManualHint': '스크립트 주소를 열었습니다. 소스가 보이면 전체 복사 후 새 스크립트에 붙여넣으세요',
+            'uiStyleNeumorph': '뉴모피즘', 'uiStyleBrutal': '네오 브루탈리즘', 'uiStyleTerminal': '터미널',
             'paletteSelect': '컬러 스킴',
             'paletteIndigo': '인디고',
             'palettePurple': '퍼플', 'paletteBlue': '블루',
@@ -1845,12 +1943,12 @@
             'stopped': '중지됨', 'scanning': '스캔 중...',
             'scanDone': '스캔 완료', 'filterApplied': '필터 적용됨',
             'appTitle': '미디어 스니퍼 Pro',
-            'tabImg': MS_CONFIG.ICONS.image + '이미지',
+            'tabImg': '이미지',
             'tabVideo': '영상',
             'tabAudio': '오디오',
             'tabM3u8': '스트림',
             'tabTranslate': '번역',
-            'tabCookie': MS_CONFIG.ICONS.cookie + '쿠키',
+            'tabCookie': '쿠키',
             'tabStorage': '저장소',
             'tabSettings': ' 설정',
             'btnSelAll': '전체 선택',
@@ -2004,7 +2102,7 @@
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': '미디어 스니퍼 Pro v1.14 · 모듈 구조 · AES-128 복호화 · 가상 리스트 · 진행률 · 플러그인 시스템',
+            'infoLine1': '미디어 스니퍼 Pro v1.15 · 모듈 구조 · AES-128 복호화 · 가상 리스트 · 진행률 · 플러그인 시스템',
             'infoLine2': '단축키: Alt+T 번역 · Alt+B 패널 토글 · Esc 닫기',
             'clickTabScan': '위 탭을 클릭하여 스캔 시작',
             'dlProgress': '다운로드 진행률',
@@ -2115,6 +2213,18 @@
             'pluginSubTabInstalled': '설치됨',
             }
     };
+    // 占位符正则缓存：LANG.get 是渲染热路径（列表里每张卡都要取几条文案），
+    // 原来每次调用都为每个占位符 new 一个 RegExp —— 一屏几十张卡就是上百次编译。
+    // 正则只跟 key 名有关，缓存起来即可（上限 200，防止畸形 key 撑爆内存）。
+    LANG._varReCache = {};
+    LANG._varReCount = 0;
+    LANG._varRe = function (k) {
+        var re = LANG._varReCache[k];
+        if (re) return re;
+        re = new RegExp('\\{' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\}', 'g');
+        if (LANG._varReCount < 200) { LANG._varReCache[k] = re; LANG._varReCount++; }
+        return re;
+    };
     LANG.get = function (key, vars) {
         var lang = (State.config && State.config.uiLang) ? State.config.uiLang : 'zh-CN';
         var t = LANG.strings[lang] || LANG.strings['zh-CN'];
@@ -2122,7 +2232,7 @@
         if (vars) {
             for (var k in vars) {
                 if (Object.prototype.hasOwnProperty.call(vars, k)) {
-                    val = String(val).replace(new RegExp('\\{' + k + '\\}', 'g'), String(vars[k]));
+                    val = String(val).replace(LANG._varRe(k), String(vars[k]));
                 }
             }
         }
@@ -2257,9 +2367,19 @@
         } catch (e) {}
         s = s.replace(/[\x00-\x1F\x7F]/g, '');
         s = s.replace(/[\\\/:\*\?"<>\|]/g, '_');
-        s = s.replace(/^[\s\.]+/, '');
+        // 31：原来把前导点也一起删了 —— '.gitignore' / '.env' 这类合法文件名
+        // 会变成 'gitignore'。只去前导空白；连续点（路径穿越）单独处理。
+        s = s.replace(/^\s+/, '');
+        s = s.replace(/^\.+/, function (dots) { return dots.length > 1 ? '_' : dots; });   // '..' → '_'
         s = s.replace(/[\s\.]+$/, '');
-        if (s.length > 180) s = s.substring(0, 170) + '_' + U.now().toString(36).slice(-4);
+        if (s.length > 180) {
+            // 25：截断后缀原来用毫秒时间戳的末 4 位（36 进制）—— 同一毫秒内批量下载
+            // 多个长文件名会得到完全相同的后缀，重名检测失效 → 互相覆盖。
+            // 掺入随机分量，几十万次调用也几乎不会撞。
+            s = s.substring(0, 165) + '_'
+                + U.now().toString(36).slice(-3)
+                + Math.random().toString(36).slice(2, 5);
+        }
         if (/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\.|$)/i.test(s)) s = '_' + s;
         if (!s.trim()) s = 'file-' + U.now();
         return s;
@@ -2305,7 +2425,9 @@
     SEC._KIND_EXT = {
         png: 'image', jpg: 'image', jpeg: 'image', gif: 'image', webp: 'image', bmp: 'image',
         svg: 'image', avif: 'image', ico: 'image', tif: 'image', tiff: 'image',
-        mp4: 'video', webm: 'video', ogg: 'video', ogv: 'video', mov: 'video', mkv: 'video',
+        // 30：.ogg 绝大多数是音频（Vorbis / Opus），归到 video 会让「音频」标签页
+        // 一条都看不到、而「视频」里全是音频。真正的 Ogg 视频用 .ogv（单独列出）。
+        mp4: 'video', webm: 'video', ogg: 'audio', ogv: 'video', mov: 'video', mkv: 'video',
         avi: 'video', flv: 'video', ts: 'video', m4v: 'video', '3gp': 'video', mpeg: 'video',
         mpg: 'video', rm: 'video', rmvb: 'video', wmv: 'video',
         mp3: 'audio', wav: 'audio', flac: 'audio', aac: 'audio', oga: 'audio', opus: 'audio',
@@ -2326,16 +2448,18 @@
         'bilibili': {
             name: '哔哩哔哩',
             icon: MS_CONFIG.ICONS.stream,
-            match: function(url) {
+            match: function(url, parsed) {
                 try {
-                    var u = new URL(url);
+                    // 优先用 detectVideoSite 传进来的解析结果（一次检测只解析一次 URL）
+                    var u = parsed || new URL(url);
                     var host = u.hostname;
                     return /bilibili\.com$/i.test(host) || /b23\.tv$/i.test(host);
                 } catch(e) { return false; }
             },
-            isVideo: function(url) {
+            isVideo: function(url, parsed) {
                 try {
-                    var u = new URL(url);
+                    // 优先用 detectVideoSite 传进来的解析结果（一次检测只解析一次 URL）
+                    var u = parsed || new URL(url);
                     var path = u.pathname;
                     return /^\/video\/BV/i.test(path) || /^\/video\/av/i.test(path) || /^\/bangumi\/play\//i.test(path);
                 } catch(e) { return false; }
@@ -2344,15 +2468,17 @@
         'douyin': {
             name: '抖音',
             icon: MS_CONFIG.ICONS.audio,
-            match: function(url) {
+            match: function(url, parsed) {
                 try {
-                    var u = new URL(url);
+                    // 优先用 detectVideoSite 传进来的解析结果（一次检测只解析一次 URL）
+                    var u = parsed || new URL(url);
                     return /douyin\.com$/i.test(u.hostname) || /iesdouyin\.com$/i.test(u.hostname);
                 } catch(e) { return false; }
             },
-            isVideo: function(url) {
+            isVideo: function(url, parsed) {
                 try {
-                    var u = new URL(url);
+                    // 优先用 detectVideoSite 传进来的解析结果（一次检测只解析一次 URL）
+                    var u = parsed || new URL(url);
                     return /\/video\//i.test(u.pathname) || /\/note\//i.test(u.pathname);
                 } catch(e) { return false; }
             }
@@ -2360,15 +2486,17 @@
         'kuaishou': {
             name: '快手',
             icon: MS_CONFIG.ICONS.lightning,
-            match: function(url) {
+            match: function(url, parsed) {
                 try {
-                    var u = new URL(url);
+                    // 优先用 detectVideoSite 传进来的解析结果（一次检测只解析一次 URL）
+                    var u = parsed || new URL(url);
                     return /kuaishou\.com$/i.test(u.hostname) || /gifshow\.com$/i.test(u.hostname);
                 } catch(e) { return false; }
             },
-            isVideo: function(url) {
+            isVideo: function(url, parsed) {
                 try {
-                    var u = new URL(url);
+                    // 优先用 detectVideoSite 传进来的解析结果（一次检测只解析一次 URL）
+                    var u = parsed || new URL(url);
                     return /\/short-video\//i.test(u.pathname) || /\/video\//i.test(u.pathname);
                 } catch(e) { return false; }
             }
@@ -2376,15 +2504,17 @@
         'xiaohongshu': {
             name: '小红书',
             icon: MS_CONFIG.ICONS.book,
-            match: function(url) {
+            match: function(url, parsed) {
                 try {
-                    var u = new URL(url);
+                    // 优先用 detectVideoSite 传进来的解析结果（一次检测只解析一次 URL）
+                    var u = parsed || new URL(url);
                     return /xiaohongshu\.com$/i.test(u.hostname) || /xhslink\.com$/i.test(u.hostname);
                 } catch(e) { return false; }
             },
-            isVideo: function(url) {
+            isVideo: function(url, parsed) {
                 try {
-                    var u = new URL(url);
+                    // 优先用 detectVideoSite 传进来的解析结果（一次检测只解析一次 URL）
+                    var u = parsed || new URL(url);
                     var path = u.pathname;
                     return /^\/explore\//i.test(path) || /^\/discovery\/item\//i.test(path) || /\/short-video\//i.test(path) || /\/video\//i.test(path);
                 } catch(e) { return false; }
@@ -2393,15 +2523,17 @@
         'weibo': {
             name: '微博',
             icon: MS_CONFIG.ICONS.globe,
-            match: function(url) {
+            match: function(url, parsed) {
                 try {
-                    var u = new URL(url);
+                    // 优先用 detectVideoSite 传进来的解析结果（一次检测只解析一次 URL）
+                    var u = parsed || new URL(url);
                     return /weibo\.com$/i.test(u.hostname) || /weibo\.cn$/i.test(u.hostname);
                 } catch(e) { return false; }
             },
-            isVideo: function(url) {
+            isVideo: function(url, parsed) {
                 try {
-                    var u = new URL(url);
+                    // 优先用 detectVideoSite 传进来的解析结果（一次检测只解析一次 URL）
+                    var u = parsed || new URL(url);
                     return /\/tv\/show\//i.test(u.pathname) || /\/video\//i.test(u.pathname);
                 } catch(e) { return false; }
             }
@@ -2409,15 +2541,17 @@
         'zhihu': {
             name: '知乎',
             icon: MS_CONFIG.ICONS.bulb,
-            match: function(url) {
+            match: function(url, parsed) {
                 try {
-                    var u = new URL(url);
+                    // 优先用 detectVideoSite 传进来的解析结果（一次检测只解析一次 URL）
+                    var u = parsed || new URL(url);
                     return /zhihu\.com$/i.test(u.hostname);
                 } catch(e) { return false; }
             },
-            isVideo: function(url) {
+            isVideo: function(url, parsed) {
                 try {
-                    var u = new URL(url);
+                    // 优先用 detectVideoSite 传进来的解析结果（一次检测只解析一次 URL）
+                    var u = parsed || new URL(url);
                     var path = u.pathname;
                     return /\/video\//i.test(path) || /\/question\/\d+\/answer\/\d+/i.test(path);
                 } catch(e) { return false; }
@@ -2426,15 +2560,17 @@
         'weixin': {
             name: '微信视频号',
             icon: MS_CONFIG.ICONS.speech,
-            match: function(url) {
+            match: function(url, parsed) {
                 try {
-                    var u = new URL(url);
+                    // 优先用 detectVideoSite 传进来的解析结果（一次检测只解析一次 URL）
+                    var u = parsed || new URL(url);
                     return /channels\.weixin\.qq\.com$/i.test(u.hostname);
                 } catch(e) { return false; }
             },
-            isVideo: function(url) {
+            isVideo: function(url, parsed) {
                 try {
-                    var u = new URL(url);
+                    // 优先用 detectVideoSite 传进来的解析结果（一次检测只解析一次 URL）
+                    var u = parsed || new URL(url);
                     return /\/video\//i.test(u.pathname) || /\/feed\//i.test(u.pathname);
                 } catch(e) { return false; }
             }
@@ -2443,10 +2579,20 @@
 
     SEC.detectVideoSite = function(url) {
         if (!url || !U.isStr(url)) return null;
+        // 每个站点的 match / isVideo 内部都要 new URL(url) —— 8 个站点 × 2 次
+        // = 一次检测最多 16 次 URL 解析（URL 构造在长 URL 上并不便宜，
+        // 而卡片列表里每个视频链接都会调一次）。
+        // 这里统一解析一次，把 {hostname, pathname} 透传给各站点；
+        // 各站点仍优先用传入的解析结果，取不到时自己兜底（保持向后兼容）。
+        var parsed = null;
+        try {
+            var u = new URL(url);
+            parsed = { hostname: u.hostname, pathname: u.pathname, href: u.href };
+        } catch (e) { return null; }          // 连 URL 都解析不了，必然不是受支持的站点
         for (var key in SEC.VIDEO_SITES) {
             if (SEC.VIDEO_SITES.hasOwnProperty(key)) {
                 var site = SEC.VIDEO_SITES[key];
-                if (site.match(url) && site.isVideo(url)) {
+                if (site.match(url, parsed) && site.isVideo(url, parsed)) {
                     return { key: key, name: site.name, icon: site.icon };
                 }
             }
@@ -2538,6 +2684,7 @@
             keyIv: null,               // IV（16字节）
             duration: 0,               // 总时长（秒）
             targetDuration: 0,         // 分片最大时长
+            mediaSequence: 0,          // EXT-X-MEDIA-SEQUENCE：首个分片的真实序号
         };
         if (!content) return result;
         var lines = content.split(/\r?\n/);
@@ -2557,19 +2704,29 @@
                 if (bwMatch) bandwidth = parseInt(bwMatch[1], 10);
                 var resMatch = info.match(/RESOLUTION=(\d+x\d+)/);
                 if (resMatch) resolution = resMatch[1];
-                // 下一行是 URL
-                if (i + 1 < lines.length) {
-                    var nextLine = lines[i + 1].trim();
-                    if (nextLine && nextLine.indexOf('#') !== 0) {
-                        result.streams.push({
-                            url: SEC.absUrl(nextLine, baseUrl),
-                            bandwidth: bandwidth,
-                            resolution: resolution,
-                            label: bandwidth > 5000000 ? '高清' : bandwidth > 2000000 ? '标清' : '低清'
-                        });
-                        i++; // 跳过 URL 行
-                    }
+                // 紧随其后的「下一个非空且非注释行」才是 URI。
+                // 原来只看 i + 1：规范允许两者之间夹空行（合法且常见），
+                // 此时 nextLine 是空串 → 整条流被丢弃（表现为「多码率源一条都认不出」）。
+                for (var si = i + 1; si < lines.length; si++) {
+                    var nextLine = lines[si].trim();
+                    if (!nextLine) continue;                    // 跳过空行
+                    if (nextLine.charAt(0) === '#') break;      // 撞到标签 = 本 tag 没有 URI
+                    result.streams.push({
+                        url: SEC.absUrl(nextLine, baseUrl),
+                        bandwidth: bandwidth,
+                        resolution: resolution,
+                        label: bandwidth > 5000000 ? '高清' : bandwidth > 2000000 ? '标清' : '低清'
+                    });
+                    i = si;                                     // 主循环从 URI 行之后继续
+                    break;
                 }
+            }
+            // #EXT-X-MEDIA-SEQUENCE: 首个分片的媒体序号
+            // AES-128 在无显式 IV 时用「媒体序号」当 IV（RFC 8216 §5.2），
+            // 而它**不一定从 0 开始**（直播回看 / 切片录播常见），必须解析出来。
+            else if (line.indexOf('#EXT-X-MEDIA-SEQUENCE:') === 0) {
+                var seqVal = parseInt(line.substring('#EXT-X-MEDIA-SEQUENCE:'.length), 10);
+                if (!isNaN(seqVal) && seqVal >= 0) result.mediaSequence = seqVal;
             }
             // #EXT-X-KEY: 加密信息
             else if (line.indexOf('#EXT-X-KEY:') === 0) {
@@ -2618,6 +2775,28 @@
     // ===== 统一 HTTP 取数（GM_xmlhttpRequest 优先，失败/超时降级 XHR）=====
     // 原来 fetchKey / fetchSegment / m3u8 拉取各复制了一份"GM + XHR"双路径代码，
     // 且缺少完成标记：GM 超时后 XHR 回包会二次回调。这里统一并加了 done 守卫。
+    // 15：在飞请求登记表。
+    // 原来 _httpGet 里的 XHR / GM handle 都是局部变量，stopDownload 只能置一个
+    // 「已停止」标志 —— 已经发出去的分片请求仍会跑完（几 MB 到几十 MB 的流量白烧，
+    // 移动端在弱网下尤其明显），下载也迟迟不退。
+    // 现在登记每个在飞请求，stopDownload 时逐个 abort。
+    M3U8._inflight = [];
+    M3U8._trackInflight = function (handle) {
+        if (!handle) return;
+        M3U8._inflight.push(handle);
+    };
+    M3U8._untrackInflight = function (handle) {
+        var i = M3U8._inflight.indexOf(handle);
+        if (i >= 0) M3U8._inflight.splice(i, 1);
+    };
+    M3U8._abortInflight = function () {
+        var list = M3U8._inflight.slice();
+        M3U8._inflight.length = 0;
+        for (var i = 0; i < list.length; i++) {
+            try { list[i].abort(); } catch (e) {}
+        }
+    };
+
     M3U8._httpGet = function (url, opts, cb) {
         var o = opts || {};
         var wantBinary = o.binary === true;
@@ -2637,28 +2816,35 @@
                 xhr.open('GET', url, true);
                 if (wantBinary) xhr.responseType = 'arraybuffer';
                 xhr.timeout = timeoutMs;
+                var releaseXhr = function () { M3U8._untrackInflight(xhr); };
                 xhr.onload = function () {
+                    releaseXhr();
                     if (xhr.status >= 200 && xhr.status < 300) {
                         var resp = wantBinary ? xhr.response : xhr.responseText;
                         if (resp) finished(null, wantBinary ? new Uint8Array(resp) : resp);
                         else finished(tag + '响应为空');
                     } else finished(tag + '失败: ' + xhr.status);
                 };
-                xhr.onerror = function () { finished(tag + '网络错误'); };
-                xhr.ontimeout = function () { finished(tag + '超时'); };
+                xhr.onerror = function () { releaseXhr(); finished(tag + '网络错误'); };
+                xhr.ontimeout = function () { releaseXhr(); finished(tag + '超时'); };
+                xhr.onabort = function () { releaseXhr(); finished(tag + '已停止'); };
+                M3U8._trackInflight(xhr);
                 xhr.send();
-            } catch (e) { finished(tag + '异常: ' + e.message); }
+            } catch (e) { M3U8._untrackInflight(xhr); finished(tag + '异常: ' + e.message); }
         };
 
         if (typeof GM_xmlhttpRequest !== 'function') { viaXHR(); return; }
         gmTimer = setTimeout(function () { gmTimer = null; finished(tag + '超时'); }, timeoutMs + 5000);
         try {
-            GM_xmlhttpRequest({
+            var gmHandle = null;
+            var gmRelease = function () { if (gmHandle) M3U8._untrackInflight(gmHandle); };
+            gmHandle = GM_xmlhttpRequest({
                 method: 'GET',
                 url: url,
                 timeout: timeoutMs,
                 responseType: wantBinary ? 'arraybuffer' : undefined,
                 onload: function (resp) {
+                    gmRelease();
                     if (resp.status >= 200 && resp.status < 300) {
                         var resp2 = wantBinary ? resp.response : resp.responseText;
                         if (resp2) finished(null, wantBinary ? new Uint8Array(resp2) : resp2);
@@ -2666,12 +2852,15 @@
                     } else finished(tag + '失败: ' + resp.status);
                 },
                 onerror: function () {
+                    gmRelease();
                     if (done) return;
                     LOG.warn('GM ' + tag + '失败，降级 XHR');
                     viaXHR();
                 },
-                ontimeout: function () { finished(tag + '超时'); }
+                onabort: function () { gmRelease(); finished(tag + '已停止'); },
+                ontimeout: function () { gmRelease(); finished(tag + '超时'); }
             });
+            M3U8._trackInflight(gmHandle);
         } catch (ge) {
             LOG.warn('GM ' + tag + '异常，降级 XHR:', ge.message);
             viaXHR();
@@ -2700,6 +2889,9 @@
         var opts = options || {};
         var concurrency = opts.concurrency || 3;
         var qualityPref = opts.quality || 'auto';
+        // 每次下载各持一个运行令牌：并发多个任务时 stopDownload(token) 只停指定那个。
+        // opts.runToken 允许调用方自己持有 token（例如外壳想在同一处统一停止）。
+        var runToken = opts.runToken || M3U8._newRunToken();
 
         // 获取 m3u8 内容（优先 GM_xmlhttpRequest 支持跨域）
         try {
@@ -2714,6 +2906,7 @@
                 if (parsed.isMaster && parsed.streams.length > 0) {
                     var selectedStream = M3U8.selectStream(parsed.streams, qualityPref);
                     LOG.info('选择码率:', selectedStream.label, selectedStream.resolution);
+                    // 递归下钻子播放列表：沿用同一个 token（一键停止才能连带停掉）
                     M3U8.downloadAndMerge(selectedStream.url, opts, progressCb, doneCb);
                     return;
                 }
@@ -2721,7 +2914,9 @@
                 LOG.info('开始下载分片:', parsed.segments.length, '加密:', parsed.encrypted);
 
                 var proceed = function(key) {
-                    M3U8._downloadSegments(parsed.segments, key, parsed.keyIv, concurrency, progressCb, doneCb);
+                    // 传 runToken（并发隔离）+ mediaSequence（AES-128 无显式 IV 时用它算 IV）
+                    M3U8._downloadSegments(parsed.segments, key, parsed.keyIv, concurrency,
+                        progressCb, doneCb, runToken, parsed.mediaSequence);
                 };
                 if (parsed.encrypted && parsed.keyUrl) {
                     M3U8.fetchKey(parsed.keyUrl, function(key, err) {
@@ -2746,13 +2941,34 @@
     };
 
     // ===== 批量下载分片并合并（支持异步 AES 解密）=====
-    M3U8._downloadSegments = function (segments, key, iv, concurrency, progressCb, doneCb) {
+    // 运行令牌：原来 M3U8._stopped 是**模块级全局标志**，两个任务并发时
+    // 「停止」其中一个会把另一个一起停掉（表现为「另一个下了一半就不动了」）。
+    // 现在每次下载各持一个 token，stopDownload(token) 可指定停哪一个；
+    // 不传参则停全部（保持原有「一键停止」语义）。
+    M3U8._activeRuns = [];
+    M3U8._newRunToken = function () {
+        var token = { stopped: false };
+        M3U8._activeRuns.push(token);
+        return token;
+    };
+
+    M3U8._downloadSegments = function (segments, key, iv, concurrency, progressCb, doneCb, runToken, mediaSequence) {
         var total = segments.length;
         var downloaded = 0;
         var failed = 0;
         var chunks = new Array(total);
         var idx = 0;
         var running = 0;
+        // 内存保护：所有分片都驻留在 chunks 里，一部 2GB 的影片就是 2GB 的
+        // Uint8Array（且解密路径还会再造一份），移动端必被系统杀掉。
+        // 这里设总量阈值，超了就中止并明确告知走「生成下载脚本」用 aria2 之类的
+        // 外部下载器 —— 比浏览器里默默 OOM 要好得多。
+        var MAX_TOTAL_BYTES = 320 * 1024 * 1024;
+        var loadedBytes = 0;
+        var abortedForMemory = false;
+        // 没传 token 时自建一个，保证单独调用本函数也能被 stopDownload 停掉
+        var token = runToken || M3U8._newRunToken();
+        // 兼容旧的 M3U8._stopped 读取点（若有外部代码依赖它）
         M3U8._stopped = false;
         // 性能 13：这里原本还分配了一个长度为 total 的「分片完成标记」数组，
         // 全程没有任何读写（真正的完成计数是同函数内的 idx / running / failed），
@@ -2761,7 +2977,14 @@
         function tryFinish() {
             if (idx < total) return;
             if (running > 0) return;
-            if (M3U8._stopped) return;
+            if (token.stopped) return;
+            if (abortedForMemory) {
+                // 主动放弃已下载的分片，尽快把内存还给系统
+                for (var ai = 0; ai < total; ai++) chunks[ai] = null;
+                doneCb(null, '文件过大（超过 ' + Math.round(MAX_TOTAL_BYTES / 1048576)
+                    + 'MB），浏览器内下载可能耗尽内存。请改用「生成下载脚本」用 aria2 / curl 下载。');
+                return;
+            }
             if (failed > 0) { doneCb(null, '下载失败 ' + failed + ' 个分片'); return; }
             var totalLen = 0;
             for (var i = 0; i < total; i++) if (chunks[i]) totalLen += chunks[i].length;
@@ -2779,45 +3002,61 @@
 
         function makeIv(segIndex) {
             if (iv && iv.length === 16) return iv;
-            // HLS 默认：使用分片序号（Media Sequence Number）作为 IV
+            // 无显式 IV 时，RFC 8216 §5.2 规定用**媒体序号**（Media Sequence Number）
+            // 作为 IV —— 即 mediaSequence + 分片下标，而不是分片下标本身。
+            // 原来直接用下标近似：源站 media-sequence ≠ 0 时（直播回看 / 切片录播
+            // 很常见）每个分片的 IV 都错位 → AES-128 解密全盘失败，
+            // 用户看到的是一堆解不开的乱码分片。
+            var seqNum = (mediaSequence || 0) + segIndex;
             var out = new Uint8Array(16);
-            var seqNum = segIndex; // 使用数组下标近似
-            var str = (seqNum || 0).toString(16).padStart(32, '0');
+            var str = seqNum.toString(16).padStart(32, '0');
             for (var i = 0; i < 16; i++) out[i] = parseInt(str.substr(i * 2, 2), 16);
             return out;
         }
 
         function worker() {
-            if (M3U8._stopped || idx >= total) { tryFinish(); return; }
+            if (abortedForMemory) { tryFinish(); return; }
+            if (token.stopped || idx >= total) { tryFinish(); return; }
             var curIdx = idx++;
             running++;
             M3U8.fetchSegment(segments[curIdx].url, function (data, err) {
                 if (err) {
                     failed++; running--;
                     LOG.warn('分片下载失败:', curIdx, err);
-                    if (!M3U8._stopped) worker(); else tryFinish();
+                    if (!token.stopped) worker(); else tryFinish();
                     return;
                 }
                 // 如果加密，使用异步 AES-128-CBC 解密
+                // 累计字节数：超阈值立即停止调度（在途分片下载完就不再开新的）
+                loadedBytes += (data && data.length) ? data.length : 0;
+                if (loadedBytes > MAX_TOTAL_BYTES) {
+                    if (!abortedForMemory) {
+                        abortedForMemory = true;
+                        LOG.warn('分片总量超过阈值，中止浏览器内下载:', Math.round(loadedBytes / 1048576), 'MB');
+                    }
+                    running--;
+                    tryFinish();
+                    return;
+                }
                 if (key) {
                     var segIv = makeIv(curIdx);
                     AES.decryptCBC(data, key, segIv, function (dec, derr) {
                         if (derr) {
                             failed++; running--;
                             LOG.warn('分片解密失败:', curIdx, derr);
-                            if (!M3U8._stopped) worker(); else tryFinish();
+                            if (!token.stopped) worker(); else tryFinish();
                             return;
                         }
                         chunks[curIdx] = dec;
                         downloaded++; running--;
                         if (progressCb) progressCb(downloaded, total, failed);
-                        if (!M3U8._stopped) worker(); else tryFinish();
+                        if (!token.stopped) worker(); else tryFinish();
                     });
                 } else {
                     chunks[curIdx] = data;
                     downloaded++; running--;
                     if (progressCb) progressCb(downloaded, total, failed);
-                    if (!M3U8._stopped) worker(); else tryFinish();
+                    if (!token.stopped) worker(); else tryFinish();
                 }
             });
         }
@@ -2826,8 +3065,16 @@
     };
 
     // ===== 停止下载 =====
-    M3U8.stopDownload = function () {
+    // stopDownload(token)：指定 token 则只停那一个任务；不传则停全部。
+    // 兼容旧调用（无参）= 一键停止所有在跑的 m3u8 下载。
+    M3U8.stopDownload = function (token) {
         M3U8._stopped = true;
+        if (token) { token.stopped = true; }
+        else {
+            for (var i = 0; i < M3U8._activeRuns.length; i++) M3U8._activeRuns[i].stopped = true;
+        }
+        // 15：把在飞的分片请求真正掐掉（否则它们会继续把流量跑完）
+        M3U8._abortInflight();
     };
 
         // ===== 生成下载脚本（跨域兜底）=====
@@ -2867,7 +3114,7 @@
     // =========================================================================
     var DEFAULT_CONFIG = {
         theme: 'auto',
-        uiStyle: 'normal',         // 界面风格: normal / material / ios27（iOS 27 液态玻璃）
+        uiStyle: 'normal',         // 界面风格: normal / material / ios27 / neumorph / brutal / terminal
         palette: 'indigo',         // 配色方案: indigo/purple/blue/green/orange/rose 或 custom_xxx
         customPalettes: [],        // 自定义配色: [{id, name, light:{primary,primary2}, dark:{primary,primary2}}]
         uiLang: 'zh-CN',           // 界面语言: zh-CN / en-US / ja-JP / ko-KR
@@ -2955,7 +3202,7 @@
         downloadProgress: null,  // {total, done, failed, speed, eta}
         downloadHistory: [],     // {url, name, time, success}
         // P1-2: 元信息缓存
-        metaCache: {},           // url -> {size, width, height, duration, type}
+        metaCache: {},           // url -> {size, width, height, duration, type}（上限见 State._metaCacheLru）
         streamMap: {},           // streamId -> videoElement（MediaStream 录制用）
         // P2-4: 多标签页同步
         syncChannel: null,
@@ -2963,6 +3210,17 @@
 
     // 性能 3：翻译结果缓存上限（字符串为主，400 条足够覆盖一页的按钮文案）
     State._translateCacheLru = U.lru(State.translateCache, 400);
+    // 元信息缓存（尺寸 / 时长）是几个缓存里唯一漏掉上限的一个 —— SPA 长会话下
+    // 每看过一个资源就多一条，只涨不跌。同样走上限管理。
+    State._metaCacheLru = U.lru(State.metaCache, 2000);
+    // 写元信息的唯一入口：保证每次落笔都会刷新 LRU 顺序并触发上限裁剪。
+    // 读路径仍走 State.metaCache[url] 直接下标（零额外开销）。
+    State.metaPut = function (url, key, val) {
+        if (!url) return;
+        if (!State.metaCache[url]) State.metaCache[url] = {};
+        State.metaCache[url][key] = val;
+        State._metaCacheLru.set(url, State.metaCache[url]);
+    };
 
     // ===== 配置校验 =====
     State.validateConfig = function (cfg) {
@@ -2970,7 +3228,7 @@
         if (!cfg) return ['配置为空'];
         // 检查必要字段类型
         if (typeof cfg.theme !== 'string' || !['auto','light','dark'].includes(cfg.theme)) errors.push('theme 必须是 auto/light/dark');
-        if (typeof cfg.uiStyle !== 'string' || !['normal','material','ios27'].includes(cfg.uiStyle)) errors.push('uiStyle 必须是 normal/material/ios27');
+        if (typeof cfg.uiStyle !== 'string' || !MS_CONFIG.UI_STYLE_IDS.includes(cfg.uiStyle)) errors.push('uiStyle 必须是 ' + MS_CONFIG.UI_STYLE_IDS.join('/'));
         if (typeof cfg.nameTpl !== 'string' || cfg.nameTpl.length > 200) errors.push('nameTpl 必须是字符串且不超过200字符');
         if (!U.isArr(cfg.whitelist)) errors.push('whitelist 必须是数组');
         if (!U.isArr(cfg.blacklist)) errors.push('blacklist 必须是数组');
@@ -3016,6 +3274,15 @@
         try {
             if (typeof GM_getValue === 'function') {
                 var raw = GM_getValue('ms_config_v8', null);
+                // 写的是对象（GM_setValue 直接存），但**读取端不能只认对象**：
+                // 部分脚本管理器（ScriptCat / 旧版暴力猴 / 手工改过存储）会把
+                // 值序列化成 JSON 字符串存回来。原来 `typeof raw === 'object'`
+                // 直接不成立 → 整段加载被静默跳过 → 配置回默认值，
+                // 用户表现为「设置莫名其妙全没了」。
+                if (raw && typeof raw === 'string') {
+                    var parsedCfg = U.safeJson(raw, null);
+                    if (parsedCfg && typeof parsedCfg === 'object') raw = parsedCfg;
+                }
                 if (raw && typeof raw === 'object') {
                     // 兼容 v1.0.8 旧配置：'apple'（苹果玻璃）已升级为 iOS 27 液态玻璃
                     if (raw.uiStyle === 'apple') raw.uiStyle = 'ios27';
@@ -3070,18 +3337,33 @@
     // ===== 资源历史记录 =====
     State._historyKey = '_ms_history';
     State._historyLimit = 200;
+    // 真源是 Map（url + kind → 记录），而不是数组。
+    // 原来 addHistory 对每条新记录都要线性扫一遍历史（上限 200 条），
+    // 批量入库 N 条就是 O(N × 200) —— 一次勾选上百个资源时是明显的主线程开销。
+    // Map 的插入顺序天然就是「最近在前」，所以：
+    //   · 查重    O(1)
+    //   · 提到最近 O(1)（delete + set）
+    //   · 裁剪    O(1)（删最早的键）
+    State._historyMap = null;
     State._ensureHistory = function () {
-        if (State._history) return;
-        State._history = [];
+        if (State._historyMap) return;
+        State._historyMap = new Map();
         try {
             // FIX-12: 兼容 GM_getValue 返回字符串 / 原生数组 / 包装对象三种形态
-            State._history = U.gmGetArray(State._historyKey, []);
+            var arr = U.gmGetArray(State._historyKey, []);
+            // 存储里的数组是「最新在前」，而 Map 需要「最早在前」（这样
+            // getHistory() 反向遍历后仍是「最新在前」，与旧行为一致）。
+            // 所以从数组末尾往前 set。
+            for (var i = arr.length - 1; i >= 0; i--) {
+                var r = arr[i];
+                if (r && r.url) State._historyMap.set(r.url + '\u0000' + (r.kind || ''), r);
+            }
         } catch (e) { LOG.warn('load history failed', e); }
     };
     State._saveHistory = function () {
         try {
-            if (typeof GM_setValue === 'function' && State._history) {
-                GM_setValue(State._historyKey, JSON.stringify(State._history));
+            if (typeof GM_setValue === 'function' && State._historyMap) {
+                GM_setValue(State._historyKey, JSON.stringify(State.getHistory()));
             }
         } catch (e) { LOG.warn('save history failed', e); }
     };
@@ -3089,17 +3371,16 @@
         if (!State.config.enableHistory) return;
         if (!items || items.length === 0) return;
         State._ensureHistory();
+        var map = State._historyMap;
         var changed = false;
         for (var i = 0; i < items.length; i++) {
             var it = items[i];
             if (!it || !it.url) continue;
             var kind = it.type || it.kind || SEC.guessKind(it.url) || 'video';
-            var existing = -1;
-            for (var j = State._history.length - 1; j >= 0; j--) {
-                if (State._history[j].url === it.url && State._history[j].kind === kind) { existing = j; break; }
-            }
-            if (existing >= 0) State._history.splice(existing, 1);
-            State._history.unshift({
+            var key = it.url + '\u0000' + kind;
+            // 先删再加 = 挪到「最近」端（Map 保持插入顺序）
+            if (map.has(key)) map.delete(key);
+            map.set(key, {
                 url: it.url,
                 kind: kind,
                 title: it.title || '',
@@ -3110,11 +3391,21 @@
             changed = true;
         }
         if (!changed) return;
-        while (State._history.length > State._historyLimit) State._history.pop();
+        // 超限时从最早的开始丢（Map 的 keys() 就是插入顺序）
+        while (map.size > State._historyLimit) {
+            map.delete(map.keys().next().value);
+        }
         State._saveHistory();
     };
-    State.getHistory = function () { State._ensureHistory(); return State._history.slice(); };
-    State.clearHistory = function () { State._history = []; State._saveHistory(); };
+    State.getHistory = function () {
+        State._ensureHistory();
+        // 对外仍返回数组（保持既有调用约定）；顺序 = 最近在前
+        var out = [];
+        State._historyMap.forEach(function (v) { out.push(v); });
+        out.reverse();
+        return out;
+    };
+    State.clearHistory = function () { State._historyMap = new Map(); State._saveHistory(); };
 
     // FIX-06: 系统主题监听只安装一次。
     // _computeTheme 会被 getTheme() 频繁调用（UI.colors() 每次都调），
@@ -3353,8 +3644,13 @@
             var base = color || MS_CONFIG.COLORS.success;
             var glass = false, dark = false;
             try {
+                // 只有 ios27 走玻璃态轻提示；新拟物 / 粗野主义 / 终端 走普通分支，
+                // 再由各风格的 CSS 换形状（见 UI._build*Css 里的 ._ms_toast 规则）。
                 glass = !!(typeof State !== 'undefined' && State && State.config && State.config.uiStyle === 'ios27');
-                dark = !!(typeof State !== 'undefined' && State && typeof State.getTheme === 'function' && State.getTheme() === 'dark');
+                // dark 用「有效明暗」：终端复古强制暗底，玻璃态以外的分支也拿它算遮罩深度
+                dark = !!(typeof UI !== 'undefined' && UI && typeof UI.isEffectivelyDark === 'function'
+                    ? UI.isEffectivelyDark()
+                    : (typeof State !== 'undefined' && State && typeof State.getTheme === 'function' && State.getTheme() === 'dark'));
             } catch (e0) {}
 
             var t = document.createElement('div');
@@ -3507,8 +3803,19 @@
         var retryTimes = (options && options.retryTimes) || VideoResolver._retryTimes;
         var attempt = 0;
         var resolver = null;
-        var timedOut = false;
         var resolveTimeout = null;
+        // 统一收口：原来 handleAttemptError 的重试链与「总超时」定时器是两条独立路径，
+        // 两边都可能调用 cb —— 用户在弹窗里看到的是「先报错、再突然又出结果」，
+        // 而调用方拿着同一个 cb 做了两次收尾（重复弹 toast / 重复写入）。
+        // 这里用一个 settled 标志把**所有** cb 出口收成一处。
+        // （原 timedOut 变量只被赋值、从未被读取，是纯死变量，一并去掉。）
+        var settled = false;
+        var finish = function (data, err) {
+            if (settled) return;
+            settled = true;
+            if (resolveTimeout) { clearTimeout(resolveTimeout); resolveTimeout = null; }
+            cb(data, err);
+        };
         if (site.key === 'bilibili') {
             resolver = VideoResolver._resolveBilibili;
         } else if (site.key === 'douyin') {
@@ -3541,29 +3848,27 @@
                 clearTimeout(attemptTimeout);
                 if (attemptTimedOut) return;
                 if (data) {
-                    clearTimeout(resolveTimeout);
                     VideoResolver._cacheLru.set(url, data);
-                    cb(data, null);
+                    finish(data, null);
                 } else {
                     handleAttemptError(err);
                 }
             }, currentAttempt);
         };
         var handleAttemptError = function(err) {
+            if (settled) return;              // 已收口（例如总超时先到）就不再排重试
             attempt++;
             if (attempt < retryTimes) {
                 var delay = 500 * Math.pow(2, attempt - 1);
                 setTimeout(tryResolve, delay);
             } else {
-                clearTimeout(resolveTimeout);
                 VideoResolver._cacheError(url, err || '解析失败');
-                cb(null, err || '解析失败');
+                finish(null, err || '解析失败');
             }
         };
-        resolveTimeout = setTimeout(function() {
-            timedOut = true;
+        resolveTimeout = setTimeout(function () {
             VideoResolver._cacheError(url, '解析总超时');
-            cb(null, '解析总超时');
+            finish(null, '解析总超时');
         }, VideoResolver._timeout * retryTimes);
         tryResolve();
     };
@@ -4858,7 +5163,21 @@ VideoResolver.fillFromHtml(result, html);
             dlBtn.style.cssText = 'flex:1;padding:12px 16px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:14px;font-weight:600;cursor:pointer;';
             dlBtn.onclick = function () {
                 try {
-                    window.open(MS_CONFIG.UPDATE_URL, '_blank');
+                    // 直接用 window.open 打开 .user.js 时，浏览器常常按**纯文本**显示
+                    // 那个文件（而不是交给脚本管理器安装），用户看到一屏代码会以为
+                    // 「更新失败」。优先用 GM_download 让油猴接管下载，
+                    // 拿不到时再退回新标签页（并提示需要点「安装」）。
+                    var ok = false;
+                    if (typeof GM_download === 'function') {
+                        try {
+                            GM_download({ url: MS_CONFIG.UPDATE_URL, name: 'media-sniffer.user.js' });
+                            ok = true;
+                        } catch (eDl) { ok = false; }
+                    }
+                    if (!ok) {
+                        window.open(MS_CONFIG.UPDATE_URL, '_blank');
+                        try { toast(LANG.t('updateManualHint') || '已打开脚本地址：浏览器若显示源码，请复制全文到脚本管理器新建安装', '#f59e0b'); } catch (eT) {}
+                    }
                     overlay.remove();
                 } catch (e) {}
             };
@@ -5088,7 +5407,8 @@ VideoResolver.fillFromHtml(result, html);
             for (var i = 0; i < qualityList.length; i++) {
                 var q = qualityList[i];
                 var selected = (q.url === currentVideoUrl || (data.videoUrls && data.videoUrls[i] === currentVideoUrl)) ? 'selected' : '';
-                options += '<option value="' + i + '" ' + selected + '>' + (q.label || ('清晰度 ' + i)) + '</option>';
+                // label 可能来自远端播放列表（清晰度名），必须转义
+                options += '<option value="' + i + '" ' + selected + '>' + SEC.escapeHtml(q.label || ('清晰度 ' + i)) + '</option>';
             }
             return options;
         }
@@ -5107,10 +5427,11 @@ VideoResolver.fillFromHtml(result, html);
         function buildUploaderHtml() {
             var parts = [];
             if (ownerFace) {
-                parts.push('<img src="' + ownerFace + '" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">');
+                // ownerFace 来自页面 og:image / 接口返回，含引号会截断 src 属性
+                parts.push('<img src="' + SEC.escapeAttr(ownerFace) + '" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">');
             }
             if (owner) {
-                parts.push('<span style="font-size:13px;color:' + c.txt + ';font-weight:500;">' + owner + '</span>');
+                parts.push('<span style="font-size:13px;color:' + c.txt + ';font-weight:500;">' + SEC.escapeHtml(owner) + '</span>');
             }
             if (data.pubdate) {
                 parts.push('<span style="font-size:11px;color:' + c.sub + ';"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ' + _formatPubDate(data.pubdate) + '</span>');
@@ -5122,7 +5443,7 @@ VideoResolver.fillFromHtml(result, html);
         function buildVideoInfoHtml() {
             var rows = [];
             if (data.bvid) {
-                rows.push('<span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg> BV号: <code style="background:' + c.bg + ';padding:2px 6px;border-radius:4px;">' + data.bvid + '</code></span>');
+                rows.push('<span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg> BV号: <code style="background:' + c.bg + ';padding:2px 6px;border-radius:4px;">' + SEC.escapeHtml(data.bvid) + '</code></span>');
             }
             if (data.duration) {
                 rows.push('<span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 时长: ' + Math.floor(data.duration / 60) + ':' + String(data.duration % 60).padStart(2, '0') + '</span>');
@@ -5163,10 +5484,11 @@ VideoResolver.fillFromHtml(result, html);
 
         function buildErrorHtml() {
             if (!resolveError) return '';
+            // resolveError 是解析失败的原始信息（含远端返回的文本），必须转义
             return '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:16px;margin-bottom:16px;text-align:center;">' +
                 '<div style="font-size:32px;margin-bottom:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>' +
                 '<div style="font-size:14px;color:#dc2626;font-weight:500;margin-bottom:4px;">解析失败</div>' +
-                '<div style="font-size:12px;color:#ef4444;margin-bottom:12px;">' + resolveError + '</div>' +
+                '<div style="font-size:12px;color:#ef4444;margin-bottom:12px;">' + SEC.escapeHtml(resolveError) + '</div>' +
                 (originalUrl ? '<button id="_ms_vlp_retry" style="padding:8px 20px;border:none;border-radius:8px;background:#ef4444;color:#fff;font-size:13px;font-weight:500;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg> 重试</button>' : '') +
             '</div>';
         }
@@ -5180,7 +5502,7 @@ VideoResolver.fillFromHtml(result, html);
                 '<div style="display:flex;align-items:center;gap:8px;font-size:' + (isMobile ? '15px' : '16px') + ';font-weight:600;color:' + c.txt + ';">' +
                     '<span style="font-size:20px;">' + siteIcon + '</span>' +
                     '<span>视频预览</span>' +
-                    (siteName ? '<span style="font-size:12px;color:' + c.sub + ';">— ' + siteName + '</span>' : '') +
+                    (siteName ? '<span style="font-size:12px;color:' + c.sub + ';">— ' + SEC.escapeHtml(siteName) + '</span>' : '') +
                 '</div>' +
                 '<button id="_ms_vlp_close" style="width:40px;height:40px;border:none;border-radius:10px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;">×</button>' +
             '</div>' +
@@ -5191,13 +5513,13 @@ VideoResolver.fillFromHtml(result, html);
 
                 // 标题区域
                 '<div style="margin-bottom:12px;">' +
-                    '<h2 style="margin:0 0 8px;font-size:' + (isMobile ? '16px' : '18px') + ';color:' + c.txt + ';line-height:1.4;">' + title + '</h2>' +
+                    '<h2 style="margin:0 0 8px;font-size:' + (isMobile ? '16px' : '18px') + ';color:' + c.txt + ';line-height:1.4;">' + SEC.escapeHtml(title) + '</h2>' +
                     buildStatsHtml() +
                 '</div>' +
 
                 // 视频播放器区域
                 '<div id="_ms_vlp_player" style="background:#000;border-radius:12px;overflow:hidden;margin-bottom:12px;position:relative;touch-action:manipulation;">' +
-                    (cover ? '<img id="_ms_vlp_cover" src="' + cover + '" style="width:100%;display:block;max-height:360px;object-fit:contain;">' : '') +
+                    (cover ? '<img id="_ms_vlp_cover" src="' + SEC.escapeAttr(cover) + '" style="width:100%;display:block;max-height:360px;object-fit:contain;">' : '') +
                     '<div id="_ms_vlp_loading" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:14px;">加载中...</div>' +
                     '<div id="_ms_vlp_video_error" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);flex-direction:column;align-items:center;justify-content:center;color:#fff;padding:20px;text-align:center;">' +
                         '<div style="font-size:32px;margin-bottom:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>' +
@@ -5248,8 +5570,8 @@ VideoResolver.fillFromHtml(result, html);
                 // 链接显示
                 '<div style="border-top:1px solid ' + c.border + ';padding-top:16px;">' +
                     '<div style="font-size:12px;color:' + c.sub + ';margin-bottom:6px;">视频地址</div>' +
-                    '<div id="_ms_vlp_video_url_text" style="background:' + c.bg2 + ';border-radius:8px;padding:10px;font-size:11px;color:' + c.txt + ';word-break:break-all;max-height:80px;overflow-y:auto;font-family:monospace;">' + (videoUrl || '解析中...') + '</div>' +
-                    (audioUrl ? '<div style="margin-top:8px;"><div style="font-size:12px;color:' + c.sub + ';margin-bottom:6px;">音频地址（DASH格式）</div><div style="background:' + c.bg2 + ';border-radius:8px;padding:10px;font-size:11px;color:' + c.txt + ';word-break:break-all;max-height:60px;overflow-y:auto;font-family:monospace;">' + audioUrl + '</div></div>' : '') +
+                    '<div id="_ms_vlp_video_url_text" style="background:' + c.bg2 + ';border-radius:8px;padding:10px;font-size:11px;color:' + c.txt + ';word-break:break-all;max-height:80px;overflow-y:auto;font-family:monospace;">' + SEC.escapeHtml(videoUrl || '解析中...') + '</div>' +
+                    (audioUrl ? '<div style="margin-top:8px;"><div style="font-size:12px;color:' + c.sub + ';margin-bottom:6px;">音频地址（DASH格式）</div><div style="background:' + c.bg2 + ';border-radius:8px;padding:10px;font-size:11px;color:' + c.txt + ';word-break:break-all;max-height:60px;overflow-y:auto;font-family:monospace;">' + SEC.escapeHtml(audioUrl) + '</div></div>' : '') +
                 '</div>' +
             '</div>';
 
@@ -5362,13 +5684,30 @@ VideoResolver.fillFromHtml(result, html);
 
             var vid = playerDiv.querySelector('video');
             if (vid) {
-                var currentTime = vid.currentTime;
+                // 原来读了 currentTime 却从未回写 —— 换个画质就把进度清零，
+                // 用户得从头拖回去。这里在元数据就绪后把进度恢复（并继续播放）。
+                var resumeAt = vid.currentTime || 0;
                 var wasPlaying = !vid.paused;
                 vid.src = newUrl;
+                var onMeta = function () {
+                    vid.removeEventListener('loadedmetadata', onMeta);
+                    try {
+                        if (resumeAt > 0 && isFinite(vid.duration) && resumeAt < vid.duration) {
+                            vid.currentTime = resumeAt;
+                        }
+                    } catch (eSeek) {}
+                    if (wasPlaying) vid.play().catch(function () {});
+                };
+                vid.addEventListener('loadedmetadata', onMeta);
                 vid.load();
-                if (wasPlaying) {
-                    vid.play().catch(function(){});
-                }
+                // 兜底：某些容器 loadedmetadata 不会再来（例如直接命中缓存失败），
+                // 2 秒后无论如何都尝试恢复一次
+                setTimeout(function () {
+                    try { vid.removeEventListener('loadedmetadata', onMeta); } catch (eR) {}
+                    try {
+                        if (wasPlaying && vid.paused) vid.play().catch(function () {});
+                    } catch (eP) {}
+                }, 2000);
             }
         }
 
@@ -5666,8 +6005,7 @@ VideoResolver.fillFromHtml(result, html);
             if (done) return;
             done = true;
             if (!err) {
-                if (!State.metaCache[url]) State.metaCache[url] = {};
-                State.metaCache[url].size = size;
+                State.metaPut(url, 'size', size);
                 cb(size > 0 ? size : null, null);
             } else cb(null, err);
         }
@@ -5719,9 +6057,8 @@ VideoResolver.fillFromHtml(result, html);
         try {
             var img = new Image();
             img.onload = function () {
-                if (!State.metaCache[url]) State.metaCache[url] = {};
-                State.metaCache[url].width = img.naturalWidth || img.width;
-                State.metaCache[url].height = img.naturalHeight || img.height;
+                State.metaPut(url, 'width', img.naturalWidth || img.width);
+                State.metaPut(url, 'height', img.naturalHeight || img.height);
                 cb(img.naturalWidth || img.width, img.naturalHeight || img.height, null);
             };
             img.onerror = function () { cb(null, null, '加载失败'); };
@@ -5730,14 +6067,50 @@ VideoResolver.fillFromHtml(result, html);
     };
 
     // 获取视频时长（通过加载 video 元素）
+    // 批量筛选（Meta.batchFetch，并发 5）会把这里排成几十上百个请求。
+    // 每个都要新建 <video> 并让浏览器去探元数据 —— 同时开太多会明显拖慢主进程，
+    // 移动端还会因为原生解码器数量限制而大面积失败。
+    // 这里加一个很小的串行队列：同时最多 2 个在探，其余排队等。
+    // （说明：浏览器探 metadata 本身就是发 Range 请求取头部，无法再省流量；
+    //   真正的问题是并发数，这里就是从并发下手。）
+    Meta._durationQueue = [];
+    Meta._durationRunning = 0;
+    Meta._DURATION_CONCURRENCY = 2;
+    Meta._runDurationQueue = function () {
+        while (Meta._durationRunning < Meta._DURATION_CONCURRENCY && Meta._durationQueue.length > 0) {
+            var job = Meta._durationQueue.shift();
+            Meta._durationRunning++;
+            job(function () {
+                Meta._durationRunning--;
+                Meta._runDurationQueue();
+            });
+        }
+    };
+
     Meta.fetchVideoDuration = function (url, cb) {
         if (State.metaCache[url] && State.metaCache[url].duration) { cb(State.metaCache[url].duration, null); return; }
+        // 同一个 url 正在探时直接复用结果，不重复入队
+        if (!Meta._durationPending) Meta._durationPending = {};
+        if (Meta._durationPending[url]) { Meta._durationPending[url].push(cb); return; }
+        Meta._durationPending[url] = [cb];
+        Meta._durationQueue.push(function (release) {
+            var waiters = Meta._durationPending[url] || [];
+            delete Meta._durationPending[url];
+            var releaseAll = function (dur, err) {
+                for (var wi = 0; wi < waiters.length; wi++) { try { waiters[wi](dur, err); } catch (eW) {} }
+                release();
+            };
+            Meta._fetchVideoDurationNow(url, releaseAll);
+        });
+        Meta._runDurationQueue();
+    };
+
+    Meta._fetchVideoDurationNow = function (url, cb) {
         try {
             var v = document.createElement('video');
             v.preload = 'metadata';
             v.onloadedmetadata = function () {
-                if (!State.metaCache[url]) State.metaCache[url] = {};
-                State.metaCache[url].duration = v.duration;
+                State.metaPut(url, 'duration', v.duration);
                 cb(v.duration, null);
                 v.src = '';
             };
@@ -5753,8 +6126,7 @@ VideoResolver.fillFromHtml(result, html);
             var a = document.createElement('audio');
             a.preload = 'metadata';
             a.onloadedmetadata = function () {
-                if (!State.metaCache[url]) State.metaCache[url] = {};
-                State.metaCache[url].duration = a.duration;
+                State.metaPut(url, 'duration', a.duration);
                 cb(a.duration, null);
                 a.src = '';
             };
@@ -5769,10 +6141,21 @@ VideoResolver.fillFromHtml(result, html);
         var done = 0;
         var results = {};
         var concurrency = 5;
+        // 空输入直接返回：原来 total === 0 时，5 个 worker 全都命中
+        // `idx >= total` 且 `done >= total`（0 >= 0 恒真）→ doneCb 被连调 5 次，
+        // 调用方（批量筛选）会重复收尾 5 遍：弹 5 条 toast、写 5 次状态。
+        if (total === 0) { if (doneCb) doneCb(results); return; }
+        // 收口：即使将来出现其它「提前终止」分支，也保证只回调一次
+        var finished = false;
+        function settle() {
+            if (finished) return;
+            finished = true;
+            if (doneCb) doneCb(results);
+        }
 
         function worker(idx) {
             if (idx >= total) {
-                if (done >= total) doneCb(results);
+                if (done >= total) settle();
                 return;
             }
             var url = urls[idx];
@@ -5804,31 +6187,10 @@ VideoResolver.fillFromHtml(result, html);
     };
 
     // 高级筛选（P1-3）
-    Meta.filterResources = function (urls, kind) {
-        var cfg = State.config;
-        var filtered = [];
-        for (var i = 0; i < urls.length; i++) {
-            var url = urls[i];
-            var meta = State.metaCache[url] || {};
-            var pass = true;
-
-            if (kind === 'image') {
-                // 图片大小筛选
-                if (cfg.minImageSize > 0 && meta.size && meta.size < cfg.minImageSize) pass = false;
-                if (cfg.minImageWidth > 0 && meta.width && meta.width < cfg.minImageWidth) pass = false;
-                if (cfg.minImageHeight > 0 && meta.height && meta.height < cfg.minImageHeight) pass = false;
-            } else if (kind === 'video') {
-                if (cfg.minVideoDuration > 0 && meta.duration && meta.duration < cfg.minVideoDuration) pass = false;
-                if (cfg.maxVideoDuration > 0 && meta.duration && meta.duration > cfg.maxVideoDuration) pass = false;
-            } else if (kind === 'audio') {
-                if (cfg.minAudioDuration > 0 && meta.duration && meta.duration < cfg.minAudioDuration) pass = false;
-            }
-
-            if (pass) filtered.push(url);
-        }
-        LOG.info('筛选结果:', kind, '原始', urls.length, '过滤后', filtered.length);
-        return filtered;
-    };
+    // 32：这里原本还有一个 Meta.filterResources（按尺寸/时长过滤 URL 列表）。
+    // 全篇搜不到任何调用方 —— 实际筛选逻辑在 UI.renderMedia 里内联实现，
+    // 那份副本既不会被调用，也会在配置字段变动时「看着像是生效了」误导后续维护。
+    // 已删除，保留这条说明便于对照历史。
 
         return Meta;
     })();
@@ -5916,7 +6278,11 @@ VideoResolver.fillFromHtml(result, html);
         var t = TranslateEngine.LANG_MAP[toLang || State.config.translateTo] || 'zh-CN';
 
         // 缓存检查
-        var cacheKey = engine.key + '|' + f + '|' + t + '|' + text.substring(0, 100);
+        // 缓存键原来只取文本前 100 个字符：只要两段文本前 100 字相同（长文里
+        // 极常见 —— 同一篇文章的不同段落、带相同前缀的标题），就会互相命中，
+        // 用户拿到的是**另一段文本的译文**。这里补上长度 + 一个轻量哈希，
+        // 让不同的长文本几乎不可能撞键。
+        var cacheKey = engine.key + '|' + f + '|' + t + '|' + text.length + '|' + U.hashStr(text);
         if (State.translateCache[cacheKey]) {
             LOG.debug('翻译缓存命中:', cacheKey);
             if (cb) cb(State.translateCache[cacheKey], null);
@@ -5954,17 +6320,20 @@ VideoResolver.fillFromHtml(result, html);
     // ===== 分段翻译 =====
     TranslateEngine._translateChunks = function (engine, text, from, to, cb, baseCacheKey) {
         var maxChunk = engine.maxChars - 50; // 留出安全余量
+        // 用「捕获组」切分，分隔符会一并留在数组的奇数位上 —— 这样拼回去能恢复原标点。
+        // 原来 split 不带捕获组，句号/感叹号/换行全被吃掉，最后只能用 '\n' 硬拼，
+        // 结果译文要么黏成一片、要么每句都被换行割裂。
+        var pieces = text.split(/([。！？!?\n]+)/);
         var chunks = [];
-        var sentences = text.split(/[。！？.!?!\n]+/);
         var current = '';
-
-        for (var i = 0; i < sentences.length; i++) {
-            var s = sentences[i];
-            if ((current + s).length > maxChunk) {
+        for (var i = 0; i < pieces.length; i++) {
+            var piece = pieces[i];
+            if (!piece) continue;
+            if ((current + piece).length > maxChunk) {
                 if (current.trim()) chunks.push(current.trim());
-                current = s;
+                current = piece;
             } else {
-                current += s;
+                current += piece;
             }
         }
         if (current.trim()) chunks.push(current.trim());
@@ -5997,7 +6366,8 @@ VideoResolver.fillFromHtml(result, html);
                         if (failed > 0 && results.length === 0) {
                             if (cb) cb(null, LANG.t('transFail'));
                         } else {
-                            var finalResult = results.join('\n');
+                            // 各段自带其原有的标点 / 换行，直接相接即可（不再用 '\n' 硬拼）
+                            var finalResult = results.join('');
                             State._translateCacheLru.set(baseCacheKey, finalResult);
                             if (failed > originalReturns) {
                                 if (cb) cb(finalResult, LANG.t('transPartialFail'));
@@ -6425,7 +6795,13 @@ VideoResolver.fillFromHtml(result, html);
             for (var i = 0; i < vs.length; i++) collectSrc(vs[i]);
 
             // 2. 递归 iframe 内的 video
+            // 23：原来只防「自引用」（cw === win），但同源 iframe 完全可能出现
+            // A 嵌 B、B 又嵌回 A 的环（一些站点用它做「伪全屏」）。那样会无限递归，
+            // 直到爆栈被最外层 try-catch 吞掉 —— 表现为「扫描到一半就停了」。
+            var visitedWins = [];
             function scanFrames(win) {
+                if (visitedWins.indexOf(win) >= 0) return;
+                visitedWins.push(win);
                 try {
                     var topFvs = win.document.querySelectorAll('video, video source, audio source');
                     for (var ti = 0; ti < topFvs.length; ti++) collectSrc(topFvs[ti]);
@@ -6610,12 +6986,20 @@ VideoResolver.fillFromHtml(result, html);
             for (var pm = 0; pm < playerM3u8.length; pm++) add(playerM3u8[pm]);
 
             // 4. 页面中所有文本节点里的 m3u8 URL
+            //    这是整条扫描里唯一「无界」的一段：TreeWalker 会走遍全页每一个文本节点，
+            //    内容站动辄几十万节点，同步跑完能卡住主线程几百毫秒。
+            //    加一个节点上限（超上限就停），并把单个节点的文本长度也截断 ——
+            //    m3u8 地址不会藏在几十 KB 的长文本里，走 prefix 就够。
             try {
                 var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
                 var textNode;
                 var re = /(https?:\/\/[^\s"'<>]+\.m3u8?[^\s"'<>]*)/gi;
-                while ((textNode = walker.nextNode()) !== null) {
-                    var matches = textNode.textContent.match(re);
+                var textBudget = 8000;          // 最多检查 8000 个文本节点
+                while (textBudget-- > 0 && (textNode = walker.nextNode()) !== null) {
+                    var rawText = textNode.textContent;
+                    if (!rawText || rawText.length < 8) continue;   // 纯空白/极短文本直接跳过
+                    if (rawText.indexOf('m3u8') < 0 && rawText.indexOf('.ts') < 0) continue;
+                    var matches = String(rawText).substring(0, 4000).match(re);
                     if (matches) {
                         for (var m = 0; m < matches.length; m++) {
                             if (SEC.isSafeUrl(matches[m])) add(SEC.absUrl(matches[m]));
@@ -8501,7 +8885,13 @@ VideoResolver.fillFromHtml(result, html);
             .replace(/\{序号\}/gi, String(idx).padStart(3, '0'))
             .replace(/\{后缀\}/gi, finalExt)
             .replace(/\{文件名\}/gi, SEC.nameFromUrl(url));
-        return SEC.safeFilename(out) + (out.indexOf('.' + finalExt) === -1 && !/\.([a-z0-9]{1,8})$/i.test(out) ? '.' + finalExt : '');
+        // 24：原来用**未转义**的 out 去判断扩展名，却把 safeFilename(out) 作为最终名。
+        // safeFilename 会删非法字符、去首尾空白与点、必要时截断 —— 任何一处改动
+        // 都可能让「判断有后缀」与「实际有后缀」不一致（重复 .mp4.mp4 或整个丢掉后缀）。
+        // 改为对最终名本身做判断。
+        var safe = SEC.safeFilename(out);
+        var hasExt = safe.indexOf('.' + finalExt) !== -1 || /\.([a-z0-9]{1,8})$/i.test(safe);
+        return safe + (hasExt ? '' : '.' + finalExt);
     };
 
     Dl._openUrl = function (url) {
@@ -8747,13 +9137,22 @@ VideoResolver.fillFromHtml(result, html);
             });
         }
 
+        // 按 task id 去重：DownloadManager 对同一个任务既可能回调 onComplete
+        // 又可能回调 onError（分片收尾成功、合并阶段再抛错），两边判断都是
+        // `done + failed >= total` —— 于是计数会大于实际任务数（统计偏差），
+        // 还可能在仍有任务没跑完时就提前 finish。
+        var counted = {};
         Dl._dm.enqueue(items, {
             onComplete: function (id, result) {
+                if (counted[id]) return;
+                counted[id] = true;
                 done++;
                 updateProgress();
                 if (done + failed >= total) finish();
             },
             onError: function (id, error) {
+                if (counted[id]) return;
+                counted[id] = true;
                 failed++;
                 updateProgress();
                 if (done + failed >= total) finish();
@@ -9073,6 +9472,26 @@ VideoResolver.fillFromHtml(result, html);
         return MS_CONFIG.COLORS.primary;
     };
 
+    // 卡片选中态是靠**内联样式**表达的（border / box-shadow 直接写在元素上），
+    // 而内联样式不带 !important —— 三种新风格（新拟物 / 粗野主义 / 终端）都用
+    // `!important` 覆盖了 [data-url] 的 border 与 box-shadow，按 CSS 优先级
+    // 「作者样式表的 !important 高于内联的非 !important」，选中态会被全部压掉，
+    // 用户点了卡片完全看不出选没选中。
+    // 解法与 MINOR-26 里 locateResource 的高亮环一致：内联也标 important
+    // （内联 !important 高于作者样式表 !important）。
+    // 传空串会连同 !important 一起清掉，元素回落到各风格 CSS 的默认边框/阴影，
+    // 正是「取消选中」期望的结果。
+    Selection._setBorderImportant = function (el, val) {
+        if (!el || !el.style) return;
+        try { el.style.setProperty('border', val, 'important'); }
+        catch (e) { try { el.style.border = val; } catch (e2) {} }
+    };
+    Selection._setShadowImportant = function (el, val) {
+        if (!el || !el.style) return;
+        try { el.style.setProperty('box-shadow', val, 'important'); }
+        catch (e) { try { el.style.boxShadow = val; } catch (e2) {} }
+    };
+
     Selection._updateCardMark = function (url) {
         var card = document.querySelector('[data-url="' + U.cssEscape(url) + '"]');
         if (!card) return;
@@ -9086,16 +9505,21 @@ VideoResolver.fillFromHtml(result, html);
         if (mark) {
             if (State.selectionMode) {
                 mark.style.display = 'flex';
-                mark.style.background = isSel ? pri : 'rgba(255,255,255,.9)';
-                mark.style.border = isSel ? 'none' : '2px solid ' + pri;
-                mark.style.color = isSel ? MS_CONFIG.COLORS.white : pri;
+                // 角标同样走 important：它是内联绘制的小圆点，将来任何风格只要
+                // 给 ._ms_sel_mark 加了带 !important 的规则就会把它压掉。
+                try { mark.style.setProperty('background', isSel ? pri : 'rgba(255,255,255,.9)', 'important'); }
+                catch (eBg) { mark.style.background = isSel ? pri : 'rgba(255,255,255,.9)'; }
+                Selection._setBorderImportant(mark, isSel ? 'none' : '2px solid ' + pri);
+                try { mark.style.setProperty('color', isSel ? MS_CONFIG.COLORS.white : pri, 'important'); }
+                catch (eCl) { mark.style.color = isSel ? MS_CONFIG.COLORS.white : pri; }
                 mark.textContent = isSel ? '\u2713' : '';
             } else {
                 mark.style.display = 'none';
             }
         }
-        card.style.border = isSel ? '2px solid ' + pri : (State.selectionMode ? '1px dashed ' + pri : '');
-        card.style.boxShadow = isSel ? selShadow : '';
+        Selection._setBorderImportant(card,
+            isSel ? '2px solid ' + pri : (State.selectionMode ? '1px dashed ' + pri : ''));
+        Selection._setShadowImportant(card, isSel ? selShadow : '');
     };
     Selection._updateAllCards = function () {
         var marks = document.querySelectorAll('._ms_sel_mark');
@@ -9110,11 +9534,12 @@ VideoResolver.fillFromHtml(result, html);
             var url = cards[j].getAttribute('data-url');
             var isSel = State.selected.has(url);
             if (State.selectionMode) {
-                cards[j].style.border = isSel ? '2px solid ' + pri2 : '1px dashed ' + pri2;
-                cards[j].style.boxShadow = isSel ? selShadow2 : '';
+                Selection._setBorderImportant(cards[j], isSel ? '2px solid ' + pri2 : '1px dashed ' + pri2);
+                Selection._setShadowImportant(cards[j], isSel ? selShadow2 : '');
             } else {
-                cards[j].style.border = '';
-                cards[j].style.boxShadow = '';
+                // 空串 = 连同 !important 一起清掉，回落到各风格 CSS 的默认样式
+                Selection._setBorderImportant(cards[j], '');
+                Selection._setShadowImportant(cards[j], '');
             }
         }
     };
@@ -9381,6 +9806,19 @@ VideoResolver.fillFromHtml(result, html);
     // ===== 模块 11：UI 面板 + 虚拟列表 (P0-2) + 进度条 + 媒体预览 (P1-1)
     // =========================================================================
     var UI = {};
+
+    // 生效中的明暗模式。终端复古强制暗底（表格里明确 ❌ 不响应 light/dark），
+    // 一切「按主题取色」的地方都必须走这个函数 —— 只改 CSS 不够：
+    // JS 生成的内联样式（卡片、标签、设置页控件）数量远超 CSS 覆盖面，
+    // 一旦漏掉就会出现「深底黑字」。
+    // 定义放在 UI 模块最前面：它被 colors / listPalettes / toggle 等大量早于
+    // 后续代码执行的地方调用，晚定义会踩「模块初始化期间就调用」的时序。
+    UI.isEffectivelyDark = function () {
+        try {
+            if (State && State.config && State.config.uiStyle === 'terminal') return true;
+        } catch (e) {}
+        return State.getTheme() === 'dark';
+    };
 
     UI._thumbCache = {};
     // 性能 3：dataURL 体积大，上限压到 240 条（够回看两屏，又不会无限涨）
@@ -9912,8 +10350,8 @@ VideoResolver.fillFromHtml(result, html);
             UI._startFloatGuard();
             UI._setupMobileGestures();
 
-            // 同步当前界面风格到浮动按钮
-            try { UI.applyUiStyle(); } catch (e) {}
+            // 同步当前界面风格到浮动按钮（走 safeRun：异常不打断建按钮，但一定留日志）
+            U.safeRun(function () { UI.applyUiStyle(); }, 'applyUiStyle(floatBtn)');
 
             // 窗口尺寸变化时把按钮拉回可视区
             try {
@@ -10054,7 +10492,7 @@ VideoResolver.fillFromHtml(result, html);
     };
 
     UI.listPalettes = function () {
-        var dark = State.getTheme() === 'dark';
+        var dark = UI.isEffectivelyDark();
         var out = [];
         for (var i = 0; i < UI._paletteOrder.length; i++) {
             var id = UI._paletteOrder[i];
@@ -10093,11 +10531,12 @@ VideoResolver.fillFromHtml(result, html);
     // 内部：取当前 palette 在当前明暗模式下的强调色
     UI._paletteColors = function () {
         var id = UI.getPalette();
+        var dark = UI.isEffectivelyDark();
         var built = UI._palettes[id];
-        if (built) return State.getTheme() === 'dark' ? built.dark : built.light;
+        if (built) return dark ? built.dark : built.light;
         var custom = UI._getCustomPalette(id);        // FIX-01: 原缺这行，custom 未声明即引用 → ReferenceError
         if (custom) {
-            var mode = State.getTheme() === 'dark' ? (custom.dark || {}) : (custom.light || {});
+            var mode = dark ? (custom.dark || {}) : (custom.light || {});
             return {
                 primary: mode.primary || MS_CONFIG.COLORS.primary,
                 primary2: mode.primary2 || MS_CONFIG.COLORS.primary2
@@ -10140,7 +10579,7 @@ VideoResolver.fillFromHtml(result, html);
     }
 
     UI.colors = function () {
-        var dark = State.getTheme() === 'dark';
+        var dark = UI.isEffectivelyDark();
         var pc = UI._paletteColors();
         return {
             bg: dark ? MS_CONFIG.COLORS.dark.bg : MS_CONFIG.COLORS.light.bg,
@@ -10169,7 +10608,7 @@ VideoResolver.fillFromHtml(result, html);
         container.appendChild(knob);
 
         function setColor(c) {
-            var dark = State.getTheme() === 'dark';
+            var dark = UI.isEffectivelyDark();
             var bgOff = dark ? MS_CONFIG.COLORS.dark.bg3 : MS_CONFIG.COLORS.light.bg3;
             container.style.background = c ? c : bgOff;
         }
@@ -10530,29 +10969,485 @@ VideoResolver.fillFromHtml(result, html);
         return css;
     };
 
+    // =========================================================================
+    // ===== 界面风格：颜色工具 =====
+    // 新拟物 / 粗野主义 / 终端 三种风格都要在「当前配色」基础上派生出一批
+    // 同色系深浅色。原来只有 UI._ios27Rgba（只负责加 alpha），这里补一个最小的
+    // 混色工具：把颜色朝白 / 黑方向线性插值，解析失败时原样返回（绝不吐 undefined）。
+    // =========================================================================
+    UI._parseRgb = function (color) {
+        var h = String(color == null ? '' : color).trim();
+        var m = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.exec(h);
+        if (m) {
+            var t = m[1];
+            if (t.length === 3) t = t.charAt(0) + t.charAt(0) + t.charAt(1) + t.charAt(1) + t.charAt(2) + t.charAt(2);
+            var n = parseInt(t, 16);
+            return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+        }
+        var m2 = /^rgba?\(([^)]+)\)$/i.exec(h);
+        if (m2) {
+            var p = m2[1].split(/[,\/]/);
+            var r = parseFloat(p[0]), g = parseFloat(p[1]), b = parseFloat(p[2]);
+            if (!isNaN(r) && !isNaN(g) && !isNaN(b)) return [Math.round(r), Math.round(g), Math.round(b)];
+        }
+        return null;
+    };
+
+    // amt > 0 向白靠、amt < 0 向黑靠（0~1）
+    UI._shade = function (color, amt) {
+        var p = UI._parseRgb(color);
+        if (!p) return color;
+        var t = amt >= 0 ? 255 : 0;
+        var k = Math.abs(amt);
+        return 'rgb(' + Math.round(p[0] + (t - p[0]) * k) + ','
+            + Math.round(p[1] + (t - p[1]) * k) + ','
+            + Math.round(p[2] + (t - p[2]) * k) + ')';
+    };
+
+    UI._alpha = function (color, a) {
+        var p = UI._parseRgb(color);
+        if (!p) return color;
+        return 'rgba(' + p[0] + ',' + p[1] + ',' + p[2] + ',' + a + ')';
+    };
+
+    // =========================================================================
+    // ===== 界面风格：新拟物 (Neumorphism) =====
+    // 设计象限：柔和 / 同色系 / 光影塑形。响应 light/dark。
+    //   · 控件与底同色，靠「左上高光 + 右下阴影」塑形，不描边、不分割线
+    //   · 静止 = 凸起（外阴影），悬停 = 略微抬高，按下/激活 = 凹陷（inset）
+    //     凸 → 凹的切换是这个风格的核心手感，所以所有可点元素都要有按下态
+    //   · 暗色下高光降到 3~5% 白、阴影加深，否则会在深底上「发光」而非「塑形」
+    // =========================================================================
+    UI._buildNeumorphCss = function (dark, isMob) {
+        var c = UI.colors();
+        var pc = UI._paletteColors() || {};
+        var A = pc.primary || MS_CONFIG.COLORS.primary;
+        var A2 = pc.primary2 || MS_CONFIG.COLORS.primary2;
+        var S = '#_ms_panel._ms_style_neumorph';
+        var B = 'body._ms_neumorph';
+        // 同色系底：暗色下再压暗一档，让「凸起」的高光有对比空间
+        var base = dark ? UI._shade(c.bg, -0.20) : c.bg;
+        var base2 = dark ? UI._shade(c.bg2, -0.16) : c.bg2;
+        var hi = dark ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.96)';
+        var hiSoft = dark ? 'rgba(255,255,255,0.028)' : 'rgba(255,255,255,0.78)';
+        var lo = dark ? 'rgba(0,0,0,0.62)' : 'rgba(163,177,198,0.62)';
+        var loSoft = dark ? 'rgba(0,0,0,0.40)' : 'rgba(163,177,198,0.44)';
+        var rOuter = isMob ? '0' : '26px 0 0 26px';
+        var rTop = isMob ? '0' : '26px 0 0 0';
+        var rCard = isMob ? '16px' : '18px';
+        var rField = '12px';
+        // 三套阴影：normal 凸起 / small 小件凸起 / pressed 凹陷
+        var raise = '6px 6px 14px ' + lo + ',-6px -6px 14px ' + hi;
+        var raiseSm = '4px 4px 9px ' + loSoft + ',-4px -4px 9px ' + hiSoft;
+        var press = 'inset 4px 4px 9px ' + lo + ',inset -4px -4px 9px ' + hiSoft;
+        var pressSm = 'inset 3px 3px 6px ' + lo + ',inset -3px -3px 6px ' + hiSoft;
+        var accentText = dark ? UI._shade(A, 0.35) : UI._shade(A, -0.18);
+
+        var css = '';
+        // ---- 面板外壳：不要描边、不要硬阴影，靠一层极浅的外阴影与底分离 ----
+        css += S + '{border-radius:' + rOuter + ' !important;background:' + base + ' !important;'
+            + 'color:' + c.txt + ' !important;border:none !important;'
+            + 'box-shadow:' + (isMob ? 'none' : '-10px 0 34px ' + lo + ',-2px 0 8px ' + loSoft) + ' !important;}';
+        // ---- 顶部标题栏：同色系凸起面，靠底部一道极浅的凹陷分界（不用 border） ----
+        css += S + ' > div:first-child{background:' + base + ' !important;color:' + c.txt + ' !important;'
+            + 'border-radius:' + rTop + ' !important;border:none !important;'
+            + 'box-shadow:0 1px 0 ' + hiSoft + ',0 6px 12px -8px ' + lo + ' !important;}';
+        css += S + ' > div:first-child > div{color:' + c.txt + ' !important;font-weight:700 !important;letter-spacing:.2px !important;}';
+        // 标题栏里的最小化 / 关闭按钮 → 圆形凸起小垫片
+        css += S + ' > div:first-child button{background:' + base + ' !important;color:' + c.sub + ' !important;'
+            + 'border:none !important;border-radius:50% !important;box-shadow:' + raiseSm + ' !important;'
+            + 'transition:box-shadow .18s ease,transform .18s ease,color .18s ease !important;}';
+        css += S + ' > div:first-child button:hover{color:' + accentText + ' !important;}';
+        css += S + ' > div:first-child button:active{box-shadow:' + pressSm + ' !important;transform:scale(.96) !important;}';
+
+        // ---- 标签栏：一枚凸起的胶囊槽，标签是槽里的小凸片，选中的凹陷下去 ----
+        css += S + ' #_ms_tabs{background:' + base2 + ' !important;border:none !important;'
+            + 'border-radius:16px !important;margin:10px 12px 6px !important;padding:5px !important;gap:5px !important;'
+            + 'box-shadow:' + pressSm + ' !important;}';
+        css += S + ' ._ms_tab{background:' + base2 + ' !important;color:' + c.sub + ' !important;'
+            + 'border:none !important;border-radius:12px !important;box-shadow:none !important;'
+            + 'transition:box-shadow .18s ease,color .18s ease,transform .18s ease !important;}';
+        css += S + ' ._ms_tab[data-active="1"]{background:' + base2 + ' !important;color:' + accentText + ' !important;'
+            + 'font-weight:700 !important;box-shadow:' + pressSm + ' !important;}';
+        css += S + ' ._ms_tab:not([data-active="1"]):hover{box-shadow:' + raiseSm + ' !important;color:' + c.txt + ' !important;}';
+        css += S + ' ._ms_tab:not([data-active="1"]):active{box-shadow:' + pressSm + ' !important;transform:scale(.97) !important;}';
+
+        // ---- 输入框 / 下拉：凹陷的「刻槽」，是这套语言里最直观的静止形态 ----
+        css += S + ' #_ms_search,' + S + ' #_ms_filter,' + S + ' #_ms_progress{background:' + base2 + ' !important;'
+            + 'border:none !important;border-radius:' + rField + ' !important;margin:0 12px 8px !important;'
+            + 'box-shadow:' + pressSm + ' !important;color:' + c.txt + ' !important;}';
+        css += S + ' input:not([type="checkbox"]):not([type="radio"]),' + S + ' select,' + S + ' textarea{'
+            + 'background:' + base2 + ' !important;color:' + c.txt + ' !important;border:none !important;'
+            + 'border-radius:10px !important;box-shadow:' + pressSm + ' !important;}';
+        css += S + ' input:focus,' + S + ' select:focus,' + S + ' textarea:focus{'
+            + 'box-shadow:' + pressSm + ',0 0 0 3px ' + UI._alpha(A, dark ? 0.30 : 0.22) + ' !important;outline:none !important;}';
+
+        // ---- 内容区：整块「凹进去」的底板，卡片浮在上面 ----
+        css += S + ' #_ms_box{background:' + base2 + ' !important;border:none !important;'
+            + 'border-radius:' + rCard + ' !important;margin:0 12px 10px !important;'
+            + 'box-shadow:' + pressSm + ' !important;}';
+        css += S + ' #_ms_footer{background:' + base + ' !important;border:none !important;'
+            + 'border-radius:' + rCard + ' !important;margin:0 12px 10px !important;'
+            + 'box-shadow:' + raiseSm + ' !important;}';
+        // 底部按钮：凸起小垫片，按下凹陷
+        css += S + ' #_ms_footer button{background:' + base + ' !important;color:' + c.txt + ' !important;'
+            + 'border:none !important;border-radius:11px !important;box-shadow:' + raiseSm + ' !important;'
+            + 'transition:box-shadow .18s ease,transform .18s ease,color .18s ease !important;}';
+        css += S + ' #_ms_footer button:hover{color:' + accentText + ' !important;}';
+        css += S + ' #_ms_footer button:active{box-shadow:' + pressSm + ' !important;transform:scale(.97) !important;}';
+
+        // ---- 资源卡片：凸起方块；选中态凹陷 + 配色描边光晕 ----
+        css += S + ' [data-url]{background:' + base + ' !important;border:none !important;'
+            + 'border-radius:' + rCard + ' !important;box-shadow:' + raiseSm + ' !important;'
+            + 'transition:box-shadow .2s ease,transform .2s ease !important;}';
+        css += S + ' [data-url]:hover{box-shadow:6px 6px 14px ' + lo + ',-5px -5px 12px ' + hi + ' !important;'
+            + 'transform:translateY(-1px) !important;}';
+        css += S + ' [data-url]:active{box-shadow:' + pressSm + ' !important;transform:translateY(0) scale(.985) !important;}';
+        // 名称栏是卡片的**第 2 个**子 div（第 1 个是缩略图，之后还有 _ms_sel_mark
+        // 与可选的 iframeBadge），所以不能写 last-child —— 那会命中角标/徽标。
+        css += S + ' [data-url] > div:nth-child(2){background:' + base + ' !important;'
+            + 'color:' + c.txt + ' !important;border-radius:0 0 ' + rCard + ' ' + rCard + ' !important;}';
+
+        // ---- 进度条：凹陷轨道 + 配色填充 ----
+        css += S + ' #_ms_progress_bar{background:linear-gradient(135deg,' + A + ',' + A2 + ') !important;border-radius:999px !important;}';
+
+        // ---- 面板外浮层：同一套同色系塑形语言（不做玻璃模糊） ----
+        css += B + ' #_ms_queue_modal,' + B + ' #_ms_vlp_modal,' + B + ' #_ms_footer_menu,'
+            + B + ' #_ms_float_ctx_menu,' + B + ' #_ms_sel_pop{background:' + base + ' !important;'
+            + 'color:' + c.txt + ' !important;border:none !important;border-radius:18px !important;'
+            + 'box-shadow:10px 10px 26px ' + lo + ',-8px -8px 20px ' + hi + ' !important;}';
+        // 轻提示保留调用方传入的语义色（成功绿 / 警告橙 / 失败红），
+        // 只把形状与阴影换成本风格 —— 若强行改成同色系底，「失败」就认不出了。
+        css += B + ' ._ms_toast{border:none !important;border-radius:14px !important;'
+            + 'box-shadow:0 10px 24px ' + lo + ',inset 0 1px 0 ' + hi + ' !important;'
+            + 'text-shadow:0 1px 2px rgba(0,0,0,.22) !important;}';
+        css += B + ' #_ms_minimized_bar{background:' + base + ' !important;color:' + c.txt + ' !important;'
+            + 'border:none !important;box-shadow:' + raise + ' !important;}';
+        css += B + ' #_ms_status{background:' + base + ' !important;color:' + c.txt + ' !important;'
+            + 'border:none !important;box-shadow:0 6px 16px ' + lo + ' !important;}';
+
+        // ---- 浮动按钮：一颗同色系「实体垫片」圆钮 ----
+        css += '#_ms_float._ms_btn_neumorph{background:' + base + ' !important;background-image:none !important;'
+            + 'color:' + accentText + ' !important;border:none !important;'
+            + 'box-shadow:7px 7px 16px ' + lo + ',-6px -6px 14px ' + hi + ' !important;'
+            + 'transition:box-shadow .2s ease,transform .2s ease !important;}';
+        css += '#_ms_float._ms_btn_neumorph:active{box-shadow:' + press + ' !important;transform:scale(.94) !important;}';
+        css += '#_ms_float._ms_btn_neumorph svg{color:' + accentText + ' !important;filter:none !important;}';
+
+        // ---- 尊重 prefers-reduced-motion ----
+        css += '@media (prefers-reduced-motion: reduce){' + S + ' *,' + S + ',' + S + '::before,' + S + '::after,'
+            + '#_ms_float._ms_btn_neumorph{transition-duration:.01ms !important;animation:none !important;}}';
+        return css;
+    };
+
+    // =========================================================================
+    // ===== 界面风格：新粗野主义 (Neo-Brutalism) =====
+    // 设计象限：硬边 / 粗描边 / 物理反馈。响应 light/dark（暗色换亮边）。
+    //   · 零圆角、粗描边、**实心无模糊**的硬偏移阴影（6px 6px 0，不是 6px 6px 20px）
+    //   · 交互反馈是「物理位移」：按下时整体平移 (3px,3px)、阴影同步收窄，
+    //     视觉上像把按钮真的摁进纸面；而不是只改颜色
+    //   · 亮色用黑墨 + 亮黄强调；暗色把墨换成白，强调色保持高饱和
+    // =========================================================================
+    UI._buildBrutalCss = function (dark, isMob) {
+        var c = UI.colors();
+        var pc = UI._paletteColors() || {};
+        var A = pc.primary || MS_CONFIG.COLORS.primary;
+        var A2 = pc.primary2 || MS_CONFIG.COLORS.primary2;
+        var S = '#_ms_panel._ms_style_brutal';
+        var B = 'body._ms_brutal';
+        var ink = dark ? '#ffffff' : '#000000';
+        var paper = dark ? '#151515' : '#ffffff';
+        var paper2 = dark ? '#1f1f1f' : '#f4f4f0';
+        var txt = dark ? '#ffffff' : '#000000';
+        var sub = dark ? '#c9c9c9' : '#3d3d3d';
+        // 暗色下强调色略微提亮，避免在深底上「糊」
+        var pop = dark ? UI._shade(A, 0.24) : A;
+        var pop2 = dark ? UI._shade(A2, 0.20) : A2;
+        var popInk = dark ? '#000000' : '#000000';       // 强调面上一律用黑字（黄/青底上黑字最清楚）
+        var edge = '3px solid ' + ink;
+        var hard = '6px 6px 0 ' + ink;
+        var hardSm = '4px 4px 0 ' + ink;
+        var rOuter = isMob ? '0' : '0';
+        // 按下 = 往阴影方向平移，同时阴影缩到 2px：制造「摁平」的物理感
+        var pressTf = 'translate(3px,3px)';
+        var pressShadow = '3px 3px 0 ' + ink;
+
+        var css = '';
+        // ---- 面板外壳：粗墨边 + 硬阴影，完全不用圆角 ----
+        css += S + '{border-radius:' + rOuter + ' !important;background:' + paper + ' !important;'
+            + 'color:' + txt + ' !important;border-left:' + edge + ' !important;'
+            + 'box-shadow:' + (isMob ? 'none' : hard + ',12px 12px 0 ' + UI._alpha(ink, dark ? 0.28 : 0.14)) + ' !important;}';
+        // ---- 标题栏：强调色实心块 + 下沿粗墨边 ----
+        css += S + ' > div:first-child{background:' + pop + ' !important;color:' + popInk + ' !important;'
+            + 'border-bottom:' + edge + ' !important;border-radius:0 !important;}';
+        css += S + ' > div:first-child > div{color:' + popInk + ' !important;font-weight:900 !important;'
+            + 'letter-spacing:.6px !important;text-transform:uppercase !important;}';
+        css += S + ' > div:first-child button{background:' + paper + ' !important;color:' + ink + ' !important;'
+            + 'border:2px solid ' + ink + ' !important;border-radius:0 !important;'
+            + 'box-shadow:2px 2px 0 ' + ink + ' !important;font-weight:900 !important;'
+            + 'transition:transform .08s linear,box-shadow .08s linear,background-color .12s linear !important;}';
+        css += S + ' > div:first-child button:hover{background:' + pop2 + ' !important;}';
+        css += S + ' > div:first-child button:active{transform:' + pressTf + ' !important;box-shadow:0 0 0 ' + ink + ' !important;}';
+
+        // ---- 标签栏：一排硬边方形按钮，选中的是强调色实心块 ----
+        css += S + ' #_ms_tabs{background:' + paper2 + ' !important;border-bottom:' + edge + ' !important;'
+            + 'border-radius:0 !important;gap:0 !important;padding:0 !important;}';
+        css += S + ' ._ms_tab{background:' + paper + ' !important;color:' + txt + ' !important;'
+            + 'border:none !important;border-right:2px solid ' + ink + ' !important;border-radius:0 !important;'
+            + 'box-shadow:none !important;font-weight:800 !important;letter-spacing:.3px !important;'
+            + 'transition:background-color .12s linear,color .12s linear !important;}';
+        css += S + ' ._ms_tab[data-active="1"]{background:' + pop + ' !important;color:' + popInk + ' !important;'
+            + 'box-shadow:inset 0 -4px 0 ' + ink + ' !important;}';
+        css += S + ' ._ms_tab:not([data-active="1"]):hover{background:' + pop2 + ' !important;}';
+
+        // ---- 输入框：白纸黑框，聚焦时换成强调色描边 ----
+        css += S + ' #_ms_search,' + S + ' #_ms_filter,' + S + ' #_ms_progress{'
+            + 'background:' + paper + ' !important;color:' + txt + ' !important;'
+            + 'border:' + edge + ' !important;border-radius:0 !important;margin:10px 12px !important;'
+            + 'box-shadow:' + hardSm + ' !important;}';
+        css += S + ' #_ms_progress{margin-bottom:10px !important;}';
+        css += S + ' input:not([type="checkbox"]):not([type="radio"]),' + S + ' select,' + S + ' textarea{'
+            + 'background:' + paper + ' !important;color:' + txt + ' !important;'
+            + 'border:2px solid ' + ink + ' !important;border-radius:0 !important;font-weight:700 !important;}';
+        css += S + ' input:focus,' + S + ' select:focus,' + S + ' textarea:focus{'
+            + 'border-color:' + pop + ' !important;box-shadow:3px 3px 0 ' + pop + ' !important;outline:none !important;}';
+
+        // ---- 内容区 / 底栏：硬边块 ----
+        css += S + ' #_ms_box{background:' + paper2 + ' !important;border:' + edge + ' !important;'
+            + 'border-radius:0 !important;margin:0 12px 10px !important;box-shadow:none !important;}';
+        css += S + ' #_ms_footer{background:' + paper + ' !important;border-top:' + edge + ' !important;'
+            + 'border-radius:0 !important;margin:0 !important;box-shadow:none !important;}';
+        css += S + ' #_ms_footer button{background:' + paper + ' !important;color:' + txt + ' !important;'
+            + 'border:2px solid ' + ink + ' !important;border-radius:0 !important;'
+            + 'box-shadow:3px 3px 0 ' + ink + ' !important;font-weight:800 !important;'
+            + 'transition:transform .08s linear,box-shadow .08s linear,background-color .12s linear !important;}';
+        css += S + ' #_ms_footer button:hover{background:' + pop + ' !important;color:' + popInk + ' !important;}';
+        css += S + ' #_ms_footer button:active{transform:' + pressTf + ' !important;box-shadow:0 0 0 ' + ink + ' !important;}';
+
+        // ---- 资源卡片：白纸黑框 + 硬阴影；悬停抬起、按下摁平 ----
+        css += S + ' [data-url]{background:' + paper + ' !important;border:2px solid ' + ink + ' !important;'
+            + 'border-radius:0 !important;box-shadow:' + hardSm + ' !important;'
+            + 'transition:transform .09s linear,box-shadow .09s linear !important;}';
+        css += S + ' [data-url]:hover{transform:translate(-2px,-2px) !important;'
+            + 'box-shadow:6px 6px 0 ' + ink + ' !important;}';
+        css += S + ' [data-url]:active{transform:' + pressTf + ' !important;box-shadow:1px 1px 0 ' + ink + ' !important;}';
+        // 名称栏是第 2 个子 div（详见新拟物里的说明），不能写 last-child
+        css += S + ' [data-url] > div:nth-child(2){background:' + paper + ' !important;'
+            + 'color:' + txt + ' !important;border-top:2px solid ' + ink + ' !important;'
+            + 'font-weight:700 !important;}';
+
+        // ---- 进度条：硬边轨道 + 强调色填充（无渐变） ----
+        css += S + ' #_ms_progress{background:' + paper + ' !important;}';
+        css += S + ' #_ms_progress_bar{background:' + pop + ' !important;border-radius:0 !important;'
+            + 'box-shadow:none !important;}';
+
+        // ---- 面板外浮层：同一套硬边 + 硬阴影 ----
+        css += B + ' #_ms_queue_modal,' + B + ' #_ms_vlp_modal,' + B + ' #_ms_footer_menu,'
+            + B + ' #_ms_float_ctx_menu,' + B + ' #_ms_sel_pop{background:' + paper + ' !important;'
+            + 'color:' + txt + ' !important;border:' + edge + ' !important;border-radius:0 !important;'
+            + 'box-shadow:8px 8px 0 ' + ink + ' !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;}';
+        // 保留语义底色（失败红 / 警告黄 一眼能分），只套上本风格的
+        // 直角 + 粗黑边 + 硬偏移阴影 —— 色块配黑框正是粗野主义的招牌。
+        css += B + ' ._ms_toast{border:2px solid ' + ink + ' !important;border-radius:0 !important;'
+            + 'box-shadow:5px 5px 0 ' + ink + ' !important;font-weight:900 !important;'
+            + 'letter-spacing:.3px !important;text-shadow:0 1px 2px rgba(0,0,0,.35) !important;'
+            + '-webkit-backdrop-filter:none !important;backdrop-filter:none !important;}';
+        css += B + ' #_ms_minimized_bar{background:' + pop + ' !important;color:' + popInk + ' !important;'
+            + 'border:2px solid ' + ink + ' !important;border-radius:0 !important;'
+            + 'box-shadow:4px 4px 0 ' + ink + ' !important;}';
+        css += B + ' #_ms_status{background:' + paper + ' !important;color:' + txt + ' !important;'
+            + 'border-bottom:2px solid ' + ink + ' !important;border-radius:0 !important;'
+            + 'box-shadow:none !important;}';
+
+        // ---- 浮动按钮：一枚方糖（硬边方块，不是圆球） ----
+        css += '#_ms_float._ms_btn_brutal{background:' + pop + ' !important;background-image:none !important;'
+            + 'color:' + popInk + ' !important;border:3px solid ' + ink + ' !important;border-radius:0 !important;'
+            + 'box-shadow:5px 5px 0 ' + ink + ' !important;'
+            + 'transition:transform .08s linear,box-shadow .08s linear !important;}';
+        css += '#_ms_float._ms_btn_brutal:active{transform:' + pressTf + ' !important;box-shadow:0 0 0 ' + ink + ' !important;}';
+        css += '#_ms_float._ms_btn_brutal svg{color:' + popInk + ' !important;filter:none !important;}';
+
+        css += '@media (prefers-reduced-motion: reduce){' + S + ' *,' + S + ',' + S + '::before,' + S + '::after,'
+            + '#_ms_float._ms_btn_brutal{transition-duration:.01ms !important;animation:none !important;}}';
+        return css;
+    };
+
+    // =========================================================================
+    // ===== 界面风格：终端复古 (Terminal) =====
+    // 设计象限：等宽 / 扫描线 / 荧光氛围。**强制暗底**（不响应 light/dark）。
+    //   · 全等宽字体 + 磷光绿前景 + 极低的底色（#070b07），像一台老 CRT
+    //   · 面板 ::after 铺扫描线（repeating-linear-gradient），pointer-events:none
+    //   · 文字带轻微 glow，标题栏末端一个闪烁光标
+    //   · 强制暗底靠 !important 全覆盖：面板 / 卡片 / 输入框的内联配色都会被压掉，
+    //     否则切到浅色主题时内联的浅色底会从荧光绿文字下面透出来
+    // =========================================================================
+    // 注意：dark 参数**有意不使用** —— 终端复古强制暗底，与系统主题无关。
+    // 保留该形参只是为了三个构建函数签名一致（调用点不必为风格特判）。
+    UI._buildTerminalCss = function (dark, isMob) {
+        var S = '#_ms_panel._ms_style_terminal';
+        var B = 'body._ms_terminal';
+        var mono = 'ui-monospace,SFMono-Regular,Menlo,Consolas,"DejaVu Sans Mono","Courier New",monospace';
+        var bg = '#070b07';          // 屏幕底
+        var bg2 = '#0b120b';         // 略亮一档的块
+        var fg = '#5cff8f';          // 磷光绿
+        var fgDim = '#2f9e57';       // 次级文字
+        var fgBright = '#c8ffd8';    // 高亮
+        var line = 'rgba(92,255,143,0.28)';
+        var lineSoft = 'rgba(92,255,143,0.13)';
+        var glow = '0 0 6px rgba(92,255,143,0.55)';
+        var rOuter = isMob ? '0' : '0';
+        var scan = 'repeating-linear-gradient(180deg,rgba(0,0,0,0.34) 0px,rgba(0,0,0,0.34) 1px,'
+            + 'rgba(0,0,0,0) 1px,rgba(0,0,0,0) 3px)';
+
+        var css = '';
+        // ---- 面板：黑底 + 绿字 + 满屏扫描线 ----
+        css += S + '{border-radius:' + rOuter + ' !important;background:' + bg + ' !important;'
+            + 'color:' + fg + ' !important;border:none !important;'
+            + 'font-family:' + mono + ' !important;font-size:13px !important;letter-spacing:.2px !important;'
+            + 'box-shadow:' + (isMob ? 'none' : '-1px 0 0 ' + line + ',-14px 0 40px rgba(0,0,0,0.7)') + ' !important;}';
+        // 扫描线 + 一层极淡的 CRT 中心亮斑；不拦截指针
+        css += S + '::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:4;'
+            + 'background:' + scan + ',radial-gradient(120% 80% at 50% 0%,rgba(92,255,143,0.07),rgba(0,0,0,0) 62%);'
+            + 'background-blend-mode:normal;opacity:.85;}';
+        css += S + ' *{font-family:' + mono + ' !important;}';
+        // 全局面板文字统一到磷光绿（次级色由下方更具体的规则覆盖）
+        css += S + ',' + S + ' #_ms_box,' + S + ' #_ms_footer{color:' + fg + ' !important;}';
+
+        // ---- 标题栏：命令行提示符风格，末端闪烁光标 ----
+        css += S + ' > div:first-child{background:' + bg2 + ' !important;color:' + fg + ' !important;'
+            + 'border-bottom:1px solid ' + line + ' !important;border-radius:0 !important;}';
+        css += S + ' > div:first-child > div{color:' + fgBright + ' !important;font-weight:700 !important;'
+            + 'text-shadow:' + glow + ' !important;}';
+        css += S + ' > div:first-child > div::after{content:"";display:inline-block;width:8px;height:14px;'
+            + 'margin-left:6px;vertical-align:-2px;background:' + fg + ';'
+            + 'animation:_ms_t_cursor 1.06s steps(1) infinite;}';
+        css += '@keyframes _ms_t_cursor{0%,49%{opacity:1}50%,100%{opacity:0}}';
+        css += S + ' > div:first-child button{background:transparent !important;color:' + fg + ' !important;'
+            + 'border:1px solid ' + line + ' !important;border-radius:0 !important;'
+            + 'box-shadow:none !important;font-weight:700 !important;text-shadow:none !important;'
+            + 'transition:background-color .12s linear,color .12s linear !important;}';
+        css += S + ' > div:first-child button:hover{background:' + UI._alpha(fg, 0.16) + ' !important;'
+            + 'color:' + fgBright + ' !important;}';
+
+        // ---- 标签栏：像一行「命令行参数」，选中的反白 ----
+        css += S + ' #_ms_tabs{background:' + bg2 + ' !important;border-bottom:1px solid ' + line + ' !important;'
+            + 'border-radius:0 !important;gap:0 !important;padding:0 !important;}';
+        css += S + ' ._ms_tab{background:transparent !important;color:' + fgDim + ' !important;'
+            + 'border:none !important;border-right:1px solid ' + lineSoft + ' !important;border-radius:0 !important;'
+            + 'box-shadow:none !important;text-shadow:none !important;font-weight:700 !important;'
+            + 'transition:background-color .12s linear,color .12s linear !important;}';
+        css += S + ' ._ms_tab[data-active="1"]{background:' + UI._alpha(fg, 0.16) + ' !important;'
+            + 'color:' + fgBright + ' !important;box-shadow:inset 0 -2px 0 ' + fg + ' !important;'
+            + 'text-shadow:' + glow + ' !important;}';
+        css += S + ' ._ms_tab:not([data-active="1"]):hover{color:' + fg + ' !important;'
+            + 'background:' + UI._alpha(fg, 0.07) + ' !important;}';
+
+        // ---- 输入框：下划线式输入（像老终端的光标行） ----
+        css += S + ' #_ms_search,' + S + ' #_ms_filter,' + S + ' #_ms_progress{'
+            + 'background:' + bg2 + ' !important;color:' + fg + ' !important;'
+            + 'border:none !important;border-bottom:1px solid ' + line + ' !important;border-radius:0 !important;'
+            + 'box-shadow:none !important;margin:0 12px 8px !important;}';
+        css += S + ' input:not([type="checkbox"]):not([type="radio"]),' + S + ' select,' + S + ' textarea{'
+            + 'background:' + bg2 + ' !important;color:' + fg + ' !important;'
+            + 'border:1px solid ' + lineSoft + ' !important;border-radius:0 !important;text-shadow:none !important;}';
+        css += S + ' input:focus,' + S + ' select:focus,' + S + ' textarea:focus{'
+            + 'border-color:' + fg + ' !important;box-shadow:0 0 0 1px ' + UI._alpha(fg, 0.5) + ' !important;'
+            + 'outline:none !important;}';
+        css += S + ' input::placeholder,' + S + ' textarea::placeholder{color:' + fgDim + ' !important;}';
+
+        // ---- 内容区 / 底栏 ----
+        css += S + ' #_ms_box{background:' + bg + ' !important;border:none !important;border-radius:0 !important;'
+            + 'box-shadow:inset 0 1px 0 ' + lineSoft + ' !important;margin:0 0 0 0 !important;}';
+        css += S + ' #_ms_footer{background:' + bg2 + ' !important;'
+            + 'border-top:1px solid ' + line + ' !important;border-radius:0 !important;margin:0 !important;}';
+        css += S + ' #_ms_footer button{background:transparent !important;color:' + fg + ' !important;'
+            + 'border:1px solid ' + line + ' !important;border-radius:0 !important;box-shadow:none !important;'
+            + 'text-shadow:none !important;transition:background-color .12s linear,color .12s linear !important;}';
+        css += S + ' #_ms_footer button:hover{background:' + UI._alpha(fg, 0.16) + ' !important;'
+            + 'color:' + fgBright + ' !important;}';
+
+        // ---- 资源卡片：方框 + 绿框，选中反白 ----
+        css += S + ' [data-url]{background:' + bg2 + ' !important;border:1px solid ' + lineSoft + ' !important;'
+            + 'border-radius:0 !important;box-shadow:none !important;'
+            + 'transition:border-color .12s linear,background-color .12s linear !important;}';
+        css += S + ' [data-url]:hover{border-color:' + fg + ' !important;'
+            + 'background:' + UI._alpha(fg, 0.09) + ' !important;box-shadow:0 0 0 1px ' + UI._alpha(fg, 0.35) + ' !important;}';
+        // 名称栏是第 2 个子 div（详见新拟物里的说明），不能写 last-child
+        css += S + ' [data-url] > div:nth-child(2){background:' + bg2 + ' !important;'
+            + 'color:' + fg + ' !important;border-top:1px solid ' + lineSoft + ' !important;}';
+
+        // ---- 进度条：细长的荧光条 ----
+        css += S + ' #_ms_progress_bar{background:' + fg + ' !important;border-radius:0 !important;'
+            + 'box-shadow:0 0 8px ' + UI._alpha(fg, 0.65) + ' !important;}';
+
+        // ---- 面板外浮层：同一套终端语言（全部走 !important 压掉内联配色） ----
+        css += B + ' #_ms_queue_modal,' + B + ' #_ms_vlp_modal,' + B + ' #_ms_footer_menu,'
+            + B + ' #_ms_float_ctx_menu,' + B + ' #_ms_sel_pop{background:' + bg2 + ' !important;'
+            + 'color:' + fg + ' !important;border:1px solid ' + line + ' !important;border-radius:0 !important;'
+            + 'box-shadow:0 0 0 1px ' + lineSoft + ',0 18px 60px rgba(0,0,0,0.8) !important;'
+            + '-webkit-backdrop-filter:none !important;backdrop-filter:none !important;'
+            + 'font-family:' + mono + ' !important;}';
+        css += B + ' #_ms_queue_modal *,' + B + ' #_ms_vlp_modal *,' + B + ' #_ms_footer_menu *,'
+            + B + ' #_ms_float_ctx_menu *,' + B + ' #_ms_sel_pop *{font-family:' + mono + ' !important;}';
+        // 终端风的轻提示：保留调用方的语义底色（成功绿 / 警告黄 / 失败红），
+        // 只把「形状与字体」换成终端语言 —— 直角、等宽、外加一圈硬黑描边。
+        // 不用 currentColor 做边框/发光：内联颜色是统一的白色，取不到语义色。
+        css += B + ' ._ms_toast{border-radius:0 !important;'
+            + 'outline:1px solid rgba(0,0,0,0.55) !important;'
+            + 'font-family:' + mono + ' !important;font-weight:700 !important;letter-spacing:.3px !important;'
+            + '-webkit-backdrop-filter:none !important;backdrop-filter:none !important;}';
+        css += B + ' #_ms_minimized_bar{background:' + bg2 + ' !important;color:' + fg + ' !important;'
+            + 'border:1px solid ' + line + ' !important;border-radius:0 !important;box-shadow:none !important;}';
+        css += B + ' #_ms_status{background:' + bg + ' !important;color:' + fg + ' !important;'
+            + 'border-bottom:1px solid ' + line + ' !important;border-radius:0 !important;box-shadow:none !important;}';
+
+        // ---- 浮动按钮：一个终端方形标记，方块光标在闪 ----
+        css += '#_ms_float._ms_btn_terminal{background:' + bg2 + ' !important;background-image:none !important;'
+            + 'color:' + fg + ' !important;border:1px solid ' + fg + ' !important;border-radius:0 !important;'
+            + 'box-shadow:0 0 0 1px ' + lineSoft + ',0 0 16px ' + UI._alpha(fg, 0.45) + ' !important;'
+            + 'transition:background-color .12s linear,box-shadow .12s linear !important;}';
+        css += '#_ms_float._ms_btn_terminal:hover{background:' + UI._alpha(fg, 0.15) + ' !important;}';
+        css += '#_ms_float._ms_btn_terminal:active{background:' + UI._alpha(fg, 0.3) + ' !important;'
+            + 'box-shadow:0 0 0 1px ' + lineSoft + ',0 0 26px ' + UI._alpha(fg, 0.7) + ' !important;}';
+        css += '#_ms_float._ms_btn_terminal svg{color:' + fg + ' !important;filter:none !important;}';
+
+        // ---- 尊重 prefers-reduced-motion（含光标闪烁） ----
+        css += '@media (prefers-reduced-motion: reduce){' + S + ' *,' + S + ',' + S + '::before,' + S + '::after,'
+            + '#_ms_float._ms_btn_terminal{transition-duration:.01ms !important;animation:none !important;}'
+            + S + ' > div:first-child > div::after{animation:none !important;opacity:1;}}';
+        return css;
+    };
+
     UI.applyUiStyle = function () {
         var style = State.config && State.config.uiStyle ? State.config.uiStyle : 'normal';
-        if (!['normal', 'material', 'ios27'].includes(style)) style = 'normal';
-        var dark = State.getTheme() === 'dark';
+        if (MS_CONFIG.UI_STYLE_IDS.indexOf(style) < 0) style = 'normal';
+        // 终端复古强制暗底：它不响应 light/dark（表格里明确标 ❌），
+        // 因此主题也一并按深色取值，避免内联背景色与 CSS 覆盖打架。
+        var dark = UI.isEffectivelyDark();
         var c = UI.colors();   // FIX-02: 末尾 _ms_sliding 规则要用 c.bg，原先未声明 → 抛错被 catch 吞掉，规则永不生效
+        // 面板 / 浮动按钮 / body 三处的风格类名，按同一张映射表切换。
+        // 原来只处理 ios27 一套，新增三种风格后必须集中管理，否则「切换风格时
+        // 只摘掉上一次那一个类」的写法会留下残影（例如粗暴风格的黑框会跟着 ios27）。
         var panel = State.panel;
         if (panel) {
-            panel.classList.remove('_ms_style_normal', '_ms_style_material', '_ms_style_ios27', '_ms_dark');
+            for (var pi = 0; pi < MS_CONFIG.UI_STYLE_IDS.length; pi++) panel.classList.remove('_ms_style_' + MS_CONFIG.UI_STYLE_IDS[pi]);
+            panel.classList.remove('_ms_dark');
             panel.classList.add('_ms_style_' + style);
             if (dark) panel.classList.add('_ms_dark');
         }
         // 同步浮动按钮风格类
         var floatBtn = UI._floatBtn || document.getElementById('_ms_float');
         if (floatBtn) {
-            floatBtn.classList.remove('_ms_btn_ios27');
-            if (style === 'ios27') floatBtn.classList.add('_ms_btn_ios27');
+            for (var fi = 0; fi < MS_CONFIG.UI_STYLE_IDS.length; fi++) floatBtn.classList.remove('_ms_btn_' + MS_CONFIG.UI_STYLE_IDS[fi]);
+            floatBtn.classList.add('_ms_btn_' + style);
         }
-        // 面板外的浮层（弹窗 / 菜单 / 轻提示）通过 body 标记统一走液态玻璃
+        // 面板外的浮层（弹窗 / 菜单 / 轻提示）通过 body 标记统一走同一套语言。
+        // 注意：只有 normal 不加标记（它靠 JS 内联样式），其余五种各一个 body 类。
         try {
             var bodyEl = document.body || document.documentElement;
             if (bodyEl && bodyEl.classList) {
-                if (style === 'ios27') bodyEl.classList.add('_ms_ios27');
-                else bodyEl.classList.remove('_ms_ios27');
+                for (var bi = 0; bi < MS_CONFIG.UI_STYLE_IDS.length; bi++) bodyEl.classList.remove('_ms_' + MS_CONFIG.UI_STYLE_IDS[bi]);
+                if (style !== 'normal') bodyEl.classList.add('_ms_' + style);
             }
         } catch (e) {}
         var styleId = '_ms_ui_style_css';
@@ -10565,18 +11460,32 @@ VideoResolver.fillFromHtml(result, html);
         var isMob = U.isMobile();
         // 样式内容未变时直接跳过重建：applyUiStyle 会被主题切换、设置保存、
         // 初始化等多个入口反复调用，重建整段 CSS 会触发样式表重新解析。
-        var styleKey = style + '|' + (dark ? 'd' : 'l') + '|' + (isMob ? 'm' : 'p') + '|' + UI.getPalette();
+        // 终端风格强制暗底、不随明暗变化，缓存键里固定成 'd'，
+        // 免得切换系统主题时白重建一遍整段 CSS。
+        var styleKey = style + '|' + (style === 'terminal' ? 'd' : (dark ? 'd' : 'l'))
+            + '|' + (isMob ? 'm' : 'p') + '|' + UI.getPalette();
         if (UI._uiStyleKey === styleKey && el.textContent) {
             UI._syncIos27Layers(panel, style);
             return;
         }
         UI._uiStyleKey = styleKey;
+        // 18：模块间靠「运行时顺序」串起来，一旦某个构建函数还没定义（比如
+        // 被裁剪版本 / 提前调用），原来会直接抛 ReferenceError 被上层 catch 吞掉。
+        // 这里显式检查并记日志，把「静默罢工」变成「一眼能看到的报错」。
+        var needBuilder = { neumorph: '_buildNeumorphCss', brutal: '_buildBrutalCss', terminal: '_buildTerminalCss' }[style];
+        if (needBuilder && typeof UI[needBuilder] !== 'function') {
+            LOG.error('界面风格构建函数缺失: UI.' + needBuilder + '（风格 ' + style + ' 退回普通）');
+            style = 'normal';
+            panel && panel.classList && panel.classList.add('_ms_style_normal');
+        }
         var css = '';
         // 只给面板主要容器挂过渡（原来用 #_ms_panel * 命中所有后代，
         // 会让每个卡片/按钮都参与合成与样式重算）；切换主题时再临时全量过渡。
         css += '#_ms_panel, #_ms_panel #_ms_tabs, #_ms_panel #_ms_box, #_ms_panel #_ms_footer, #_ms_panel #_ms_search { transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease; }';
         css += '#_ms_panel._ms_theming, #_ms_panel._ms_theming * { transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease !important; }';
-        css += 'body._ms_glass_idle #_ms_panel._ms_style_ios27 *, body._ms_glass_idle #_ms_float._ms_btn_ios27 { animation-play-state: paused !important; }';
+        css += 'body._ms_glass_idle #_ms_panel._ms_style_ios27 *, body._ms_glass_idle #_ms_float._ms_btn_ios27 { animation-play-state: paused !important; }'
+            // 终端风格的标题光标是无限闪烁动画，面板关闭 / 页面切后台时同样该停
+            + 'body._ms_glass_idle #_ms_panel._ms_style_terminal > div:first-child > div::after { animation-play-state: paused !important; opacity: 0 !important; }';
         // WARN-13: UI._onVlinkScrollStart 会给正在滚动区域里的视频卡加 _ms_vlink_paused，
         // 但原先没有任何对应样式，加/删都毫无效果（纯死代码）。
         // 这里赋予它真实语义：快速滚动期间暂停卡片内的动画与过渡，减少合成开销。
@@ -10596,6 +11505,15 @@ VideoResolver.fillFromHtml(result, html);
         } else if (style === 'ios27') {
             // iOS 27 液态玻璃：材质、镜面高光与动效全部由 UI._buildIos27Css 生成
             css += UI._buildIos27Css(dark, isMob);
+        } else if (style === 'neumorph') {
+            // 新拟物：同色系 + 光影塑形，凸起 / 凹陷两态切换
+            css += UI._buildNeumorphCss(dark, isMob);
+        } else if (style === 'brutal') {
+            // 新粗野主义：硬边 + 粗描边 + 硬偏移阴影，按下时物理位移
+            css += UI._buildBrutalCss(dark, isMob);
+        } else if (style === 'terminal') {
+            // 终端复古：强制暗底 + 等宽 + 扫描线（不响应 light/dark）
+            css += UI._buildTerminalCss(dark, isMob);
         } else {
             // normal：不注入额外覆盖样式，由 JS 内联样式控制
         }
@@ -10763,10 +11681,10 @@ VideoResolver.fillFromHtml(result, html);
     UI._moDisconnect = function () {};
 
     UI.setUiStyle = function (style) {
-        if (!['normal', 'material', 'ios27'].includes(style)) style = 'normal';
+        if (MS_CONFIG.UI_STYLE_IDS.indexOf(style) < 0) style = 'normal';
         State.config.uiStyle = style;
         State.save();
-        try { UI.applyUiStyle(); } catch (e) { LOG.error('应用界面风格失败:', e); }
+        U.safeRun(function () { UI.applyUiStyle(); }, 'applyUiStyle');
         try { applyPanelThemeNow(); } catch (e) {}
         try { UI.renderSettings(); } catch (e) {}
     };
@@ -11289,6 +12207,8 @@ VideoResolver.fillFromHtml(result, html);
         var panel = State.panel;
         if (UI._glassTimer) { clearTimeout(UI._glassTimer); UI._glassTimer = null; }
         if (!panel || !panel.classList) return;
+        // 只有 ios27 用了 backdrop-filter；新拟物 / 粗野主义 / 终端都是实心底色，
+        // 没有可停的实时模糊，直接返回。
         if (State.config.uiStyle !== 'ios27') return;
         try {
             if (on) panel.classList.add('_ms_sliding');
@@ -11543,7 +12463,8 @@ VideoResolver.fillFromHtml(result, html);
         progressWrap.id = '_ms_progress';
         progressWrap.style.cssText = 'padding:8px 12px;background:' + c.bg2 + ';border-bottom:1px solid ' + c.border + ';display:none;cursor:pointer;transition: background-color 0.3s, color 0.3s;';
         progressWrap.title = '点击查看下载队列';
-        progressWrap.innerHTML = '<div style="font-size:12px;color:' + c.sub + ';margin-bottom:4px;">' + LANG.t('dlProgress') + '</div><div style="height:8px;background:' + c.bg3 + ';border-radius:4px;overflow:hidden;"><div id="_ms_progress_bar" style="height:100%;background:linear-gradient(135deg,' + MS_CONFIG.COLORS.primary + ',' + MS_CONFIG.COLORS.primary2 + ');width:0%;transition:width .3s;"></div></div><div id="_ms_progress_text" style="font-size:11px;color:' + c.sub + ';margin-top:4px;">0 / 0</div>';
+        // 进度条原来写死 MS_CONFIG.COLORS.primary/primary2（默认靛蓝），切配色后不跟随
+        progressWrap.innerHTML = '<div style="font-size:12px;color:' + c.sub + ';margin-bottom:4px;">' + LANG.t('dlProgress') + '</div><div style="height:8px;background:' + c.bg3 + ';border-radius:4px;overflow:hidden;"><div id="_ms_progress_bar" style="height:100%;background:linear-gradient(135deg,' + c.primary + ',' + c.primary2 + ');width:0%;transition:width .3s;"></div></div><div id="_ms_progress_text" style="font-size:11px;color:' + c.sub + ';margin-top:4px;">0 / 0</div>';
         progressWrap.addEventListener('click', function () { UI.showDownloadQueue(); });
         State.panel.appendChild(progressWrap);
 
@@ -11620,7 +12541,7 @@ VideoResolver.fillFromHtml(result, html);
         }
 
         document.documentElement.appendChild(State.panel);
-        try { UI.applyUiStyle(); } catch (e) { LOG.error('初始化界面风格失败:', e); }
+        U.safeRun(function () { UI.applyUiStyle(); }, 'applyUiStyle(init)');
     };
 
     UI._applyTabStyle = function (btn, active) {
@@ -11630,16 +12551,22 @@ VideoResolver.fillFromHtml(result, html);
         btn.setAttribute('data-active', active ? '1' : '0');
         var bg, color, shadow;
         if (active) {
+            // 激活态原来硬编码靛蓝（#6366f1 / #8b5cf6 / rgba(99,102,241,...)），
+            // 切到「玫瑰红」「青绿」等配色后 tab 仍是靛蓝 —— 与卡片、按钮不一致。
+            // 统一走当前配色。
+            var pc = UI._paletteColors() || {};
+            var pri = pc.primary || c.primary;
+            var pri2 = pc.primary2 || c.primary2;
             if (isGlass) {
-                bg = 'linear-gradient(135deg,rgba(99,102,241,0.82),rgba(139,92,246,0.82))';
-                shadow = 'box-shadow:0 4px 14px rgba(99,102,241,.25), inset 0 1px 0 rgba(255,255,255,.25);';
+                bg = 'linear-gradient(135deg,' + UI._ios27Rgba(pri, 0.82) + ',' + UI._ios27Rgba(pri2, 0.82) + ')';
+                shadow = 'box-shadow:0 4px 14px ' + UI._ios27Rgba(pri, 0.25) + ', inset 0 1px 0 rgba(255,255,255,.25);';
             } else {
-                bg = 'linear-gradient(135deg,#6366f1,#8b5cf6)';
-                shadow = 'box-shadow:0 4px 12px rgba(99,102,241,.3);';
+                bg = 'linear-gradient(135deg,' + pri + ',' + pri2 + ')';
+                shadow = 'box-shadow:0 4px 12px ' + UI._ios27Rgba(pri, 0.30) + ';';
             }
             color = '#fff';
         } else {
-            bg = State.getTheme() === 'dark' ? '#334155' : '#e2e8f0';
+            bg = UI.isEffectivelyDark() ? '#334155' : '#e2e8f0';
             color = c.sub;
             shadow = '';
         }
@@ -11832,12 +12759,22 @@ VideoResolver.fillFromHtml(result, html);
 
         var box = document.getElementById('_ms_box');
         if (!box) { renderTab(); return; }
+        // 22：原来每次切标签都无条件 box.scrollTop = 0 —— 只是去看了下别的标签、
+        // 再切回来，列表就被拉回顶部，用户得重新往下翻（图片列表几百条时很难受）。
+        // 现在按标签各自记住滚动位置，切回时恢复。
+        if (!UI._tabScroll) UI._tabScroll = {};
+        var prevTab = State._prevTabForScroll;
+        if (prevTab && prevTab !== tab) UI._tabScroll[prevTab] = box.scrollTop || 0;
+        State._prevTabForScroll = tab;
+        var restoreTop = UI._tabScroll[tab] || 0;
         box.style.opacity = '0';
         box.style.pointerEvents = 'none';
         requestAnimationFrame(function () {
             requestAnimationFrame(function () {
                 renderTab();
-                box.scrollTop = 0;
+                // renderMedia 内部会自己恢复一份滚动位置；这里再把非媒体页
+                // （翻译 / 设置 / Cookie 等）的位置也一并还原
+                box.scrollTop = restoreTop;
                 box.style.opacity = '1';
                 box.style.pointerEvents = 'auto';
             });
@@ -12445,6 +13382,18 @@ VideoResolver.fillFromHtml(result, html);
             box.addEventListener('scroll', handler, { passive: true });
         }
 
+        // 26：从 video 切到别的标签后，_thumbScrollHandler 原本只在 kind === 'video'
+        // 那一支里被替换 —— 切走后旧的处理器仍留在常驻的 #_ms_box 上，
+        // 每次滚动都在跑「加载可见视频缩略图」，而此刻列表里根本没有视频卡。
+        // 这里在渲染前无条件把两个滚动处理器都摘掉，之后再按需重绑。
+        ['_thumbScrollHandler', '_vlinkScrollHandler'].forEach(function (k) {
+            var prev = UI[k];
+            if (prev) { try { box.removeEventListener('scroll', prev); } catch (e) {} }
+            UI[k] = null;
+        });
+        if (UI._thumbScrollTimer) { clearTimeout(UI._thumbScrollTimer); UI._thumbScrollTimer = null; }
+        if (UI._vlinkScrollTimer) { clearTimeout(UI._vlinkScrollTimer); UI._vlinkScrollTimer = null; }
+
         if (kind === 'video' && State.config.autoExtractThumb) {
             setTimeout(function () { UI._loadVisibleVideoThumbs(container); }, 100);
             rebindBoxScroll('_thumbScrollHandler', function () {
@@ -12878,11 +13827,21 @@ VideoResolver.fillFromHtml(result, html);
 
                 if (v.canPlayType('application/vnd.apple.mpegurl')) {
                     v.src = url;
-                } else if (typeof Hls !== 'undefined') {
+                } else if (typeof Hls !== 'undefined' || (typeof window !== 'undefined' && window.Hls)) {
+                    // typeof Hls 只能探到「当前脚本作用域可见」的 Hls；页面自己在用的
+                    // 那个实例挂在 window.Hls 上，这里一并复用 —— 省一次 CDN 下载，
+                    // 也绕开了「站点 CSP 不放行 jsdelivr」的情况。
+                    if (typeof Hls === 'undefined' && typeof window !== 'undefined' && window.Hls) {
+                        Hls = window.Hls;
+                    }
                     initHls();
                 } else {
                     var hlsScript = document.createElement('script');
-                    hlsScript.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest';
+                    // 固定版本：@latest 会在上游发新版时行为突变（甚至换 API），
+                    // 而且部分站点的 CSP 只放行白名单域，离线时更是完全不可用。
+                    // 1.5.17 是稳定版，接口与当前调用方式一致。
+                    // 下面还会优先复用页面自己已经加载的 window.Hls（见 useHls 分支）。
+                    hlsScript.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js';
                     hlsScript.async = true;
                     hlsScript.onload = initHls;
                     hlsScript.onerror = function() {
@@ -13930,7 +14889,14 @@ VideoResolver.fillFromHtml(result, html);
         styleWrap.appendChild(styleDesc);
         var styleRow = document.createElement('div');
         styleRow.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;';
-        var styles = [['normal', LANG.t('uiStyleNormal')], ['material', LANG.t('uiStyleMaterial')], ['ios27', LANG.t('uiStyleIos27')]];
+        var styles = [
+            ['normal', LANG.t('uiStyleNormal')],
+            ['material', LANG.t('uiStyleMaterial')],
+            ['ios27', LANG.t('uiStyleIos27')],
+            ['neumorph', LANG.t('uiStyleNeumorph')],
+            ['brutal', LANG.t('uiStyleBrutal')],
+            ['terminal', LANG.t('uiStyleTerminal')]
+        ];
         for (var si = 0; si < styles.length; si++) {
             (function (s) {
                 var b = document.createElement('button');
@@ -14248,10 +15214,14 @@ VideoResolver.fillFromHtml(result, html);
         container.appendChild(makeGroup('domainRules', LANG.t('grpDomainRules'), drContent));
 
         // 脚本市场 / 插件系统
-        if (typeof UI._pluginSettingTab !== 'string') UI._pluginSettingTab = 'rules';
+        // 34：页面内状态原来直接挂在 UI 对象上（UI._settingsState.pluginTab），
+        // 与「UI 是函数集合」的语义混在一起，也不便统一重置。
+        // 统一收进 UI._settingsState（只放设置页的临时 UI 状态，不进持久化配置）。
+        if (!UI._settingsState) UI._settingsState = {};
+        if (typeof UI._settingsState.pluginTab !== 'string') UI._settingsState.pluginTab = 'rules';
         var pluginContent = document.createElement('div');
         var pluginDesc = document.createElement('div');
-        pluginDesc.textContent = UI._pluginSettingTab === 'rules' ? LANG.t('pluginRulesDesc') : LANG.t('pluginParsersDesc');
+        pluginDesc.textContent = UI._settingsState.pluginTab === 'rules' ? LANG.t('pluginRulesDesc') : LANG.t('pluginParsersDesc');
         pluginDesc.style.cssText = 'font-size:12px;color:' + c.sub + ';margin-bottom:10px;';
         pluginContent.appendChild(pluginDesc);
 
@@ -14261,21 +15231,21 @@ VideoResolver.fillFromHtml(result, html);
         function updatePluginTabStyles() {
             var btns = pluginTabWrap.querySelectorAll('button');
             for (var bi = 0; bi < btns.length; bi++) {
-                var isActive = pluginTabs[bi][0] === UI._pluginSettingTab;
+                var isActive = pluginTabs[bi][0] === UI._settingsState.pluginTab;
                 btns[bi].style.background = isActive ? 'linear-gradient(135deg,' + c.primary + ',' + c.primary2 + ')' : c.bg3;
                 btns[bi].style.color = isActive ? '#fff' : c.txt;
             }
-            pluginDesc.textContent = UI._pluginSettingTab === 'rules' ? LANG.t('pluginRulesDesc') : LANG.t('pluginParsersDesc');
+            pluginDesc.textContent = UI._settingsState.pluginTab === 'rules' ? LANG.t('pluginRulesDesc') : LANG.t('pluginParsersDesc');
         }
         for (var pti = 0; pti < pluginTabs.length; pti++) {
             (function (pt) {
                 var b = document.createElement('button');
                 b.textContent = pt[1];
-                b.style.cssText = 'flex:1;padding:10px;border:none;border-radius:10px;background:' + (UI._pluginSettingTab === pt[0] ? 'linear-gradient(135deg,' + c.primary + ',' + c.primary2 + ')' : c.bg3) + ';color:' + (UI._pluginSettingTab === pt[0] ? '#fff' : c.txt) + ';font-size:13px;font-weight:600;cursor:pointer;';
+                b.style.cssText = 'flex:1;padding:10px;border:none;border-radius:10px;background:' + (UI._settingsState.pluginTab === pt[0] ? 'linear-gradient(135deg,' + c.primary + ',' + c.primary2 + ')' : c.bg3) + ';color:' + (UI._settingsState.pluginTab === pt[0] ? '#fff' : c.txt) + ';font-size:13px;font-weight:600;cursor:pointer;';
                 b.addEventListener('click', function () {
-                    UI._pluginSettingTab = pt[0];
-                    rulesSection.style.display = UI._pluginSettingTab === 'rules' ? 'block' : 'none';
-                    parsersSection.style.display = UI._pluginSettingTab === 'parsers' ? 'block' : 'none';
+                    UI._settingsState.pluginTab = pt[0];
+                    rulesSection.style.display = UI._settingsState.pluginTab === 'rules' ? 'block' : 'none';
+                    parsersSection.style.display = UI._settingsState.pluginTab === 'parsers' ? 'block' : 'none';
                     updatePluginTabStyles();
                 });
                 pluginTabWrap.appendChild(b);
@@ -14284,7 +15254,7 @@ VideoResolver.fillFromHtml(result, html);
         pluginContent.appendChild(pluginTabWrap);
 
         var rulesSection = document.createElement('div');
-        rulesSection.style.display = UI._pluginSettingTab === 'rules' ? 'block' : 'none';
+        rulesSection.style.display = UI._settingsState.pluginTab === 'rules' ? 'block' : 'none';
         var ruleListWrap = document.createElement('div');
         rulesSection.appendChild(ruleListWrap);
 
@@ -14428,7 +15398,7 @@ VideoResolver.fillFromHtml(result, html);
         renderRuleList();
 
         var parsersSection = document.createElement('div');
-        parsersSection.style.display = UI._pluginSettingTab === 'parsers' ? 'block' : 'none';
+        parsersSection.style.display = UI._settingsState.pluginTab === 'parsers' ? 'block' : 'none';
         var parserListWrap = document.createElement('div');
         parsersSection.appendChild(parserListWrap);
 
@@ -14912,7 +15882,7 @@ VideoResolver.fillFromHtml(result, html);
         for (var i = 0; i < tabBtns.length; i++) {
             UI._applyTabStyle(tabBtns[i], tabBtns[i].getAttribute('data-tab') === State.tab);
         }
-        try { UI.applyUiStyle(); } catch (e) { LOG.error('应用界面风格失败:', e); }
+        U.safeRun(function () { UI.applyUiStyle(); }, 'applyUiStyle');
     }
     // FIX-07: 把主题应用函数注册到 State 上。
     // 必须放在函数体外面：原先是 applyPanelThemeNow 自己最后一行赋值，
