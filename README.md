@@ -2,7 +2,7 @@
 
 一个功能强大的 Tampermonkey / ScriptCat 油猴脚本，用于抓取网页中的图片、视频、音频、m3u8 流媒体资源，支持批量下载、AES-128 解密、翻译、Cookie/Storage 管理等功能。
 
-> **当前版本：v1.14** · [下载最新版](https://github.com/zhjich123/zhjich123/releases/latest)
+> **当前版本：v1.15** · [下载最新版](https://github.com/zhjich123/zhjich123/releases/latest)
 
 ## 功能特性
 
@@ -39,6 +39,75 @@
 邮箱：zhengjingchen123456@outlook.com
 
 ## 更新日志
+
+### v1.15
+**新增三种界面风格（新拟物 / 粗野主义 / 终端复古）+ 34 项缺陷修复 + 修复宿主页面 CSS 导致的图标错位**
+
+#### 新增：三种界面风格
+
+「设置 → 界面风格」由 3 个按钮扩到 **6 个**：普通 / Material / iOS 27 / **新拟物** / **粗野主义** / **终端**。
+
+- **新拟物** — 柔和 · 同色系 · 光影塑形：控件与底同色，靠「左上高光 + 右下阴影」塑形，不描边；
+  静止凸起 → 按下凹陷（`inset`），输入框是常驻凹槽；暗色下高光自动压到 3~5% 白
+- **粗野主义** — 硬边 · 粗描边 · 物理反馈：零圆角 + 3px 描边（暗色换亮边）+ **硬偏移阴影**
+  （`6px 6px 0`）；按下时整体 `translate(3px,3px)`、阴影收窄，像真把按钮摁进纸面
+- **终端复古** — 等宽 · 扫描线 · 荧光：磷光绿 + 近黑底、面板铺扫描线、标题栏闪烁光标、文字带 glow；
+  **强制暗底**，不响应 light / dark
+- 关键实现：「强制暗底」**下沉到配色层**（新增 `UI.isEffectivelyDark()`，
+  `colors` / `_paletteColors` / `listPalettes` / toggle / 标签页底色全走它）——
+  只改 CSS 不够，JS 生成的内联样式数量远超 CSS 覆盖面，会出现「深底黑字」
+- 轻提示保留语义色：三套风格只改形状（圆角 / 边框 / 字体 / 阴影），
+  不统一底色，否则「成功绿 / 警告黄 / 失败红」分不出来
+
+#### 🔴 修复：v1.15 首版「风格系统整体罢工」
+
+界面风格白名单 `UI_STYLE_IDS` 被写在 `State` IIFE 内部，而 `UI` 与 `State` 是**并列**的两个 IIFE
+—— `UI.applyUiStyle()` 取不到它，抛 `ReferenceError` 被三处 `try-catch` 吞掉；
+抛错点在 `_syncIos27Layers` 之前，**连 ios27 的玻璃层也不再挂载**。
+已挪到 `MS_CONFIG.UI_STYLE_IDS`（跨模块常量池），6 处引用全部改过去并删掉局部副本。
+
+#### 🟡 修复：三种新风格下卡片选中态看不出来
+
+三套新 CSS 都用 `!important` 覆盖 `[data-url]` 的 `border` / `box-shadow`，
+而选中态是**不带 important 的内联赋值** → 被整体压掉。
+已新增 `Selection._setBorderImportant` / `_setShadowImportant`（`setProperty(…, 'important')`）。
+顺带修掉一个自引入的 bug：三套 CSS 里写的 `[data-url] > div:last-child` 命中的不是名称栏
+（卡片子节点是「缩略图 → 名称栏 → 选中角标 → iframe 徽标」），已改为 `> div:nth-child(2)`。
+
+#### 🔴 修复：宿主页面的 CSS 把图标变成块级元素
+
+很多站点（Tailwind Preflight 为代表）带一条
+`audio,canvas,embed,iframe,img,object,svg,video{vertical-align:middle;display:block}`，
+本脚本运行在**别人页面上**，这条规则让「图标 + 文字」的按钮被**拆成两行**
+（图标独占第一行靠左、文字被挤到第二行居中、按钮高度翻倍，看上去就是一大块纯色）。
+已在**图标定义处统一补** `display:inline-block;vertical-align:middle`（已有 style 会合并进去，
+不产生重复属性），并注入兜底 CSS 覆盖直接写在 HTML 字符串里的 `<svg>` ——
+选择器全部带 `_ms_` 前缀 + `!important`，**只改我们自己的容器，不动宿主页面的图标**。
+
+#### 34 项缺陷修复
+
+- **高危**：配置读到字符串静默丢弃（设置「莫名全没了」）· AES-128 的 IV 用错媒体序号
+  （源站序号 ≠ 0 时解密全盘失败）· 分片全驻内存（260MB+ 直接 OOM）· 预览弹窗远端字段 XSS
+  （10 处）· 总超时与解析回调双触发，cb 被调两次
+- **中危**：`batchFetch` 空输入调 5 次 `doneCb` · `metaCache` 没上限 ·
+  `M3U8._stopped` 全局标志（停一个连带停全部）· 多码率源因「标签后空行」丢流 ·
+  翻译缓存键只取前 100 字符（不同文本互相命中）· `Dl.batch` 计数偏差 ·
+  tab / 进度条硬编码靛蓝 · 批量探时长并发失控 · TreeWalker 遍历全页文本卡主线程 ·
+  停止下载后在飞请求仍跑完 · hls.js `@latest` · 一键更新被当纯文本 · 模块依赖无守卫 ·
+  空 catch 静默吞异常（新增 `U.safeRun`）
+- **低危**：切画质丢进度 · 分段翻译丢标点 · 切标签丢滚动位置 · iframe 环递归 ·
+  文件名重复/丢后缀 · 截断后缀同毫秒碰撞 · 滚动处理器残留 · 历史记录 O(N×200) ·
+  每站点各自 `new URL` · `LANG.get` 每次 `new RegExp` · `.ogg` 误判为视频 ·
+  `.gitignore` 被改成 `gitignore` · 死代码清理 · 语言表重复图标 · 设置页状态挂 UI 对象
+
+#### ✅ 验证
+
+新增 `t-style3` **241 项** / `t-fix34` **220 项** / `t-hostcss` **49 项**；
+反向验证 `_rev-style3` **49/49** · `_rev-fix34` **45/45** · `_rev-hostcss` **14/14**；
+回归 `t-vgrid` 42 · `t-p0d` 118 · `t-p0c` 179 · `t-p0b` 105 · `t-p0` 49 · `t-panel` 185 ·
+`t-ios27` 144 · `t-version` 40 · `t-identity` 31 · `t-perf2` 148 · `t-refs` 全部通过；
+`_rev` 34/34 · `_rev-vgrid` 12/12 · `_rev-perf2` 28/28 · `_rev-identity` 20/20 · `_rev-p0d` 25/25 全绿
+
 
 ### v1.14
 **修复「每次升级都会多装一个脚本」+ 接入原生自动更新 + 第三批 13 项稳定性/性能修复**
