@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         媒体嗅探器 Media Sniffer Pro
 // @namespace    http://tampermonkey.net/
-// @version      1.15
+// @version      1.16
 // @description  图片/视频/音频/m3u8 抓取 · AES-128解密 · 分片合并 · 虚拟列表 · 进度可视化 · 跨域兜底 · Cookie/Storage · 翻译 · 元信息 · 高级筛选 · iOS 27 液态玻璃界面
 // @license      GPL-3.0-or-later
 // @downloadURL  https://raw.githubusercontent.com/zhjich123/zhjich123/main/media-sniffer.user.js
@@ -43,7 +43,7 @@
     }
 
     try {
-    console.info('[MS] 脚本开始加载，版本:', '1.15');
+    console.info('[MS] 脚本开始加载，版本:', '1.16');
 
 
 
@@ -51,7 +51,7 @@
     // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.045a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.01 17.461 2 12 2z"></path></svg></svg> 全局配置（图标 / 颜色 / 尺寸 / 配色板）
     // =========================================================================
     var MS_CONFIG = {
-        VERSION: '1.15',
+        VERSION: '1.16',
         // 界面风格白名单（唯一真源）。必须放在 MS_CONFIG 里 —— 它在最外层作用域，
         // State IIFE 与 UI IIFE 是**并列**的两个 IIFE，写在其中一个里面另一个取不到。
         // （v1.15 首版曾把它放在 State IIFE 内，导致 UI.applyUiStyle 抛 ReferenceError
@@ -328,12 +328,17 @@
             var iconSize = isMobile ? '32px' : '28px';
             var thumbHtml = '';
             if (kind === 'img') {
-                thumbHtml = '<img src="' + SEC.escapeAttr(url) + '" loading="lazy" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;" onerror="this.style.display=\'none\';this.parentNode.style.background=\'' + MS_CONFIG.COLORS.darkGradientEnd + '\';">';
+                // 整洁-1：原来这里用内联 onerror，属性值里得手写引号转义，
+                // 换个色/换个图标就得再来一遍（极易漏）。改成打一个 data-* 标记，
+                // 由网格容器的 error 委托统一兜底（见 UI._bindMediaThumbFallback）。
+                thumbHtml = '<img src="' + SEC.escapeAttr(url) + '" loading="lazy" referrerpolicy="no-referrer" data-ms-thumb="img" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;">';
             } else if (kind === 'video') {
                 var cached = UI._thumbCache[url];
                 var grad = 'linear-gradient(135deg,' + MS_CONFIG.COLORS.darkGradientStart + ',' + MS_CONFIG.COLORS.darkGradientEnd + ')';
                 if (cached) {
-                    thumbHtml = '<img src="' + SEC.escapeAttr(cached) + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;" onerror="var d=document.createElement(\'div\');d.style.cssText=\'width:100%;height:100%;background:' + grad + ';display:flex;align-items:center;justify-content:center;color:' + MS_CONFIG.COLORS.white + ';font-size:' + iconSize + ';\';d.textContent=\'' + MS_CONFIG.ICONS.play + '\';this.parentNode.appendChild(d);this.remove();">';
+                    // 同上：缩略图加载失败的兜底也走委托。data-ms-thumb 的值告诉
+                    // 处理器「失败后该摆什么」（图标 + 渐变由统一逻辑补）。
+                    thumbHtml = '<img src="' + SEC.escapeAttr(cached) + '" loading="lazy" data-ms-thumb="video" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;">';
                 } else {
                     thumbHtml = '<div class="_ms_v_thumb" data-url="' + SEC.escapeAttr(url) + '" style="width:100%;height:100%;background:' + grad + ';display:flex;align-items:center;justify-content:center;color:' + MS_CONFIG.COLORS.white + ';font-size:' + iconSize + ';">' + MS_CONFIG.ICONS.play + '</div>';
                 }
@@ -350,7 +355,11 @@
             }
             return '<div class="_ms_card" data-url="' + SEC.escapeAttr(url) + '" data-idx="' + SEC.escapeAttr(idx) + '" draggable="' + (inSelMode ? 'true' : 'false') + '" style="position:relative;border-radius:' + MS_CONFIG.SIZES.cardRadius + 'px;background:' + c.bg2 + ';overflow:hidden;cursor:pointer;' + borderStyle + shadow + ';">' +
                 '<div style="width:100%;aspect-ratio:1/1;overflow:hidden;background:' + c.bg3 + ';display:flex;align-items:center;justify-content:center;">' + thumbHtml + '</div>' +
-                '<div style="padding:' + namePadding + ';font-size:' + nameFontSize + ';color:' + c.txt + ';line-height:1.3;word-break:break-all;overflow:hidden;max-height:' + nameMaxHeight + ';text-overflow:ellipsis;">' + U.trunc(SEC.nameFromUrl(url), isMobile ? 40 : 30) + '</div>' +
+                // 安全：nameFromUrl 只做「取最后一段 + 去查询串」，**不做任何转义**。
+                // URL 语法允许路径里出现 `<`/`>`（例如 https://x/a/<img src=x onerror=...>），
+                // 直接拼进 innerHTML 就会被当成标签解析 —— 这是一条真实的注入路径。
+                // 卡片渲染是热路径，但 escapeHtml 只是几次 replace，代价可以忽略。
+                '<div style="padding:' + namePadding + ';font-size:' + nameFontSize + ';color:' + c.txt + ';line-height:1.3;word-break:break-all;overflow:hidden;max-height:' + nameMaxHeight + ';text-overflow:ellipsis;">' + SEC.escapeHtml(U.trunc(SEC.nameFromUrl(url), isMobile ? 40 : 30)) + '</div>' +
                 markHtml +
                 iframeBadge +
                 '</div>';
@@ -363,7 +372,42 @@
     //  模块 1：核心工具 (Utils) + 日志系统
     // =========================================================================
     var U = {};
-    U.VERSION = '1.15';
+    U.VERSION = '1.16';
+
+    // 7：String.prototype.padStart / padEnd 是 ES2017。老 WebView / 老 Safari
+    // 里它们不存在，会直接在生成诊断报告（p.name.padEnd(22)）、
+    // 生成文件名（padStart(3,'0')）、时间格式化（padStart(2,'0')）处抛 TypeError。
+    // 只在缺失时补，不覆盖原生实现。
+    (function () {
+        try {
+            if (typeof String.prototype.padStart !== 'function') {
+                String.prototype.padStart = function (len, pad) {
+                    var str = String(this);
+                    var target = Number(len) || 0;
+                    if (str.length >= target) return str;
+                    var filler = pad === undefined ? ' ' : String(pad);
+                    if (!filler) return str;
+                    var need = target - str.length;
+                    var fill = '';
+                    while (fill.length < need) fill += filler;
+                    return fill.slice(0, need) + str;
+                };
+            }
+            if (typeof String.prototype.padEnd !== 'function') {
+                String.prototype.padEnd = function (len, pad) {
+                    var str = String(this);
+                    var target = Number(len) || 0;
+                    if (str.length >= target) return str;
+                    var filler = pad === undefined ? ' ' : String(pad);
+                    if (!filler) return str;
+                    var need = target - str.length;
+                    var fill = '';
+                    while (fill.length < need) fill += filler;
+                    return str + fill.slice(0, need);
+                };
+            }
+        } catch (e) {}
+    })();
     U.toStr = Object.prototype.toString;
     U.isArr = Array.isArray || function (x) { return U.toStr.call(x) === '[object Array]'; };
     U.isStr = function (x) { return typeof x === 'string'; };
@@ -413,9 +457,52 @@
     // ===== 日志系统（分级 debug/info/warn/error）=====
     var LOG = {};
     LOG.LEVELS = { DEBUG: 0, INFO: 1, WARN: 2, ERROR: 3 };
+    LOG.LEVEL_NAMES = ['DEBUG', 'INFO', 'WARN', 'ERROR'];
     LOG.level = LOG.LEVELS.INFO; // 默认 INFO 级别
     LOG.prefix = '[MS-v1]';
+
+    // ===== 诊断用：环形日志缓冲 =====
+    // 为什么需要它：脚本问题上报时，用户看到的往往只是「没反应」，
+    // 而 console 里的日志他们既看不到、也没法整页贴给我们。
+    // 这里把最近 N 条日志留在内存里，诊断面板能直接回看 + 一键导出成报告。
+    //
+    // 两个实现要点：
+    //   1) **先记录、再按 console 级别过滤** —— 否则 INFO 级别下 DEBUG 日志全丢，
+    //      而排查问题时恰恰最需要 DEBUG。
+    //   2) 只存「格式化后的短字符串」，不持有原始对象引用 —— 否则一个被 log 过的
+    //      大对象（比如整个 chunks 数组）会被缓冲一直吊着，反而制造内存泄漏。
+    LOG.buffer = [];
+    LOG.maxBuffer = 400;
+    LOG._fmtArg = function (v) {
+        if (v === null) return 'null';
+        if (v === undefined) return 'undefined';
+        var t = typeof v;
+        if (t === 'string') return v;
+        if (t === 'number' || t === 'boolean') return String(v);
+        if (v instanceof Error) return (v.name || 'Error') + ': ' + (v.message || '');
+        if (t === 'function') return 'function ' + (v.name || 'anonymous');
+        try {
+            var j = JSON.stringify(v);
+            return j === undefined ? Object.prototype.toString.call(v) : j;
+        } catch (e) {
+            return Object.prototype.toString.call(v);   // 循环引用等
+        }
+    };
+    LOG._record = function (lvl, args) {
+        try {
+            var parts = [];
+            for (var i = 0; i < args.length; i++) parts.push(LOG._fmtArg(args[i]));
+            var msg = parts.join(' ');
+            if (msg.length > 400) msg = msg.slice(0, 400) + '…';
+            LOG.buffer.push({ t: U.now(), lvl: lvl, msg: msg });
+            // 环形：超限就丢掉最旧的（一次性裁到位，避免每条都 splice）
+            if (LOG.buffer.length > LOG.maxBuffer) {
+                LOG.buffer.splice(0, LOG.buffer.length - LOG.maxBuffer);
+            }
+        } catch (e) {}
+    };
     LOG._out = function (lvl, args) {
+        LOG._record(lvl, args);              // 先记缓冲（不受 console 级别影响）
         if (lvl < LOG.level) return;
         var method = lvl === 0 ? 'log' : lvl === 1 ? 'info' : lvl === 2 ? 'warn' : 'error';
         try { console[method].apply(console, [LOG.prefix].concat(Array.from(args))); } catch (e) {}
@@ -425,6 +512,18 @@
     LOG.warn = function () { LOG._out(2, arguments); };
     LOG.error = function () { LOG._out(3, arguments); };
     LOG.setLevel = function (lvl) { if (U.isNum(lvl) && lvl >= 0 && lvl <= 3) LOG.level = lvl; };
+    // 供诊断面板使用
+    LOG.clearBuffer = function () { LOG.buffer.length = 0; };
+    LOG.dump = function (minLvl) {
+        var out = [];
+        var lo = (minLvl == null) ? 0 : minLvl;
+        for (var i = 0; i < LOG.buffer.length; i++) {
+            var e = LOG.buffer[i];
+            if (e.lvl < lo) continue;
+            out.push(e);
+        }
+        return out;
+    };
 
     // ===== 防抖/节流 =====
     U.debounce = function (fn, wait) {
@@ -576,6 +675,12 @@
     // ===== 有界记忆化（热路径：URL 解析等纯函数）=====
     // new URL() 是热点里最贵的调用之一，缓存后重复 URL 直接命中。
     // 上限到达时按插入顺序批量淘汰 1/4，避免维护完整 LRU 的开销。
+    // 整洁-5：这里的淘汰是「到顶按插入顺序批量删 1/4」，**不是 LRU** ——
+    // Map 的迭代顺序就是插入顺序，命中不会把条目挪到队尾，所以一个刚被访问过的
+    // 热 key 也有可能被删掉（它是「先来先走」，不是「最久未用先走」）。
+    // 之所以还能用：单参记忆化场景里键的分布通常很稳，重算一次也不贵。
+    // 如果哪天发现某个用它的地方命中率异常（比如键是轮流出现的周期性输入），
+    // 换成 U.lru —— 那个是按访问顺序淘汰的，专治这种模式。
     U.memo1 = function (fn, max) {
         var cap = max || 1500;
         var cache = new Map();
@@ -726,6 +831,18 @@
     // ===== 模块 1b：国际化系统 (i18n)
     // =========================================================================
     var LANG = {};
+    // =========================================================================
+    // 【约定】LANG.strings 里**只放纯文本**。
+    //
+    // 图标一律由 UI._tabIconMap 提供（tab 的图标特别容易走偏：
+    // 曾经 en/ja/ko 三份表里把 <svg> 直接拼进 tabImg/tabVideo… 的值里，
+    // 于是「语言不同 → 有没有图标也不同」，切换语言还会把外层的
+    // <span> 包装整块覆盖掉）。
+    //
+    // UI._tabLabel 仍然保留剥 SVG 的逻辑作为**兜底**，但那是安全网不是许可：
+    // 新增语言 / 新增键时不要照抄旧写法。下面的 LANG.assertPlainText()
+    // 会在启动时（DEBUG 级别下）把违规的键名打出来。
+    // =========================================================================
     LANG.strings = {
         'zh-CN': {
             'scan': '扫描',
@@ -845,6 +962,24 @@
             'filterApplied': '筛选已应用',
             'appTitle': '媒体嗅探器 Pro',
             'tabImg': '图片', 'tabVideo': '视频',
+            'tabDiag': '诊断',
+            'diagTitle': '诊断与自检',
+            'diagDesc': '排查问题时把「复制报告」的内容发给开发者即可',
+            'diagEnv': '环境',
+            'diagStats': '运行统计',
+            'diagCaches': '缓存占用',
+            'diagPerf': '耗时打点',
+            'diagSelfCheck': '自检结果',
+            'diagLogs': '运行日志',
+            'diagRunCheck': '重新自检',
+            'diagCopyReport': '复制报告',
+            'diagClearLogs': '清空日志',
+            'diagCopied': '报告已复制到剪贴板',
+            'diagCopyFail': '复制失败，请手动选择文本',
+            'diagLogLevel': '日志级别',
+            'diagAllLevels': '全部',
+            'diagEmptyLogs': '（暂无日志）',
+            'diagRefresh': '刷新',
             'tabAudio': '音频',
             'tabM3u8': '流媒体',
             'tabTranslate': '翻译',
@@ -963,7 +1098,10 @@
             'noCopyUrl': '无链接可复制',
             'm3u8Start': '开始处理 m3u8',
             'm3u8Progress': '下载进度: {d}/{t}',
-            'm3u8Fail': '下载失败',
+            'muxPreparing': '准备合流…', 'muxStageLib': '加载合流组件…', 'muxStageVideo': '下载视频轨 {p}%',
+            'muxStageAudio': '下载音频轨 {p}%', 'muxStageParse': '解析轨道…', 'muxStageMux': '合并音视频…',
+            'muxStageVerify': '校验产物…', 'muxOk': '合流完成', 'muxFail': '合流失败', 'muxSaved': '已保存合流后的视频',
+            'muxSeparate': '已改为分别下载音视频（请用 ffmpeg 合并）', 'muxNoAudio': '这条流没有独立音频轨',
             'm3u8Done': 'm3u8 下载完成',
             'previewFail': '预览失败',
             'extractFail': '提取失败',
@@ -1016,7 +1154,7 @@
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': '媒体嗅探器 Pro v1.15 · SelectionManager · 拖拽排序 · 收藏夹 · 智能去重 · 分组 · 批量操作注册 · 插件系统',
+            'infoLine1': '媒体嗅探器 Pro v1.16 · SelectionManager · 拖拽排序 · 收藏夹 · 智能去重 · 分组 · 批量操作注册 · 插件系统',
             'infoLine2': '快捷键：Alt+T 翻译选中 · Alt+B 开关面板 · Esc 关闭',
             'clickTabScan': '点击标签扫描',
             'dlProgress': '下载进度',
@@ -1064,6 +1202,91 @@
             'parserHeaders': '请求头 JSON（可选）',
             'addRule': '添加规则',
             'addParser': '添加解析器',
+            'parserSteps': '多步流水线（steps，JSON，高级）',
+            'parserStepsHint': '按顺序请求多个接口，用 {{变量}} 把上一步的结果传给下一步。留空即为单步模式。',
+            'parserTemplate': '从模板新建',
+            'parserTemplatePick': '选择模板…',
+            'parserRunsTips': '适用站点（正则）',
+            'grpAudioId': '音频识别（听歌识曲）',
+            'audioIdDesc': '录几秒音频识别歌曲名 / 歌手，识别成功后一键复制分享。密钥只保存在本地。',
+            'audioIdProvider': '识别通道',
+            'audioIdNeedKey': '请先在设置里填好识别通道的密钥 / 地址',
+            'audioIdBusy': '正在识别中，请稍候…',
+            'transcribeBusy': '正在转写中，请稍候…',
+            'webdavBackupFail': '备份失败: {e}',
+            'audioIdProviderAudD': 'AudD（推荐，一个 Token 即可）',
+            'audioIdProviderAcr': 'ACRCloud（付费/自建账号）',
+            'audioIdProviderCustom': '自定义接口',
+            'audioIdToken': 'AudD API Token',
+            'audioIdAcrHost': 'ACRCloud Host',
+            'audioIdAcrKey': 'ACRCloud Access Key',
+            'audioIdAcrSecret': 'ACRCloud Access Secret',
+            'audioIdCustomUrl': '自定义接口地址（POST 音频，返回 JSON）',
+            'audioIdSeconds': '录音时长（秒）',
+            'audioIdSource': '音频来源',
+            'audioIdSourcePage': '页面播放的声音（免权限）',
+            'audioIdSourceMic': '麦克风（对着外放录音）',
+            'audioIdRun': '开始识别',
+            'audioIdStageCapture': '正在录音…还剩 {s} 秒',
+            'audioIdStageIdentify': '正在识别…',
+            'audioIdNoMatch': '没听出来这首曲子（换个段落或延长录音再试）',
+            'audioIdResult': '识别结果',
+            'audioIdCopyInfo': '复制歌曲信息',
+            'audioIdCopiedInfo': '已复制歌曲信息',
+            'audioIdHistory': '识别历史',
+            'audioIdClearHistory': '清空识别历史',
+            'audioIdNoHistory': '还没有识别记录',
+            'grpTranscribe': '转文字 + AI 摘要',
+            'transcribeDesc': '把视频的音频轨转成文稿，再让 AI 出一份摘要。多轨站点可直接用音频轨，无需先下载视频。密钥只保存在本地。',
+            'asrBaseUrl': 'ASR 接口地址（Whisper 兼容）',
+            'asrKey': 'ASR 密钥',
+            'asrModel': 'ASR 模型',
+            'asrLang': '语言（auto=自动）',
+            'asrMaxMB': '单次上传上限（MB）',
+            'asrChunkSeconds': '超限时每片秒数',
+            'aiBaseUrl': 'AI 接口地址（OpenAI 兼容）',
+            'aiKey': 'AI 密钥',
+            'aiModel': 'AI 模型',
+            'aiPromptStyle': '摘要风格',
+            'styleSummary': '结构化摘要',
+            'stylePoints': '要点清单',
+            'styleTimeline': '时间轴提纲',
+            'styleQa': '问答对',
+            'transcribeRun': '转文字',
+            'transcribeStageFetch': '下载音频…',
+            'transcribeStageDecode': '解码并重采样…',
+            'transcribeStageAsr': '转写中 {i}/{n}',
+            'transcribeStageUpload': '上传中…',
+            'transcribeStageSummary': 'AI 生成摘要…',
+            'transcribeResult': '转写结果',
+            'transcribeCopyText': '复制全文',
+            'transcribeCopyMd': '复制 Markdown',
+            'transcribeSaveMd': '保存为 .md',
+            'transcribeSummaryFailed': '（摘要失败：{e}）',
+            'transcribeNoKey': '请先在设置里填写 ASR 密钥',
+            'transcribeHistory': '转写历史',
+            'transcribeClearHistory': '清空转写历史',
+            'transcribeNoHistory': '还没有转写记录',
+            'grpWebdav': 'WebDAV 后端（NAS）',
+            'webdavDesc': '把配置与历史同步到 WebDAV，并可把下载文件直接存进 NAS。密码仅保存在本地，不会写入备份文件。',
+            'webdavEnabled': '启用 WebDAV',
+            'webdavUrl': 'WebDAV 地址（https://nas.example.com/dav/）',
+            'webdavDir': '子目录',
+            'webdavUser': '用户名',
+            'webdavPass': '密码',
+            'webdavTest': '测试连接',
+            'webdavTesting': '正在测试…',
+            'webdavTestOk': '连接成功，目录下 {n} 个文件',
+            'webdavBackup': '备份到云端',
+            'webdavRestore': '从云端恢复',
+            'webdavBackupOk': '已备份（{kb} KB）',
+            'webdavRestoreOk': '已恢复 {n} 项配置',
+            'webdavLastSync': '上次同步：{t}',
+            'webdavNever': '从未同步',
+            'webdavUploadDownloads': '下载文件直接存到 NAS（不落本地下载目录）',
+            'webdavUploaded': '已上传到 NAS：{name}',
+            'webdavUploadFailed': 'NAS 上传失败（已回退到本地下载）: {e}',
+            'webdavNeedConfig': '请先填写 WebDAV 地址',
             'edit': '编辑',
             'noRules': '暂无自定义规则',
             'noParsers': '暂无解析器插件',
@@ -1229,6 +1452,24 @@
             'filterApplied': 'Filter applied',
             'appTitle': 'Media Sniffer Pro',
             'tabImg': 'Images',
+            'tabDiag': 'Diagnostics',
+            'diagTitle': 'Diagnostics & Self-check',
+            'diagDesc': 'When reporting a problem, send the developer the "Copy report" output',
+            'diagEnv': 'Environment',
+            'diagStats': 'Runtime stats',
+            'diagCaches': 'Cache usage',
+            'diagPerf': 'Timing marks',
+            'diagSelfCheck': 'Self-check',
+            'diagLogs': 'Logs',
+            'diagRunCheck': 'Re-run check',
+            'diagCopyReport': 'Copy report',
+            'diagClearLogs': 'Clear logs',
+            'diagCopied': 'Report copied to clipboard',
+            'diagCopyFail': 'Copy failed — please select the text manually',
+            'diagLogLevel': 'Log level',
+            'diagAllLevels': 'All',
+            'diagEmptyLogs': '(no logs yet)',
+            'diagRefresh': 'Refresh',
             'tabVideo': 'Videos',
             'tabAudio': 'Audio',
             'tabM3u8': 'Streams',
@@ -1351,7 +1592,10 @@
             'noCopyUrl': 'No URLs to copy',
             'm3u8Start': 'Starting m3u8 download...',
             'm3u8Progress': 'Progress: {d}/{t}',
-            'm3u8Fail': 'Download failed',
+            'muxPreparing': 'Preparing mux…', 'muxStageLib': 'Loading mux engine…', 'muxStageVideo': 'Downloading video track {p}%',
+            'muxStageAudio': 'Downloading audio track {p}%', 'muxStageParse': 'Parsing tracks…', 'muxStageMux': 'Muxing…',
+            'muxStageVerify': 'Verifying…', 'muxOk': 'Mux complete', 'muxFail': 'Mux failed', 'muxSaved': 'Saved muxed video',
+            'muxSeparate': 'Downloading tracks separately (merge with ffmpeg)', 'muxNoAudio': 'No separate audio track in this stream',
             'm3u8Done': '✓ m3u8 merged and downloaded',
             'previewFail': 'Preview failed',
             'extractFail': 'Extraction failed',
@@ -1404,7 +1648,7 @@
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': 'Media Sniffer Pro v1.15 · SelectionManager · Drag Sort · Favorites · Smart Dedup · Groups · Batch Actions · Plugin System',
+            'infoLine1': 'Media Sniffer Pro v1.16 · SelectionManager · Drag Sort · Favorites · Smart Dedup · Groups · Batch Actions · Plugin System',
             'infoLine2': 'Shortcuts: Alt+T Translate · Alt+B Toggle · Esc Close',
             'clickTabScan': 'Click a tab above to start scanning',
             'dlProgress': 'Download Progress',
@@ -1452,6 +1696,91 @@
             'parserHeaders': 'Headers JSON (optional)',
             'addRule': 'Add Rule',
             'addParser': 'Add Parser',
+            'parserSteps': 'Multi-step pipeline (steps, JSON, advanced)',
+            'parserStepsHint': 'Call APIs in order; pass results forward with {{var}}. Leave empty for single-step mode.',
+            'parserTemplate': 'New from template',
+            'parserTemplatePick': 'Pick a template…',
+            'parserRunsTips': 'Applies to (regex)',
+            'grpAudioId': 'Audio Recognition (Song ID)',
+            'audioIdDesc': 'Record a few seconds to identify the song and artist, then copy a shareable line. Keys stay on your device.',
+            'audioIdProvider': 'Provider',
+            'audioIdNeedKey': 'Set the provider key/endpoint in Settings first',
+            'audioIdBusy': 'Identifying, please wait…',
+            'transcribeBusy': 'Transcribing, please wait…',
+            'webdavBackupFail': 'Backup failed: {e}',
+            'audioIdProviderAudD': 'AudD (recommended, one token)',
+            'audioIdProviderAcr': 'ACRCloud (paid / self-hosted)',
+            'audioIdProviderCustom': 'Custom endpoint',
+            'audioIdToken': 'AudD API Token',
+            'audioIdAcrHost': 'ACRCloud Host',
+            'audioIdAcrKey': 'ACRCloud Access Key',
+            'audioIdAcrSecret': 'ACRCloud Access Secret',
+            'audioIdCustomUrl': 'Custom endpoint (POST audio, return JSON)',
+            'audioIdSeconds': 'Record seconds',
+            'audioIdSource': 'Audio source',
+            'audioIdSourcePage': 'Playing in page (no permission)',
+            'audioIdSourceMic': 'Microphone (hold near speaker)',
+            'audioIdRun': 'Identify',
+            'audioIdStageCapture': 'Recording… {s}s left',
+            'audioIdStageIdentify': 'Identifying…',
+            'audioIdNoMatch': 'No match (try another part or record longer)',
+            'audioIdResult': 'Match found',
+            'audioIdCopyInfo': 'Copy song info',
+            'audioIdCopiedInfo': 'Song info copied',
+            'audioIdHistory': 'Recognition history',
+            'audioIdClearHistory': 'Clear history',
+            'audioIdNoHistory': 'No records yet',
+            'grpTranscribe': 'Transcript + AI Summary',
+            'transcribeDesc': 'Turn a video\'s audio track into text, then let AI summarize it. Multi-track sites expose an audio track directly, so no download needed. Keys stay on your device.',
+            'asrBaseUrl': 'ASR endpoint (Whisper-compatible)',
+            'asrKey': 'ASR key',
+            'asrModel': 'ASR model',
+            'asrLang': 'Language (auto)',
+            'asrMaxMB': 'Upload limit per request (MB)',
+            'asrChunkSeconds': 'Chunk seconds when over limit',
+            'aiBaseUrl': 'AI endpoint (OpenAI-compatible)',
+            'aiKey': 'AI key',
+            'aiModel': 'AI model',
+            'aiPromptStyle': 'Summary style',
+            'styleSummary': 'Structured summary',
+            'stylePoints': 'Key points',
+            'styleTimeline': 'Timed outline',
+            'styleQa': 'Q&A pairs',
+            'transcribeRun': 'Transcribe',
+            'transcribeStageFetch': 'Downloading audio…',
+            'transcribeStageDecode': 'Decoding / resampling…',
+            'transcribeStageAsr': 'Transcribing {i}/{n}',
+            'transcribeStageUpload': 'Uploading…',
+            'transcribeStageSummary': 'AI summarizing…',
+            'transcribeResult': 'Transcript',
+            'transcribeCopyText': 'Copy text',
+            'transcribeCopyMd': 'Copy Markdown',
+            'transcribeSaveMd': 'Save as .md',
+            'transcribeSummaryFailed': '(summary failed: {e})',
+            'transcribeNoKey': 'Set your ASR key in Settings first',
+            'transcribeHistory': 'Transcript history',
+            'transcribeClearHistory': 'Clear history',
+            'transcribeNoHistory': 'No records yet',
+            'grpWebdav': 'WebDAV Backend (NAS)',
+            'webdavDesc': 'Sync settings and history to WebDAV, and optionally store downloads straight on your NAS. Passwords stay local and are never written into backups.',
+            'webdavEnabled': 'Enable WebDAV',
+            'webdavUrl': 'WebDAV URL (https://nas.example.com/dav/)',
+            'webdavDir': 'Subfolder',
+            'webdavUser': 'Username',
+            'webdavPass': 'Password',
+            'webdavTest': 'Test connection',
+            'webdavTesting': 'Testing…',
+            'webdavTestOk': 'Connected — {n} files in folder',
+            'webdavBackup': 'Back up to cloud',
+            'webdavRestore': 'Restore from cloud',
+            'webdavBackupOk': 'Backed up ({kb} KB)',
+            'webdavRestoreOk': 'Restored {n} settings',
+            'webdavLastSync': 'Last sync: {t}',
+            'webdavNever': 'never',
+            'webdavUploadDownloads': 'Store downloads on NAS (skip local download folder)',
+            'webdavUploaded': 'Uploaded to NAS: {name}',
+            'webdavUploadFailed': 'NAS upload failed (fell back to local download): {e}',
+            'webdavNeedConfig': 'Fill in the WebDAV URL first',
             'edit': 'Edit',
             'noRules': 'No custom rules',
             'noParsers': 'No parser plugins',
@@ -1596,6 +1925,24 @@
             'scanDone': 'スキャン完了', 'filterApplied': 'フィルターを適用しました',
             'appTitle': 'メディアスニッファー Pro',
             'tabImg': '画像',
+            'tabDiag': '診断',
+            'diagTitle': '診断とセルフチェック',
+            'diagDesc': '問題を報告する際は「レポートをコピー」の内容を開発者に送ってください',
+            'diagEnv': '環境',
+            'diagStats': '実行統計',
+            'diagCaches': 'キャッシュ使用量',
+            'diagPerf': '所要時間の記録',
+            'diagSelfCheck': 'セルフチェック',
+            'diagLogs': '実行ログ',
+            'diagRunCheck': '再チェック',
+            'diagCopyReport': 'レポートをコピー',
+            'diagClearLogs': 'ログを消す',
+            'diagCopied': 'レポートをクリップボードにコピーしました',
+            'diagCopyFail': 'コピー失敗。手動で選択してください',
+            'diagLogLevel': 'ログレベル',
+            'diagAllLevels': 'すべて',
+            'diagEmptyLogs': '（ログなし）',
+            'diagRefresh': '更新',
             'tabVideo': '動画',
             'tabAudio': '音声',
             'tabM3u8': 'ストリーム',
@@ -1701,7 +2048,10 @@
             'noCopyUrl': 'コピーするURLはありません',
             'm3u8Start': 'm3u8のDLを開始...',
             'm3u8Progress': '進捗: {d}/{t}',
-            'm3u8Fail': 'DL失敗',
+            'muxPreparing': '合流を準備…', 'muxStageLib': '合流エンジンを読込中…', 'muxStageVideo': '映像トラックをDL中 {p}%',
+            'muxStageAudio': '音声トラックをDL中 {p}%', 'muxStageParse': 'トラックを解析…', 'muxStageMux': '合成中…',
+            'muxStageVerify': '検証中…', 'muxOk': '合流完了', 'muxFail': '合流失敗', 'muxSaved': '合流済み動画を保存しました',
+            'muxSeparate': '映像と音声を別々にDLします（ffmpeg で結合）', 'muxNoAudio': '独立した音声トラックがありません',
             'm3u8Done': '✓ m3u8 結合・DL完了',
             'previewFail': 'プレビュー失敗',
             'extractFail': '抽出失敗',
@@ -1754,7 +2104,7 @@
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': 'メディアスニッファー Pro v1.15 · モジュール設計 · AES-128復号 · 仮想リスト · 進捗可視化 · プラグインシステム',
+            'infoLine1': 'メディアスニッファー Pro v1.16 · モジュール設計 · AES-128復号 · 仮想リスト · 進捗可視化 · プラグインシステム',
             'infoLine2': 'ショートカット: Alt+T 翻訳 · Alt+B パネル切替 · Esc 閉じる',
             'clickTabScan': '上のタブをクリックしてスキャン開始',
             'dlProgress': 'ダウンロード進捗',
@@ -1800,6 +2150,91 @@
             'parserHeaders': 'ヘッダーJSON（任意）',
             'addRule': 'ルール追加',
             'addParser': 'パーサー追加',
+            'parserSteps': 'マルチステップ（steps、JSON、上級）',
+            'parserStepsHint': '複数APIを順に呼び出し、{{変数}} で前の結果を次へ渡します。空欄なら単一ステップ。',
+            'parserTemplate': 'テンプレートから作成',
+            'parserTemplatePick': 'テンプレートを選択…',
+            'parserRunsTips': '適用サイト（正規表現）',
+            'grpAudioId': '楽曲認識（曲名検索）',
+            'audioIdDesc': '数秒録音して曲名・アーティストを特定し、ワンタッチで共有用テキストをコピー。キーは端末内のみに保存します。',
+            'audioIdProvider': '認識チャンネル',
+            'audioIdNeedKey': '先に設定で認識チャンネルのキー / アドレスを入力してください',
+            'audioIdBusy': '認識中です。しばらくお待ちください…',
+            'transcribeBusy': '文字起こし中です。しばらくお待ちください…',
+            'webdavBackupFail': 'バックアップ失敗: {e}',
+            'audioIdProviderAudD': 'AudD（推奨・トークン1つ）',
+            'audioIdProviderAcr': 'ACRCloud（有料/自前）',
+            'audioIdProviderCustom': 'カスタムAPI',
+            'audioIdToken': 'AudD API Token',
+            'audioIdAcrHost': 'ACRCloud Host',
+            'audioIdAcrKey': 'ACRCloud Access Key',
+            'audioIdAcrSecret': 'ACRCloud Access Secret',
+            'audioIdCustomUrl': 'カスタムAPI（音声をPOSTしJSONを返す）',
+            'audioIdSeconds': '録音秒数',
+            'audioIdSource': '音声ソース',
+            'audioIdSourcePage': 'ページ再生音（権限不要）',
+            'audioIdSourceMic': 'マイク（スピーカーに向ける）',
+            'audioIdRun': '認識開始',
+            'audioIdStageCapture': '録音中…残り {s} 秒',
+            'audioIdStageIdentify': '認識中…',
+            'audioIdNoMatch': '曲を特定できませんでした（別の箇所か長めに録音してください）',
+            'audioIdResult': '認識結果',
+            'audioIdCopyInfo': '曲情報をコピー',
+            'audioIdCopiedInfo': '曲情報をコピーしました',
+            'audioIdHistory': '認識履歴',
+            'audioIdClearHistory': '履歴を消去',
+            'audioIdNoHistory': '記録はまだありません',
+            'grpTranscribe': '文字起こし + AI要約',
+            'transcribeDesc': '動画の音声トラックを文字起こしし、AIで要約します。マルチトラックサイトは音声トラックを直接使えるので動画DL不要。キーは端末内のみ。',
+            'asrBaseUrl': 'ASRエンドポイント（Whisper互換）',
+            'asrKey': 'ASRキー',
+            'asrModel': 'ASRモデル',
+            'asrLang': '言語（auto=自動）',
+            'asrMaxMB': '1回のアップロード上限（MB）',
+            'asrChunkSeconds': '超過時の分割秒数',
+            'aiBaseUrl': 'AIエンドポイント（OpenAI互換）',
+            'aiKey': 'AIキー',
+            'aiModel': 'AIモデル',
+            'aiPromptStyle': '要約スタイル',
+            'styleSummary': '構造化要約',
+            'stylePoints': '要点リスト',
+            'styleTimeline': 'タイムライン',
+            'styleQa': 'Q&A形式',
+            'transcribeRun': '文字起こし',
+            'transcribeStageFetch': '音声を取得中…',
+            'transcribeStageDecode': 'デコード/リサンプル中…',
+            'transcribeStageAsr': '変換中 {i}/{n}',
+            'transcribeStageUpload': 'アップロード中…',
+            'transcribeStageSummary': 'AIが要約中…',
+            'transcribeResult': '文字起こし結果',
+            'transcribeCopyText': '全文をコピー',
+            'transcribeCopyMd': 'Markdownをコピー',
+            'transcribeSaveMd': '.md として保存',
+            'transcribeSummaryFailed': '（要約失敗：{e}）',
+            'transcribeNoKey': '先に設定でASRキーを入力してください',
+            'transcribeHistory': '文字起こし履歴',
+            'transcribeClearHistory': '履歴を消去',
+            'transcribeNoHistory': '記録はまだありません',
+            'grpWebdav': 'WebDAVバックエンド（NAS）',
+            'webdavDesc': '設定と履歴をWebDAVに同期し、ダウンロードをNASへ直接保存できます。パスワードは端末内のみでバックアップに含めません。',
+            'webdavEnabled': 'WebDAVを有効化',
+            'webdavUrl': 'WebDAV URL（https://nas.example.com/dav/）',
+            'webdavDir': 'サブフォルダ',
+            'webdavUser': 'ユーザー名',
+            'webdavPass': 'パスワード',
+            'webdavTest': '接続テスト',
+            'webdavTesting': 'テスト中…',
+            'webdavTestOk': '接続成功・フォルダ内 {n} 件',
+            'webdavBackup': 'クラウドへバックアップ',
+            'webdavRestore': 'クラウドから復元',
+            'webdavBackupOk': 'バックアップ完了（{kb} KB）',
+            'webdavRestoreOk': '{n} 項目を復元しました',
+            'webdavLastSync': '前回同期：{t}',
+            'webdavNever': '未同期',
+            'webdavUploadDownloads': 'ダウンロードをNASへ直接保存',
+            'webdavUploaded': 'NASへアップロード済み：{name}',
+            'webdavUploadFailed': 'NASへのアップロードに失敗（ローカル保存に切替）: {e}',
+            'webdavNeedConfig': '先にWebDAVアドレスを入力してください',
             'edit': '編集',
             'noRules': 'カスタムルールなし',
             'noParsers': 'パーサープラグインなし',
@@ -1944,6 +2379,24 @@
             'scanDone': '스캔 완료', 'filterApplied': '필터 적용됨',
             'appTitle': '미디어 스니퍼 Pro',
             'tabImg': '이미지',
+            'tabDiag': '진단',
+            'diagTitle': '진단 및 자체 점검',
+            'diagDesc': '문제를 보고할 때 "보고서 복사" 내용을 개발자에게 보내주세요',
+            'diagEnv': '환경',
+            'diagStats': '실행 통계',
+            'diagCaches': '캐시 사용량',
+            'diagPerf': '소요 시간 기록',
+            'diagSelfCheck': '자체 점검',
+            'diagLogs': '실행 로그',
+            'diagRunCheck': '다시 점검',
+            'diagCopyReport': '보고서 복사',
+            'diagClearLogs': '로그 지우기',
+            'diagCopied': '보고서를 클립보드에 복사했습니다',
+            'diagCopyFail': '복사 실패 — 직접 선택해 주세요',
+            'diagLogLevel': '로그 레벨',
+            'diagAllLevels': '전체',
+            'diagEmptyLogs': '(로그 없음)',
+            'diagRefresh': '새로고침',
             'tabVideo': '영상',
             'tabAudio': '오디오',
             'tabM3u8': '스트림',
@@ -2049,7 +2502,10 @@
             'noCopyUrl': '복사할 URL이 없습니다',
             'm3u8Start': 'm3u8 다운로드 시작...',
             'm3u8Progress': '진행률: {d}/{t}',
-            'm3u8Fail': '다운로드 실패',
+            'muxPreparing': '합류 준비 중…', 'muxStageLib': '합류 엔진 로드 중…', 'muxStageVideo': '비디오 트랙 다운로드 {p}%',
+            'muxStageAudio': '오디오 트랙 다운로드 {p}%', 'muxStageParse': '트랙 분석 중…', 'muxStageMux': '합치는 중…',
+            'muxStageVerify': '검증 중…', 'muxOk': '합류 완료', 'muxFail': '합류 실패', 'muxSaved': '합류된 동영상을 저장했습니다',
+            'muxSeparate': '트랙을 각각 다운로드합니다 (ffmpeg 로 병합)', 'muxNoAudio': '독립 오디오 트랙이 없습니다',
             'm3u8Done': '✓ m3u8 병합 및 다운로드 완료',
             'previewFail': '미리보기 실패',
             'extractFail': '추출 실패',
@@ -2102,7 +2558,7 @@
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': '미디어 스니퍼 Pro v1.15 · 모듈 구조 · AES-128 복호화 · 가상 리스트 · 진행률 · 플러그인 시스템',
+            'infoLine1': '미디어 스니퍼 Pro v1.16 · 모듈 구조 · AES-128 복호화 · 가상 리스트 · 진행률 · 플러그인 시스템',
             'infoLine2': '단축키: Alt+T 번역 · Alt+B 패널 토글 · Esc 닫기',
             'clickTabScan': '위 탭을 클릭하여 스캔 시작',
             'dlProgress': '다운로드 진행률',
@@ -2148,6 +2604,91 @@
             'parserHeaders': '헤더 JSON (선택)',
             'addRule': '규칙 추가',
             'addParser': '파서 추가',
+            'parserSteps': '다단계 파이프라인 (steps, JSON, 고급)',
+            'parserStepsHint': '여러 API를 순서대로 호출하고 {{변수}} 로 이전 결과를 전달합니다. 비우면 단일 단계입니다.',
+            'parserTemplate': '템플릿에서 생성',
+            'parserTemplatePick': '템플릿 선택…',
+            'parserRunsTips': '적용 사이트 (정규식)',
+            'grpAudioId': '음악 인식(노래 찾기)',
+            'audioIdDesc': '몇 초 녹음해 곡명과 아티스트를 찾고 공유용 텍스트를 복사합니다. 키는 기기에만 저장됩니다.',
+            'audioIdProvider': '인식 채널',
+            'audioIdNeedKey': '설정에서 인식 채널 키 / 주소를 먼저 입력하세요',
+            'audioIdBusy': '인식 중입니다. 잠시만 기다려 주세요…',
+            'transcribeBusy': '받아쓰기 중입니다. 잠시만 기다려 주세요…',
+            'webdavBackupFail': '백업 실패: {e}',
+            'audioIdProviderAudD': 'AudD(권장, 토큰 하나)',
+            'audioIdProviderAcr': 'ACRCloud(유료/자체)',
+            'audioIdProviderCustom': '사용자 API',
+            'audioIdToken': 'AudD API Token',
+            'audioIdAcrHost': 'ACRCloud Host',
+            'audioIdAcrKey': 'ACRCloud Access Key',
+            'audioIdAcrSecret': 'ACRCloud Access Secret',
+            'audioIdCustomUrl': '사용자 API(오디오 POST, JSON 반환)',
+            'audioIdSeconds': '녹음 길이(초)',
+            'audioIdSource': '오디오 소스',
+            'audioIdSourcePage': '페이지 재생음(권한 불필요)',
+            'audioIdSourceMic': '마이크(스피커에 대고 녹음)',
+            'audioIdRun': '인식 시작',
+            'audioIdStageCapture': '녹음 중… {s}초 남음',
+            'audioIdStageIdentify': '인식 중…',
+            'audioIdNoMatch': '곡을 찾지 못했습니다(다른 구간이나 더 길게 시도)',
+            'audioIdResult': '인식 결과',
+            'audioIdCopyInfo': '곡 정보 복사',
+            'audioIdCopiedInfo': '곡 정보를 복사했습니다',
+            'audioIdHistory': '인식 기록',
+            'audioIdClearHistory': '기록 지우기',
+            'audioIdNoHistory': '기록이 없습니다',
+            'grpTranscribe': '받아쓰기 + AI 요약',
+            'transcribeDesc': '영상의 오디오 트랙을 텍스트로 바꾸고 AI가 요약합니다. 다중 트랙 사이트는 오디오 트랙을 바로 써서 다운로드가 필요 없습니다. 키는 기기에만 저장됩니다.',
+            'asrBaseUrl': 'ASR 주소(Whisper 호환)',
+            'asrKey': 'ASR 키',
+            'asrModel': 'ASR 모델',
+            'asrLang': '언어(auto=자동)',
+            'asrMaxMB': '요청당 업로드 한도(MB)',
+            'asrChunkSeconds': '초과 시 분할 초',
+            'aiBaseUrl': 'AI 주소(OpenAI 호환)',
+            'aiKey': 'AI 키',
+            'aiModel': 'AI 모델',
+            'aiPromptStyle': '요약 스타일',
+            'styleSummary': '구조화 요약',
+            'stylePoints': '핵심 목록',
+            'styleTimeline': '타임라인 개요',
+            'styleQa': '질의응답',
+            'transcribeRun': '받아쓰기',
+            'transcribeStageFetch': '오디오 내려받는 중…',
+            'transcribeStageDecode': '디코딩/리샘플 중…',
+            'transcribeStageAsr': '변환 중 {i}/{n}',
+            'transcribeStageUpload': '업로드 중…',
+            'transcribeStageSummary': 'AI 요약 중…',
+            'transcribeResult': '받아쓰기 결과',
+            'transcribeCopyText': '전체 복사',
+            'transcribeCopyMd': 'Markdown 복사',
+            'transcribeSaveMd': '.md 로 저장',
+            'transcribeSummaryFailed': '(요약 실패: {e})',
+            'transcribeNoKey': '설정에서 ASR 키를 먼저 입력하세요',
+            'transcribeHistory': '받아쓰기 기록',
+            'transcribeClearHistory': '기록 지우기',
+            'transcribeNoHistory': '기록이 없습니다',
+            'grpWebdav': 'WebDAV 백엔드(NAS)',
+            'webdavDesc': '설정과 기록을 WebDAV에 동기화하고 다운로드를 NAS에 바로 저장할 수 있습니다. 비밀번호는 기기에만 있고 백업에 포함되지 않습니다.',
+            'webdavEnabled': 'WebDAV 사용',
+            'webdavUrl': 'WebDAV 주소(https://nas.example.com/dav/)',
+            'webdavDir': '하위 폴더',
+            'webdavUser': '사용자 이름',
+            'webdavPass': '비밀번호',
+            'webdavTest': '연결 테스트',
+            'webdavTesting': '테스트 중…',
+            'webdavTestOk': '연결 성공 · 폴더에 {n}개',
+            'webdavBackup': '클라우드로 백업',
+            'webdavRestore': '클라우드에서 복원',
+            'webdavBackupOk': '백업 완료({kb} KB)',
+            'webdavRestoreOk': '{n}개 설정 복원',
+            'webdavLastSync': '마지막 동기화: {t}',
+            'webdavNever': '없음',
+            'webdavUploadDownloads': '다운로드를 NAS에 바로 저장',
+            'webdavUploaded': 'NAS에 업로드됨: {name}',
+            'webdavUploadFailed': 'NAS 업로드 실패(로컬 저장으로 전환): {e}',
+            'webdavNeedConfig': 'WebDAV 주소를 먼저 입력하세요',
             'edit': '편집',
             'noRules': '사용자 규칙 없음',
             'noParsers': '파서 플러그인 없음',
@@ -2222,7 +2763,15 @@
         var re = LANG._varReCache[k];
         if (re) return re;
         re = new RegExp('\\{' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\}', 'g');
-        if (LANG._varReCount < 200) { LANG._varReCache[k] = re; LANG._varReCount++; }
+        // 原来是「满 200 就永久停止缓存」—— 一旦某个语言/一堆不同键把额度用光，
+        // 之后所有键每次都要重新 new RegExp（_varRe 是在 LANG.get 的热路径上）。
+        // 改成「到顶就整体清空重来」：简单、无状态、命中率长期稳定。
+        if (LANG._varReCount >= 200) {
+            LANG._varReCache = {};
+            LANG._varReCount = 0;
+        }
+        LANG._varReCache[k] = re;
+        LANG._varReCount++;
         return re;
     };
     LANG.get = function (key, vars) {
@@ -2239,6 +2788,28 @@
         return val;
     };
     LANG.t = LANG.get;
+
+    // 开发期守卫：扫一遍所有语言表，把「值里带 <svg>」的键报出来。
+    // 只在 DEBUG 级别下跑、只报一次，成本可忽略；作用是让违反上面那条约定的人
+    // 一眼看到，而不是等切语言时发现图标没了再回头查。
+    LANG.assertPlainText = function () {
+        var bad = [];
+        try {
+            for (var lang in LANG.strings) {
+                if (!Object.prototype.hasOwnProperty.call(LANG.strings, lang)) continue;
+                var table = LANG.strings[lang];
+                for (var k in table) {
+                    if (!Object.prototype.hasOwnProperty.call(table, k)) continue;
+                    var v = table[k];
+                    if (typeof v === 'string' && v.indexOf('<svg') >= 0) bad.push(lang + '.' + k);
+                }
+            }
+        } catch (e) { return []; }
+        if (bad.length) {
+            try { LOG.warn('[LANG] 以下文案里内嵌了 SVG，违反「LANG 只存纯文本」约定（图标请走 UI._tabIconMap）:', bad.join(', ')); } catch (e2) {}
+        }
+        return bad;
+    };
 
         return LANG;
     })();
@@ -2680,8 +3251,11 @@
             segments: [],              // 分片列表 [{url, duration}]
             encrypted: false,          // 是否加密
             keyMethod: null,           // 加密方法（AES-128）
-            keyUrl: null,              // 密钥 URL
+            keyUrl: null,              // 密钥 URL（最后一个）
             keyIv: null,               // IV（16字节）
+            keyRotated: false,         // 播放列表里出现了多个不同的 #EXT-X-KEY URI
+            keyUris: [],               // **全部**出现过的密钥 URI（去重、按出现顺序）
+            keyUriCount: 0,            // 不同密钥的数量（= keyUris.length）
             duration: 0,               // 总时长（秒）
             targetDuration: 0,         // 分片最大时长
             mediaSequence: 0,          // EXT-X-MEDIA-SEQUENCE：首个分片的真实序号
@@ -2732,10 +3306,26 @@
             else if (line.indexOf('#EXT-X-KEY:') === 0) {
                 result.encrypted = true;
                 var keyInfo = line.substring('#EXT-X-KEY:'.length);
+                // P1-4：密钥轮换检测。原来只保留最后一个 #EXT-X-KEY，
+                // 播放列表中途换密钥（直播回看 / 分段加密很常见）时，
+                // 前面那一批分片会用错误密钥解密 —— 产物大段花屏甚至整段坏掉，
+                // 而且失败信息完全指不到原因。检测到不同 URI 就标记出来，
+                // 上层据此拒绝浏览器内合并、引导用户走「生成下载脚本」。
                 var methodMatch = keyInfo.match(/METHOD=(\w+)/);
                 if (methodMatch) result.keyMethod = methodMatch[1];
                 var uriMatch = keyInfo.match(/URI="([^"]+)"/);
-                if (uriMatch) result.keyUrl = uriMatch[1];
+                if (uriMatch) {
+                    // 记录**所有**出现过的密钥 URI（按出现顺序、去重）。
+                    // 只记「非首个」是不够的：keyUrl 会被反复覆盖成最后一个，
+                    // 于是 A→B→C 只剩 [B, C]，去重后仍然只数出 2 个，还是错的。
+                    if (!result.keyUris) result.keyUris = [];
+                    if (result.keyUris.indexOf(uriMatch[1]) < 0) result.keyUris.push(uriMatch[1]);
+                    if (result.keyUriCount > 1 || (result.keyUrl && result.keyUrl !== uriMatch[1])) {
+                        result.keyRotated = true;
+                    }
+                    result.keyUriCount = result.keyUris.length;
+                    result.keyUrl = uriMatch[1];
+                }
                 var ivMatch = keyInfo.match(/IV=0x([0-9a-fA-F]+)/);
                 if (ivMatch) result.keyIv = AES.hexToBytes(ivMatch[1]);
                 else result.keyIv = null; // 默认用序号作为 IV
@@ -2893,6 +3483,17 @@
         // opts.runToken 允许调用方自己持有 token（例如外壳想在同一处统一停止）。
         var runToken = opts.runToken || M3U8._newRunToken();
 
+        // 出口收口：本函数自己有若干「还没走到 _downloadSegments 就结束」的路径
+        // （无分片 / 取播放列表失败 / 取密钥失败 / 抛异常），这些出口必须自己回收
+        // 令牌，否则每失败一次就漏一个。_downloadSegments 内部也会回收（幂等）。
+        var settled = false;
+        var finish = function (data, err) {
+            if (settled) return;
+            settled = true;
+            M3U8._releaseRunToken(runToken);
+            doneCb(data, err);
+        };
+
         // 获取 m3u8 内容（优先 GM_xmlhttpRequest 支持跨域）
         try {
             var fetchM3u8 = function(url, onOk, onErr) {
@@ -2906,28 +3507,55 @@
                 if (parsed.isMaster && parsed.streams.length > 0) {
                     var selectedStream = M3U8.selectStream(parsed.streams, qualityPref);
                     LOG.info('选择码率:', selectedStream.label, selectedStream.resolution);
-                    // 递归下钻子播放列表：沿用同一个 token（一键停止才能连带停掉）
-                    M3U8.downloadAndMerge(selectedStream.url, opts, progressCb, doneCb);
+                    // 递归下钻子播放列表：把同一个 token **真正传下去** ——
+                    // 原来只递归 opts（不含 runToken），子任务会另开一个令牌，
+                    // 外层这个就永久留在数组里；而且 stopDownload(外层令牌) 也停不掉子任务。
+                    var subOpts = {};
+                    for (var sk in opts) if (Object.prototype.hasOwnProperty.call(opts, sk)) subOpts[sk] = opts[sk];
+                    subOpts.runToken = runToken;
+                    settled = true;      // 由子任务负责最终 doneCb，外层不再收口
+                    M3U8.downloadAndMerge(selectedStream.url, subOpts, progressCb, doneCb);
                     return;
                 }
-                if (parsed.segments.length === 0) { doneCb(null, 'm3u8 无分片'); return; }
+                if (parsed.segments.length === 0) { finish(null, 'm3u8 无分片'); return; }
+                // 密钥轮换：浏览器内合并只会用最后一个密钥解全部片段，产物必然损坏。
+                // 与其交付一个坏文件，不如明确拒绝并给出可用的替代路径。
+                if (parsed.keyRotated) {
+                    LOG.warn('m3u8 密钥轮换，拒绝浏览器内合并:', parsed.keyUris);
+                    // 直接报 keyUris 的长度（解析时已按出现顺序去重、且含首个）。
+                    // 原来写 keyUris.length + 1，在 A→B→A 这种「绕回第一个」的序列上
+                    // 会报成 3，实际只有 2 个不同密钥。
+                    var uniqKeyCount = 0;
+                    var seenKeys = {};
+                    for (var ki = 0; ki < (parsed.keyUris || []).length; ki++) {
+                        var ku = parsed.keyUris[ki];
+                        if (!ku || seenKeys[ku]) continue;
+                        seenKeys[ku] = true;
+                        uniqKeyCount++;
+                    }
+                    if (!uniqKeyCount) uniqKeyCount = 1;
+                    finish(null, '这条播放列表在中途更换了加密密钥（共 '
+                        + uniqKeyCount + ' 个不同密钥），浏览器内合并会解错前面的分片。'
+                        + '请改用「生成下载脚本」用 aria2 / ffmpeg 下载并合并。');
+                    return;
+                }
                 LOG.info('开始下载分片:', parsed.segments.length, '加密:', parsed.encrypted);
 
                 var proceed = function(key) {
                     // 传 runToken（并发隔离）+ mediaSequence（AES-128 无显式 IV 时用它算 IV）
                     M3U8._downloadSegments(parsed.segments, key, parsed.keyIv, concurrency,
-                        progressCb, doneCb, runToken, parsed.mediaSequence);
+                        progressCb, finish, runToken, parsed.mediaSequence);
                 };
                 if (parsed.encrypted && parsed.keyUrl) {
                     M3U8.fetchKey(parsed.keyUrl, function(key, err) {
-                        if (err) { doneCb(null, err); return; }
+                        if (err) { finish(null, err); return; }
                         proceed(key);
                     });
                 } else {
                     proceed(null);
                 }
-            }, function(err) { doneCb(null, err); });
-        } catch (e) { doneCb(null, 'm3u8 异常: ' + e.message); }
+            }, function(err) { finish(null, err); });
+        } catch (e) { finish(null, 'm3u8 异常: ' + e.message); }
     };
 
     // ===== 选择码率 =====
@@ -2950,6 +3578,14 @@
         var token = { stopped: false };
         M3U8._activeRuns.push(token);
         return token;
+    };
+    // 令牌回收：原来只有 push 没有 splice，下载无论成功 / 失败 / 内存超限 / 被停止
+    // 都不会把它摘掉。SPA 长会话里这个数组只涨不跌（一天上千条），
+    // master 下钻还会每次再多一个。这里做成幂等 —— 重复释放无副作用。
+    M3U8._releaseRunToken = function (token) {
+        if (!token) return;
+        var i = M3U8._activeRuns.indexOf(token);
+        if (i >= 0) M3U8._activeRuns.splice(i, 1);
     };
 
     M3U8._downloadSegments = function (segments, key, iv, concurrency, progressCb, doneCb, runToken, mediaSequence) {
@@ -2975,17 +3611,20 @@
         // 白白占用内存，已删除。
 
         function tryFinish() {
+            // 被停止要放在最前面判定：否则 idx < total 时直接 return，
+            // 令牌永远留在 _activeRuns 里（这正是泄漏的主因）。
+            if (token.stopped) { M3U8._releaseRunToken(token); return; }
             if (idx < total) return;
             if (running > 0) return;
-            if (token.stopped) return;
             if (abortedForMemory) {
                 // 主动放弃已下载的分片，尽快把内存还给系统
                 for (var ai = 0; ai < total; ai++) chunks[ai] = null;
+                M3U8._releaseRunToken(token);
                 doneCb(null, '文件过大（超过 ' + Math.round(MAX_TOTAL_BYTES / 1048576)
                     + 'MB），浏览器内下载可能耗尽内存。请改用「生成下载脚本」用 aria2 / curl 下载。');
                 return;
             }
-            if (failed > 0) { doneCb(null, '下载失败 ' + failed + ' 个分片'); return; }
+            if (failed > 0) { M3U8._releaseRunToken(token); doneCb(null, '下载失败 ' + failed + ' 个分片'); return; }
             var totalLen = 0;
             for (var i = 0; i < total; i++) if (chunks[i]) totalLen += chunks[i].length;
             var merged = new Uint8Array(totalLen);
@@ -2997,6 +3636,7 @@
                 }
             }
             LOG.info('分片合并完成:', totalLen, '字节');
+            M3U8._releaseRunToken(token);
             doneCb(merged, null);
         }
 
@@ -3179,6 +3819,37 @@
         // Aria2 RPC 推送设置
         aria2RpcUrl: '',
         aria2RpcSecret: '',
+        // ---- 听歌识曲（音频识别）----
+        audioIdProvider: 'audd',        // audd / acrcloud / custom
+        audioIdToken: '',               // AudD API Token（仅本地保存）
+        audioIdAcrHost: '',             // ACRCloud Host，如 identify-us-west-1.acrcloud.com
+        audioIdAcrKey: '',
+        audioIdAcrSecret: '',
+        audioIdCustomUrl: '',
+        audioIdSeconds: 8,              // 录音时长（3-20 秒）
+        audioIdSource: 'page',          // page=抓页面播放流 / mic=麦克风
+        audioIdHistory: [],             // [{artist,title,album,cover,links,provider,at}]
+        // ---- 转文字与 AI 摘要 ----
+        asrProvider: 'openai',          // 仅作展示；实际用 asrBaseUrl
+        asrBaseUrl: 'https://api.openai.com/v1',
+        asrKey: '',                     // 仅本地保存
+        asrModel: 'whisper-1',
+        asrLang: 'auto',
+        asrMaxMB: 24,                   // 单次上传上限（MB）
+        asrChunkSeconds: 600,           // 超过上限时每片秒数
+        aiBaseUrl: 'https://api.openai.com/v1',
+        aiKey: '',
+        aiModel: 'gpt-4o-mini',
+        aiPromptStyle: 'summary',       // summary / points / timeline / qa
+        transcribeHistory: [],
+        // ---- WebDAV 后端 ----
+        webdavEnabled: false,
+        webdavUrl: '',
+        webdavDir: 'media-sniffer/',
+        webdavUser: '',
+        webdavPass: '',
+        webdavLastSyncAt: 0,
+        webdavUploadDownloads: false,   // 下载文件直接存 NAS 而不落本地
         // 可定制快捷键
         shortcutToggle: 'b',
         shortcutTranslate: 't',
@@ -3244,6 +3915,17 @@
         if (!U.isNum(cfg.batchDelay) || cfg.batchDelay < 50 || cfg.batchDelay > 5000) errors.push('batchDelay 必须在 50-5000');
         if (typeof cfg.askBeforeDownload !== 'boolean') errors.push('askBeforeDownload 必须是布尔值');
         if (!U.isNum(cfg.logLevel) || cfg.logLevel < 0 || cfg.logLevel > 3) errors.push('logLevel 必须在 0-3');
+        // 三大新模块（音频识别 / 转写 / WebDAV）
+        if (cfg.audioIdProvider !== undefined && ['audd', 'acrcloud', 'custom'].indexOf(cfg.audioIdProvider) < 0) errors.push('audioIdProvider 必须是 audd/acrcloud/custom');
+        if (cfg.audioIdSeconds !== undefined && (!U.isNum(cfg.audioIdSeconds) || cfg.audioIdSeconds < 3 || cfg.audioIdSeconds > 20)) errors.push('audioIdSeconds 必须在 3-20');
+        if (cfg.audioIdSource !== undefined && ['page', 'mic'].indexOf(cfg.audioIdSource) < 0) errors.push('audioIdSource 必须是 page/mic');
+        if (cfg.audioIdHistory !== undefined && !U.isArr(cfg.audioIdHistory)) errors.push('audioIdHistory 必须是数组');
+        if (cfg.asrMaxMB !== undefined && (!U.isNum(cfg.asrMaxMB) || cfg.asrMaxMB < 1 || cfg.asrMaxMB > 100)) errors.push('asrMaxMB 必须在 1-100');
+        if (cfg.asrChunkSeconds !== undefined && (!U.isNum(cfg.asrChunkSeconds) || cfg.asrChunkSeconds < 30 || cfg.asrChunkSeconds > 1800)) errors.push('asrChunkSeconds 必须在 30-1800');
+        if (cfg.aiPromptStyle !== undefined && ['summary', 'points', 'timeline', 'qa'].indexOf(cfg.aiPromptStyle) < 0) errors.push('aiPromptStyle 必须是 summary/points/timeline/qa');
+        if (cfg.transcribeHistory !== undefined && !U.isArr(cfg.transcribeHistory)) errors.push('transcribeHistory 必须是数组');
+        if (cfg.webdavEnabled !== undefined && typeof cfg.webdavEnabled !== 'boolean') errors.push('webdavEnabled 必须是布尔值');
+        if (cfg.webdavUrl !== undefined && typeof cfg.webdavUrl !== 'string') errors.push('webdavUrl 必须是字符串');
         if (!U.isNum(cfg.minImageSize) || cfg.minImageSize < 0) errors.push('minImageSize 必须 >= 0');
         if (!U.isNum(cfg.minImageWidth) || cfg.minImageWidth < 0) errors.push('minImageWidth 必须 >= 0');
         if (!U.isNum(cfg.minImageHeight) || cfg.minImageHeight < 0) errors.push('minImageHeight 必须 >= 0');
@@ -3465,11 +4147,32 @@
                             State._computeTheme();
                             if (State._applyTheme) State._applyTheme();
                         } else if (msg && msg.type === 'resources') {
-                            LOG.info('收到同步资源');
-                            State.images = msg.data.images || [];
-                            State.videos = msg.data.videos || [];
-                            State.audios = msg.data.audios || [];
-                            State.m3u8 = msg.data.m3u8 || [];
+                            // P3-17：增量消息（append:true）只带本次新增的 URL，
+                            // 接收端追加即可；整量消息（扫描完成 / 导入配置）仍走替换。
+                            // 用 NetState.hits 去重，避免「增量 + 整量」交错时出现重复条目。
+                            if (msg.append) {
+                                LOG.info('收到同步资源（增量）');
+                                var inc = msg.data || {};
+                                var mergeIn = function (arr, list) {
+                                    if (!U.isArr(list) || !list.length) return;
+                                    for (var mi = 0; mi < list.length; mi++) {
+                                        var u = list[mi];
+                                        if (!u || NetState.hits.has(u)) continue;
+                                        NetState.hits.add(u);
+                                        arr.push(u);
+                                    }
+                                };
+                                mergeIn(State.images, inc.images);
+                                mergeIn(State.videos, inc.videos);
+                                mergeIn(State.audios, inc.audios);
+                                mergeIn(State.m3u8, inc.m3u8);
+                            } else {
+                                LOG.info('收到同步资源');
+                                State.images = msg.data.images || [];
+                                State.videos = msg.data.videos || [];
+                                State.audios = msg.data.audios || [];
+                                State.m3u8 = msg.data.m3u8 || [];
+                            }
                             if (State._renderThrottled) State._renderThrottled();
                         }
                     } catch (e) { LOG.error('同步消息处理失败:', e); }
@@ -3519,22 +4222,25 @@
     var NetState = { hits: new Set(), queue: [], flushing: false };
     NetState._flush = function () {
         if (NetState.flushing || NetState.queue.length === 0) return;
+        if (typeof Diag !== 'undefined') Diag.stats.netFlushCount++;   // Diag 模块在后段定义：未加载时静默跳过（模块顺序变化 / 测试沙箱）
+        if (typeof Diag !== 'undefined') Diag.stats.netFlushLastAt = U.now();   // Diag 模块在后段定义：未加载时静默跳过（模块顺序变化 / 测试沙箱）
         NetState.flushing = true;
         // 性能 11：原来一次最多 200，改成 100 的用意是「小批量、快响应」，
         // 但每次 flush 的固定成本（数组 splice + 循环 + 末尾一次 _renderThrottled
         // 与 _broadcast）与批量大小无关，批量越小固定成本占比越高。
         // 队列经常一次涌入几百条 URL，100 会让 flush 次数翻几倍。
         var batch = NetState.queue.splice(0, Math.min(200, NetState.queue.length));
+        var added = { images: [], videos: [], audios: [], m3u8: [] };
         for (var i = 0; i < batch.length; i++) {
             var url = batch[i];
             if (!url || NetState.hits.has(url) || !SEC.isSafeUrl(url)) continue;
             NetState.hits.add(url);
             var abs = SEC.absUrl(url);
             var kind = SEC.guessKind(abs);
-            if (kind === 'image') State.images.push(abs);
-            else if (kind === 'video') State.videos.push(abs);
-            else if (kind === 'audio') State.audios.push(abs);
-            else if (kind === 'm3u8') State.m3u8.push(abs);
+            if (kind === 'image') { State.images.push(abs); added.images.push(abs); }
+            else if (kind === 'video') { State.videos.push(abs); added.videos.push(abs); }
+            else if (kind === 'audio') { State.audios.push(abs); added.audios.push(abs); }
+            else if (kind === 'm3u8') { State.m3u8.push(abs); added.m3u8.push(abs); }
         }
         // 进入本函数前已用 NetState.hits 去重，这里无需再对整份列表做 uniq
         // （原实现对每次 flush 都要重新扫描全部 URL，资源多时是主要开销之一）
@@ -3544,7 +4250,12 @@
             if (t === 'img' || t === 'video' || t === 'audio' || t === 'm3u8') State._renderThrottled();
         }
         // 同步到其他标签页
-        if (State.config.enableSync) State._broadcast({ type: 'resources', data: { images: State.images, videos: State.videos, audios: State.audios, m3u8: State.m3u8 } });
+        // P3-17：原来每次 flush 都把**完整**资源数组广播出去，
+        // 资源攒到几千条时每条消息上百 KB，而绝大多数内容接收端早就有了。
+        // 改成只广播本次新增的 URL 列表（数组为空就不发），接收端追加。
+        if (State.config.enableSync && (added.images.length || added.videos.length || added.audios.length || added.m3u8.length)) {
+            State._broadcast({ type: 'resources', append: true, data: added });
+        }
     };
     NetState._scheduleFlush = U.throttle(NetState._flush, 500);
     NetState.collect = function (url) {
@@ -3638,8 +4349,44 @@
     // iOS 27 风格下改用液态玻璃材质（半透明染色 + 背景模糊 + 镜面边缘），
     // 其余风格保持原来的不透明纯色，避免影响 normal / material。
     var TOAST_DUR = 2500;
+    // 同时最多堆叠 3 条，超出排队等待；同一文本 800ms 内不重复弹。
+    // 原来没有任何约束：批量下载 100 个文件会瞬间创建上百个 DOM 节点、
+    // 上百对 rAF 回调，界面直接糊成一片。
+    var TOAST_MAX = 3;
+    var TOAST_DEDUP_MS = 800;
+    var _toastLive = 0;
+    var _toastQueue = [];
+    var _toastLast = { msg: '', at: 0 };
+
+    function _toastDrain() {
+        if (_toastLive >= TOAST_MAX || !_toastQueue.length) return;
+        var job = _toastQueue.shift();
+        _toastRender(job.msg, job.color, job.dur, job.onClick);
+    }
+
     function toast(msg, color, dur, onClick) {
         try {
+            var text = String(msg == null ? '' : msg);
+            var now = U.now();
+            // 同文案去重：批量操作里「开始下载: xxx」会连着触发几十次
+            if (text === _toastLast.msg && (now - _toastLast.at) < TOAST_DEDUP_MS) return;
+            _toastLast.msg = text;
+            _toastLast.at = now;
+            if (_toastLive >= TOAST_MAX) {
+                // 排队上限也设一个，避免极端情况下队列本身无限增长
+                if (_toastQueue.length < TOAST_MAX * 4) {
+                    _toastQueue.push({ msg: text, color: color, dur: dur, onClick: onClick });
+                }
+                return;
+            }
+            _toastRender(text, color, dur, onClick);
+        } catch (e) {}
+    }
+
+    function _toastRender(msg, color, dur, onClick) {
+        try {
+            _toastLive++;
+            if (typeof Diag !== 'undefined') Diag.stats.toastCount++;   // Diag 模块在后段定义：未加载时静默跳过（模块顺序变化 / 测试沙箱）
             var clickable = typeof onClick === 'function';
             var base = color || MS_CONFIG.COLORS.success;
             var glass = false, dark = false;
@@ -3710,8 +4457,15 @@
                 try { requestAnimationFrame(function () { requestAnimationFrame(play); }); } catch (e2) {}
                 setTimeout(play, 90);
             }
-            setTimeout(hide, dur || TOAST_DUR);
-        } catch (e) {}
+            var gone = false;
+            var release = function () {
+                if (gone) return;
+                gone = true;
+                _toastLive = Math.max(0, _toastLive - 1);
+                _toastDrain();
+            };
+            setTimeout(function () { hide(); release(); }, dur || TOAST_DUR);
+        } catch (e) { _toastLive = Math.max(0, _toastLive - 1); _toastDrain(); }
     }
     function copyText(text) {
         try { if (typeof GM_setClipboard === 'function') { GM_setClipboard(text); toast(LANG.t('copiedN', {n: String(text).length})); return; } } catch (e) {}
@@ -3784,6 +4538,7 @@
     };
 
     VideoResolver.resolve = function(url, cb, options) {
+        if (typeof Diag !== 'undefined') Diag.stats.resolveCount++;   // Diag 模块在后段定义：未加载时静默跳过（模块顺序变化 / 测试沙箱）
         if (VideoResolver._cache[url]) { cb(VideoResolver._cache[url], null); return; }
         if (VideoResolver._isErrorCached(url)) {
             cb(null, VideoResolver._errorCache[url].error);
@@ -4318,169 +5073,46 @@ VideoResolver.fillFromHtml(result, html);
         } catch(e) { cb(null, e.message); }
     };
 
-    VideoResolver._resolveXiaohongshu = function(pageUrl, cb, attempt) {
-        attempt = attempt || 0;
-        try {
-            if (typeof GM_xmlhttpRequest === 'function') {
+    // 整洁-3：小红书 / 微博 / 知乎 / 微信视频号这四个站点目前只有「拉页面 +
+    // 尽力从 HTML 里捡字段」这一条通路，实现完全一致，原来抄了四份几乎逐字相同的
+    // 代码块（改一处要记得改四处）。抽成一个工厂，差异只剩「站点名 + 图标 + Referer」。
+    VideoResolver._stubResolve = function (siteName, siteIcon, referer) {
+        return function (pageUrl, cb, attempt) {
+            attempt = attempt || 0;
+            try {
+                if (typeof GM_xmlhttpRequest !== 'function') { cb(null, '需要 Tampermonkey 环境'); return; }
                 GM_xmlhttpRequest({
                     method: 'GET',
                     url: pageUrl,
                     headers: {
-                        'Referer': 'https://www.xiaohongshu.com/',
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1'
+                        'Referer': referer,
+                        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1'
                     },
-                    onload: function(resp) {
+                    onload: function (resp) {
                         try {
                             var html = resp.responseText || resp.response || '';
                             var result = {
-                                title: '',
-                                cover: '',
-                                videoUrl: '',
-                                duration: 0,
-                                author: '',
-                                siteIcon: MS_CONFIG.ICONS.book,
-                                siteName: '小红书'
+                                title: '', cover: '', videoUrl: '', duration: 0, author: '',
+                                siteIcon: siteIcon, siteName: siteName
                             };
-VideoResolver.fillFromHtml(result, html);
+                            VideoResolver.fillFromHtml(result, html);
                             result.error = '暂不支持解析';
                             cb(result, null);
-                        } catch(e) { cb(null, e.message); }
+                        } catch (e) { cb(null, e.message); }
                     },
-                    onerror: function() {
-                        cb(null, '网络请求失败');
-                    },
-                    ontimeout: function() {
-                        cb(null, '请求超时');
-                    }
+                    onerror: function () { cb(null, '网络请求失败'); },
+                    ontimeout: function () { cb(null, '请求超时'); }
                 });
-            } else {
-                cb(null, '需要 Tampermonkey 环境');
-            }
-        } catch(e) { cb(null, e.message); }
+            } catch (e) { cb(null, e.message); }
+        };
     };
 
-    VideoResolver._resolveWeibo = function(pageUrl, cb, attempt) {
-        attempt = attempt || 0;
-        try {
-            if (typeof GM_xmlhttpRequest === 'function') {
-                GM_xmlhttpRequest({
-                    method: 'GET',
-                    url: pageUrl,
-                    headers: {
-                        'Referer': 'https://weibo.com/',
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1'
-                    },
-                    onload: function(resp) {
-                        try {
-                            var html = resp.responseText || resp.response || '';
-                            var result = {
-                                title: '',
-                                cover: '',
-                                videoUrl: '',
-                                duration: 0,
-                                author: '',
-                                siteIcon: MS_CONFIG.ICONS.globe,
-                                siteName: '微博'
-                            };
-VideoResolver.fillFromHtml(result, html);
-                            result.error = '暂不支持解析';
-                            cb(result, null);
-                        } catch(e) { cb(null, e.message); }
-                    },
-                    onerror: function() {
-                        cb(null, '网络请求失败');
-                    },
-                    ontimeout: function() {
-                        cb(null, '请求超时');
-                    }
-                });
-            } else {
-                cb(null, '需要 Tampermonkey 环境');
-            }
-        } catch(e) { cb(null, e.message); }
-    };
-
-    VideoResolver._resolveZhihu = function(pageUrl, cb, attempt) {
-        attempt = attempt || 0;
-        try {
-            if (typeof GM_xmlhttpRequest === 'function') {
-                GM_xmlhttpRequest({
-                    method: 'GET',
-                    url: pageUrl,
-                    headers: {
-                        'Referer': 'https://www.zhihu.com/',
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1'
-                    },
-                    onload: function(resp) {
-                        try {
-                            var html = resp.responseText || resp.response || '';
-                            var result = {
-                                title: '',
-                                cover: '',
-                                videoUrl: '',
-                                duration: 0,
-                                author: '',
-                                siteIcon: MS_CONFIG.ICONS.bulb,
-                                siteName: '知乎'
-                            };
-VideoResolver.fillFromHtml(result, html);
-                            result.error = '暂不支持解析';
-                            cb(result, null);
-                        } catch(e) { cb(null, e.message); }
-                    },
-                    onerror: function() {
-                        cb(null, '网络请求失败');
-                    },
-                    ontimeout: function() {
-                        cb(null, '请求超时');
-                    }
-                });
-            } else {
-                cb(null, '需要 Tampermonkey 环境');
-            }
-        } catch(e) { cb(null, e.message); }
-    };
-
-    VideoResolver._resolveWeixin = function(pageUrl, cb, attempt) {
-        attempt = attempt || 0;
-        try {
-            if (typeof GM_xmlhttpRequest === 'function') {
-                GM_xmlhttpRequest({
-                    method: 'GET',
-                    url: pageUrl,
-                    headers: {
-                        'Referer': 'https://channels.weixin.qq.com/',
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1'
-                    },
-                    onload: function(resp) {
-                        try {
-                            var html = resp.responseText || resp.response || '';
-                            var result = {
-                                title: '',
-                                cover: '',
-                                videoUrl: '',
-                                duration: 0,
-                                author: '',
-                                siteIcon: MS_CONFIG.ICONS.speech,
-                                siteName: '微信视频号'
-                            };
-VideoResolver.fillFromHtml(result, html);
-                            result.error = '暂不支持解析';
-                            cb(result, null);
-                        } catch(e) { cb(null, e.message); }
-                    },
-                    onerror: function() {
-                        cb(null, '网络请求失败');
-                    },
-                    ontimeout: function() {
-                        cb(null, '请求超时');
-                    }
-                });
-            } else {
-                cb(null, '需要 Tampermonkey 环境');
-            }
-        } catch(e) { cb(null, e.message); }
-    };
+    VideoResolver._resolveXiaohongshu = VideoResolver._stubResolve('小红书', MS_CONFIG.ICONS.book, 'https://www.xiaohongshu.com/');
+    VideoResolver._resolveWeibo = VideoResolver._stubResolve('微博', MS_CONFIG.ICONS.globe, 'https://weibo.com/');
+    // 图标必须与 SEC.VIDEO_SITES.zhihu.icon 保持一致 —— 抽 stub 工厂时手滑写成了
+    // ICONS.book，导致「视频链接卡片」用 bulb、「预览弹窗」用 book，同一站点两个图标。
+    VideoResolver._resolveZhihu = VideoResolver._stubResolve('知乎', MS_CONFIG.ICONS.bulb, 'https://www.zhihu.com/');
+    VideoResolver._resolveWeixin = VideoResolver._stubResolve('微信视频号', MS_CONFIG.ICONS.speech, 'https://channels.weixin.qq.com/');
 
     VideoResolver._fetchPlayUrl = function(opts) {
         var bvid = opts.bvid;
@@ -4862,57 +5494,323 @@ VideoResolver.fillFromHtml(result, html);
         return cur;
     };
 
-    Plugins._callParserApi = function (plugin, pageUrl, cb) {
+
+    // -------------------------------------------------------------------------
+    // 声明式解析器 DSL（站点适配插件化）
+    //
+    // 背景：原来 parserPlugins 只支持「一次 HTTP 请求 + 一个 JSON 路径」，
+    // 表达不了 B 站这类**两步**接口（先 view 拿 cid，再 playurl 拿地址）。
+    // 因此 7 个站点只能硬编码在 VideoResolver 里，社区加不了新站点。
+    //
+    // 这里把它扩成**纯声明式的多步流水线** —— 依然不执行任意代码：
+    //
+    //   {
+    //     matchPattern: 'bilibili\\.com/video/(?<bvid>BV[0-9A-Za-z]+)',
+    //     steps: [
+    //       { url: 'https://api.bilibili.com/x/web-interface/view?bvid={{bvid}}',
+    //         headers: { Referer: 'https://www.bilibili.com/' },
+    //         save: { cid: 'data.cid', title: 'data.title' } },
+    //       { url: 'https://api.bilibili.com/x/player/playurl?bvid={{bvid}}&cid={{cid}}&fnval=16',
+    //         dataPath: 'data',
+    //         sources: { videoPath: 'dash.video', audioPath: 'dash.audio' } }
+    //     ]
+    //   }
+    //
+    // 可用变量：
+    //   {{url}}      —— 页面 URL（已 encodeURIComponent）
+    //   {{page}}     —— 页面 URL 原样
+    //   {{g1}}…{{gN}}—— matchPattern 的编号捕获组
+    //   {{名称}}     —— matchPattern 的**命名捕获组**，以及前序步骤 save 的键
+    //
+    // 安全边界：模板只能引用变量做字符串插值；JSON 路径只做属性读取。
+    // 没有任何 eval / new Function / 远程脚本加载。
+    // -------------------------------------------------------------------------
+
+    // 模板插值（未知变量渲染成空串）
+    Plugins._interpolate = function (tpl, vars) {
+        if (tpl == null) return '';
+        return String(tpl).replace(/\{\{\s*([\w$.]+)\s*\}\}/g, function (m, key) {
+            var v = vars ? vars[key] : undefined;
+            if (v === undefined || v === null) return '';
+            try { return String(v); } catch (e) { return ''; }
+        });
+    };
+
+    // 从 matchPattern 抓编号 / 命名捕获组，作为初始变量
+    Plugins._captureVars = function (pattern, pageUrl) {
+        var vars = { url: encodeURIComponent(pageUrl || ''), page: pageUrl || '' };
+        if (!pattern) return vars;
         try {
-            var apiUrl = plugin.apiUrl.replace(/\{url\}/g, encodeURIComponent(pageUrl));
-            var method = (plugin.method || 'GET').toUpperCase();
-            var headers = plugin.headers || {};
+            var m = new RegExp(pattern, 'i').exec(pageUrl || '');
+            if (!m) return vars;
+            for (var i = 1; i < m.length; i++) vars['g' + i] = m[i] == null ? '' : String(m[i]);
+            if (m.groups) {
+                for (var k in m.groups) {
+                    if (Object.prototype.hasOwnProperty.call(m.groups, k)) vars[k] = m.groups[k] == null ? '' : String(m.groups[k]);
+                }
+            }
+        } catch (e) { LOG.warn('[Plugins] matchPattern 无效:', e.message); }
+        return vars;
+    };
+
+    // 依次跑完整条流水线。cb(err, ctx)，ctx = { src, raw, step }
+    //   src  —— 最后一步 dataPath 之后的节点
+    //   raw  —— 最后一步的完整 JSON（sources 取双轨时需要）
+    Plugins._runSteps = function (plugin, pageUrl, cb) {
+        var steps = (U.isArr(plugin.steps) && plugin.steps.length) ? plugin.steps : [{
+            url: plugin.apiUrl, method: plugin.method, headers: plugin.headers, dataPath: plugin.dataPath
+        }];
+        var vars = Plugins._captureVars(plugin.matchPattern, pageUrl);
+        var ctx = { src: null, raw: null, step: null, vars: vars };
+        var idx = 0;
+        var finished = false;
+
+        function fail(msg) { if (finished) return; finished = true; cb(msg, null); }
+
+        function next() {
+            if (idx >= steps.length) { if (finished) return; finished = true; cb(null, ctx); return; }
+            var st = steps[idx] || {};
+            var rawUrl = Plugins._interpolate(st.url || '', vars);
+            if (!rawUrl) { fail('第 ' + (idx + 1) + ' 步缺少 url'); return; }
+            if (typeof SEC !== 'undefined' && SEC.isSafeUrl && !SEC.isSafeUrl(rawUrl)) {
+                fail('第 ' + (idx + 1) + ' 步 URL 不被允许（' + rawUrl.slice(0, 60) + '）'); return;
+            }
+            var method = String(st.method || plugin.method || 'GET').toUpperCase();
             var req = {
                 method: method,
-                url: apiUrl,
-                headers: headers,
-                timeout: 15000,
+                url: rawUrl,
+                headers: st.headers || plugin.headers || {},
+                timeout: st.timeout || 15000,
                 onload: function (res) {
-                    try {
-                        var data = U.safeJson(res.responseText, null);
-                        if (!data) { cb(null, '插件返回非 JSON 数据'); return; }
-                        var src = Plugins._getByPath(data, plugin.dataPath);
-                        if (src === undefined) src = data;
-                        var videos = src.videos || src.video || src.data || [];
-                        if (!Array.isArray(videos)) videos = [videos];
-                        var videoUrls = [], qualityList = [];
-                        for (var i = 0; i < videos.length; i++) {
-                            var v = videos[i];
-                            var vurl = (typeof v === 'string' ? v : (v.url || v.link || v.src));
-                            if (!vurl) continue;
-                            videoUrls.push(vurl);
-                            qualityList.push({ url: vurl, quality: v.quality || v.name || ('清晰度 ' + (i + 1)), type: 'video' });
+                    if (finished) return;
+                    if (res.status < 200 || res.status >= 300) { fail('第 ' + (idx + 1) + ' 步 HTTP ' + res.status); return; }
+                    var data = U.safeJson(res.responseText, null);
+                    if (!data) { fail('第 ' + (idx + 1) + ' 步返回非 JSON'); return; }
+                    ctx.raw = data;
+                    if (st.save && typeof st.save === 'object') {
+                        for (var k in st.save) {
+                            if (!Object.prototype.hasOwnProperty.call(st.save, k)) continue;
+                            var v = Plugins._getByPath(data, st.save[k]);
+                            if (v !== undefined && v !== null) vars[k] = v;
                         }
-                        if (!videoUrls.length && src.url) {
-                            videoUrls.push(src.url);
-                            qualityList.push({ url: src.url, quality: '默认', type: 'video' });
-                        }
-                        var out = {
-                            title: src.title || src.name || '',
-                            cover: src.cover || src.thumb || src.pic || '',
-                            videoUrl: videoUrls[0] || '',
-                            videoUrls: videoUrls,
-                            qualityList: qualityList,
-                            siteName: plugin.name,
-                            siteIcon: MS_CONFIG.ICONS.plug,
-                            duration: src.duration || 0,
-                            author: src.author || src.uploader || ''
-                        };
-                        cb(out, null);
-                    } catch (e) {
-                        cb(null, '插件数据解析失败: ' + e.message);
                     }
+                    var node = st.dataPath ? Plugins._getByPath(data, st.dataPath) : data;
+                    ctx.src = (node === undefined || node === null) ? data : node;
+                    ctx.step = st;
+                    idx++;
+                    next();
                 },
-                onerror: function () { cb(null, '插件 API 请求失败'); },
-                ontimeout: function () { cb(null, '插件 API 请求超时'); }
+                onerror: function () { fail('第 ' + (idx + 1) + ' 步请求失败'); },
+                ontimeout: function () { fail('第 ' + (idx + 1) + ' 步请求超时'); }
             };
-            if (method === 'POST') req.data = '';
-            GM_xmlhttpRequest(req);
+            if (method === 'POST') req.data = Plugins._interpolate(st.body || plugin.body || '', vars);
+            try {
+                if (typeof GM_xmlhttpRequest !== 'function') { fail('需要 Tampermonkey 环境'); return; }
+                GM_xmlhttpRequest(req);
+            } catch (e) { fail('第 ' + (idx + 1) + ' 步调用异常: ' + e.message); }
+        }
+        next();
+    };
+
+    // 按 sources 配置从 DASH 对象里同时取视频轨与音频轨
+    Plugins._extractSources = function (src, step, plugin) {
+        var sp = (step && step.sources) || {};
+        var vPath = sp.videoPath || 'video';
+        var aPath = sp.audioPath || 'audio';
+        var idKey = sp.idPath || 'id';
+        var pickUrl = function (it) {
+            if (typeof it === 'string') return it;
+            return (it && (it.baseUrl || it.base_url || it.url || it.src)) || '';
+        };
+        var vList = Plugins._getByPath(src, vPath);
+        var aList = Plugins._getByPath(src, aPath);
+        if (!Array.isArray(vList)) vList = vList ? [vList] : [];
+        if (!Array.isArray(aList)) aList = aList ? [aList] : [];
+        if (!vList.length) return null;
+
+        var byIdDesc = function (a, b) { return (Number(b[idKey]) || 0) - (Number(a[idKey]) || 0); };
+        var sorted = vList.slice().sort(byIdDesc);
+        var aSorted = aList.slice().sort(byIdDesc);
+        var bestAudio = aSorted.length ? pickUrl(aSorted[0]) : '';
+
+        var videoUrls = [], qualityList = [];
+        for (var i = 0; i < sorted.length; i++) {
+            var u = pickUrl(sorted[i]);
+            if (!u) continue;
+            videoUrls.push(u);
+            qualityList.push({
+                url: u,
+                quality: sorted[i].label || sorted[i].quality || String(sorted[i][idKey] || ('清晰度 ' + (i + 1))),
+                id: sorted[i][idKey], type: 'video'
+            });
+        }
+        if (!videoUrls.length) return null;
+        return {
+            videoUrl: videoUrls[0], videoUrls: videoUrls, qualityList: qualityList,
+            audioUrl: bestAudio, isDash: !!(bestAudio && bestAudio !== videoUrls[0])
+        };
+    };
+
+    // 把节点规整成 VideoResolver 认得的形状
+    Plugins._shapeResult = function (src, plugin) {
+        var out = {
+            title: '', cover: '', videoUrl: '', videoUrls: [], qualityList: [],
+            siteName: plugin.name || '', siteIcon: MS_CONFIG.ICONS.plug,
+            duration: 0, author: '', isDash: false, audioUrl: ''
+        };
+        if (src == null) return out;
+        if (typeof src === 'string') {
+            out.videoUrl = src; out.videoUrls = [src];
+            out.qualityList = [{ url: src, quality: '默认', type: 'video' }];
+            return out;
+        }
+        out.title = src.title || src.name || '';
+        out.cover = src.cover || src.thumb || src.pic || '';
+        out.duration = src.duration || 0;
+        out.author = src.author || src.uploader || '';
+
+        var videos = src.videos || src.video || src.data || [];
+        if (!Array.isArray(videos)) videos = [videos];
+        var videoUrls = [], qualityList = [];
+        for (var i = 0; i < videos.length; i++) {
+            var v = videos[i];
+            var vurl = (typeof v === 'string' ? v : (v && (v.url || v.link || v.src || v.baseUrl || v.base_url)));
+            if (!vurl) continue;
+            videoUrls.push(vurl);
+            qualityList.push({
+                url: vurl,
+                quality: (v && (v.quality || v.name || v.label)) || ('清晰度 ' + (i + 1)),
+                id: v && v.id, type: 'video'
+            });
+        }
+        if (!videoUrls.length && src.url) {
+            videoUrls.push(src.url);
+            qualityList.push({ url: src.url, quality: '默认', type: 'video' });
+        }
+        out.videoUrls = videoUrls;
+        out.qualityList = qualityList;
+        out.videoUrl = videoUrls[0] || '';
+        return out;
+    };
+
+    // 解析器配置校验（UI 与测试共用；返回错误数组，空数组即合法）
+    Plugins.validateParser = function (p) {
+        var errs = [];
+        p = p || {};
+        if (!p.name || !String(p.name).trim()) errs.push('名称不能为空');
+        if (!p.matchPattern || !String(p.matchPattern).trim()) errs.push('匹配规则不能为空');
+        else {
+            try { new RegExp(p.matchPattern); }
+            catch (e) { errs.push('匹配规则不是合法正则: ' + e.message); }
+        }
+        var hasSteps = U.isArr(p.steps) && p.steps.length > 0;
+        if (!hasSteps && !p.apiUrl) errs.push('单步解析器必须填 apiUrl（或用 steps 配置多步）');
+        if (hasSteps) {
+            if (p.steps.length > 8) errs.push('步骤最多 8 步');
+            for (var i = 0; i < p.steps.length; i++) {
+                var st = p.steps[i] || {};
+                if (!st.url) errs.push('第 ' + (i + 1) + ' 步缺少 url');
+                if (st.method && ['GET', 'POST'].indexOf(String(st.method).toUpperCase()) === -1) {
+                    errs.push('第 ' + (i + 1) + ' 步 method 只支持 GET / POST');
+                }
+                if (st.save && typeof st.save !== 'object') errs.push('第 ' + (i + 1) + ' 步 save 必须是对象');
+            }
+        }
+        if (p.apiUrl && /\{\{\s*[\w$.]+\s*\}\}/.test(String(p.apiUrl)) && !hasSteps) {
+            // 单步模式下只有 {{url}} / {{page}} / {{gN}} 可用
+            var unknown = [];
+            String(p.apiUrl).replace(/\{\{\s*([\w$.]+)\s*\}\}/g, function (m, k) {
+                if (k !== 'url' && k !== 'page' && !/^g\d+$/.test(k)) unknown.push(k);
+                return m;
+            });
+            if (unknown.length) {
+                errs.push('单步模式的 apiUrl 用不了变量 ' + unknown.join(', ')
+                    + '（这些来自 matchPattern 命名组或前序步骤的 save，需要改成 steps 多步）');
+            }
+        }
+        return errs;
+    };
+
+    // 内置示例模板：用 DSL 复刻 B 站的两步接口（默认不启用，供用户照着改）
+    Plugins.PARSER_TEMPLATES = [
+        {
+            key: 'bilibili-two-step',
+            label: 'B 站（两步：view → playurl）',
+            parser: {
+                name: '哔哩哔哩（示例）',
+                matchPattern: 'bilibili\\.com/video/(?<bvid>BV[0-9A-Za-z]+)',
+                enabled: false,
+                steps: [
+                    {
+                        url: 'https://api.bilibili.com/x/web-interface/view?bvid={{bvid}}',
+                        headers: { 'Referer': 'https://www.bilibili.com/', 'User-Agent': 'Mozilla/5.0' },
+                        save: { cid: 'data.cid', title: 'data.title', cover: 'data.pic' }
+                    },
+                    {
+                        url: 'https://api.bilibili.com/x/player/playurl?bvid={{bvid}}&cid={{cid}}&fnval=16&fourk=1',
+                        headers: { 'Referer': 'https://www.bilibili.com/', 'User-Agent': 'Mozilla/5.0' },
+                        dataPath: 'data',
+                        sources: { videoPath: 'dash.video', audioPath: 'dash.audio', videoUrlPath: 'baseUrl', idPath: 'id' }
+                    }
+                ]
+            }
+        },
+        {
+            key: 'single-step',
+            label: '单步 HTTP + JSON 路径',
+            parser: {
+                name: '通用接口',
+                matchPattern: '',
+                apiUrl: 'https://example.com/api?url={{url}}',
+                dataPath: 'data',
+                enabled: false,
+                steps: []
+            }
+        }
+    ];
+
+    Plugins.templateParser = function (key) {
+        var tpls = Plugins.PARSER_TEMPLATES;
+        for (var i = 0; i < tpls.length; i++) {
+            if (tpls[i].key === key) {
+                var clone = JSON.parse(JSON.stringify(tpls[i].parser));
+                clone.id = Plugins._id();
+                return clone;
+            }
+        }
+        return null;
+    };
+
+    // 统一入口：不管单步 / 多步，都走 _runSteps，结果用同一套形状化逻辑
+    Plugins._callParserApi = function (plugin, pageUrl, cb) {
+        try {
+            Plugins._runSteps(plugin, pageUrl, function (err, ctx) {
+                if (err) { cb(null, err); return; }
+                try {
+                    var out = Plugins._shapeResult(ctx.src, plugin);
+                    // sources 配置存在时优先用它（DASH 双轨场景）
+                    var hasSources = ctx.step && ctx.step.sources && Object.keys(ctx.step.sources).length;
+                    if (hasSources) {
+                        var dash = Plugins._extractSources(ctx.src, ctx.step, plugin);
+                        if (dash) {
+                            out.videoUrl = dash.videoUrl;
+                            out.videoUrls = dash.videoUrls;
+                            out.qualityList = dash.qualityList;
+                            out.audioUrl = dash.audioUrl;
+                            out.isDash = dash.isDash;
+                        }
+                    }
+                    // 前序步骤 save 过的字段可以补进结果（save 的值放在 ctx.vars 里）
+                    if (ctx.vars) {
+                        if (!out.title && ctx.vars.title) out.title = String(ctx.vars.title);
+                        if (!out.cover && ctx.vars.cover) out.cover = String(ctx.vars.cover);
+                    }
+                    if (!out.videoUrl && !out.videoUrls.length) { cb(null, '插件未解析出video地址'); return; }
+                    cb(out, null);
+                } catch (e2) {
+                    cb(null, '插件数据解析失败: ' + e2.message);
+                }
+            });
         } catch (e) {
             cb(null, '插件调用异常: ' + e.message);
         }
@@ -4922,7 +5820,9 @@ VideoResolver.fillFromHtml(result, html);
         var plugins = Plugins.listParsers();
         for (var i = 0; i < plugins.length; i++) {
             var p = plugins[i];
-            if (!p.enabled || !p.matchPattern || !p.apiUrl) continue;
+            // 多步（steps）或单步（apiUrl）任一配好即可
+            var hasSteps = U.isArr(p.steps) && p.steps.length > 0;
+            if (!p.enabled || !p.matchPattern || (!p.apiUrl && !hasSteps)) continue;
             try {
                 if (new RegExp(p.matchPattern, 'i').test(url)) {
                     Plugins._callParserApi(p, url, cb);
@@ -4973,6 +5873,9 @@ VideoResolver.fillFromHtml(result, html);
         parser.method = ['GET', 'POST'].indexOf((parser.method || '').toUpperCase()) !== -1 ? parser.method.toUpperCase() : 'GET';
         parser.headers = typeof parser.headers === 'object' && parser.headers !== null ? parser.headers : {};
         parser.dataPath = parser.dataPath || '';
+        // 声明式多步流水线（可选）：[{url, method, headers, save, dataPath, sources}]
+        if (!U.isArr(parser.steps)) parser.steps = [];
+        parser.steps = parser.steps.filter(function (s) { return s && typeof s === 'object'; }).slice(0, 8);
         parser.enabled = typeof parser.enabled === 'boolean' ? parser.enabled : true;
         if (!U.isArr(State.config.parserPlugins)) State.config.parserPlugins = [];
         State.config.parserPlugins.push(parser);
@@ -5563,7 +6466,8 @@ VideoResolver.fillFromHtml(result, html);
                 '</div>' :
                 '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;margin-bottom:16px;">' +
                     '<button id="_ms_vlp_play" style="flex:1;min-width:120px;padding:12px 20px;border:none;border-radius:10px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:14px;font-weight:600;cursor:pointer;">▶ 播放视频</button>' +
-                    '<button id="_ms_vlp_dl" style="flex:1;min-width:120px;padding:12px 20px;border:none;border-radius:10px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:14px;font-weight:600;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> 下载视频</button>' +
+                    '<button id="_ms_vlp_asr" style="flex:1;min-width:100px;padding:12px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:14px;font-weight:600;cursor:pointer;">' + MS_CONFIG.ICONS.speech + ' ' + LANG.t('transcribeRun') + '</button>' +
+                    '<button id="_ms_vlp_dl" style="flex:1;min-width:100px;padding:12px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:14px;font-weight:600;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> 下载视频</button>' +
                     '<button id="_ms_vlp_copy" style="flex:1;min-width:120px;padding:12px 20px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-size:14px;font-weight:600;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> 复制链接</button>' +
                 '</div>') +
 
@@ -5611,6 +6515,9 @@ VideoResolver.fillFromHtml(result, html);
         });
 
         function closeModal() {
+            abortedFlag = true;                         // 关闭弹窗即中止在途合流
+            if (muxHandle) { try { muxHandle.abort(); } catch (e) {} muxHandle = null; }
+            UI._vlpAbortMux = null;
             if (isMobile) {
                 modal.style.transform = 'translateY(100%)';
                 overlay.style.background = 'rgba(0,0,0,0)';
@@ -5764,14 +6671,96 @@ VideoResolver.fillFromHtml(result, html);
         };
 
         // 下载按钮
-        document.getElementById('_ms_vlp_dl').onclick = function() {
-            if (!currentVideoUrl) {
-                toast('视频地址不可用', '#f59e0b');
+        // DASH 合流：B 站等内容站默认下发 DASH —— 视频轨与音频轨是两条独立地址。
+        // 原来这里直接下 currentVideoUrl，**产物是静音的**，用户会以为脚本坏了。
+        // 现在：有独立音频轨时走 VideoMux 合流（fMP4 真正 merge moov/trak + 重写 moof），
+        // 失败则自动降级为「分别下载两条轨」，不会让用户白等。
+        var abortedFlag = false;
+        var muxStatusEl = null;
+        function muxSay(msg) {
+            if (!muxStatusEl || !muxStatusEl.parentNode) {
+                muxStatusEl = document.createElement('div');
+                muxStatusEl.style.cssText = 'margin-top:10px;padding:8px 12px;border-radius:8px;background:' + c.bg2
+                    + ';color:' + c.sub + ';font-size:12px;text-align:center;line-height:1.6;';
+                var rowEl = dlBtnEl && dlBtnEl.parentNode;
+                if (rowEl && rowEl.parentNode) rowEl.parentNode.insertBefore(muxStatusEl, rowEl.nextSibling);
+                else modal.appendChild(muxStatusEl);
+            }
+            muxStatusEl.textContent = msg;
+        }
+        function muxClear() {
+            if (muxStatusEl && muxStatusEl.parentNode) muxStatusEl.parentNode.removeChild(muxStatusEl);
+            muxStatusEl = null;
+        }
+        var muxHandle = null;
+        var dlBtnEl = document.getElementById('_ms_vlp_dl');
+        var muxStageText = {
+            lib: function () { return LANG.t('muxStageLib'); },
+            video: function (l, t) { return LANG.t('muxStageVideo', { p: (t > 0 ? Math.round(l / t * 100) : 0) }); },
+            audio: function (l, t) { return LANG.t('muxStageAudio', { p: (t > 0 ? Math.round(l / t * 100) : 0) }); },
+            parse: function () { return LANG.t('muxStageParse'); },
+            mux: function () { return LANG.t('muxStageMux'); },
+            verify: function () { return LANG.t('muxStageVerify'); }
+        };
+        function muxFallbackToSeparate(reason) {
+            muxClear();
+            muxSay(LANG.t('muxFail') + ': ' + reason + ' · ' + LANG.t('muxSeparate'));
+            VideoMux.saveSeparate(currentVideoUrl, audioUrl, title.substring(0, 80));
+            LOG.warn('[VideoMux] 降级为分别下载:', reason);
+        }
+        if (dlBtnEl) dlBtnEl.onclick = function() {
+            if (muxHandle) return;                       // 进行中：忽略重复点击
+            if (!currentVideoUrl) { toast('视频地址不可用', '#f59e0b'); return; }
+            var rawName = title.replace(/[\\\/:\*\?"<>\|]/g, '_').substring(0, 100);
+            if (!(isDash && audioUrl)) {
+                // 非 DASH（或没有独立音频轨）：保持原路径
+                Dl.one(currentVideoUrl, rawName + '.mp4', State.config.batchRetry, State.config.customHeaders);
+                toast('开始下载: ' + title.substring(0, 30), '#10b981');
                 return;
             }
-            var name = title.replace(/[\\\/:\*\?"<>\|]/g, '_').substring(0, 100) + '.mp4';
-            Dl.one(currentVideoUrl, name, State.config.batchRetry, State.config.customHeaders);
-            toast('开始下载: ' + title.substring(0, 30), '#10b981');
+            muxSay(LANG.t('muxPreparing'));
+            dlBtnEl.disabled = true; dlBtnEl.style.opacity = '0.6';
+            muxHandle = VideoMux.run({
+                videoUrl: currentVideoUrl,
+                audioUrl: audioUrl,
+                baseName: rawName,
+                onStage: function (stage, loaded, total) {
+                    if (abortedFlag) return;
+                    var f = muxStageText[stage];
+                    muxSay(LANG.t('muxPreparing') + ' ' + (f ? f(loaded, total) : stage));
+                }
+            }, function (res) {
+                muxHandle = null;
+                UI._vlpAbortMux = null;
+                dlBtnEl.disabled = false; dlBtnEl.style.opacity = '';
+                if (abortedFlag) return;
+                if (res.ok && res.blob) {
+                    muxSay(LANG.t('muxOk'));
+                    try {
+                        Dl.fallback(URL.createObjectURL(res.blob), res.filename, null);
+                        toast(LANG.t('muxSaved') + ': ' + res.filename, '#10b981');
+                    } catch (eSave) {
+                        muxFallbackToSeparate('保存失败 ' + eSave.message);
+                        return;
+                    }
+                    setTimeout(muxClear, 2500);
+                } else {
+                    muxFallbackToSeparate(res.reason || '未知原因');
+                }
+            });
+            // 暴露给 Dl.stop：用户点「停止下载」时也要中止在途合流
+            UI._vlpAbortMux = function () {
+                abortedFlag = true;
+                if (muxHandle) { try { muxHandle.abort(); } catch (e) {} muxHandle = null; }
+            };
+        };
+
+        // 转文字按钮：优先用独立音频轨（体积小、不占带宽），没有就用视频地址
+        var asrBtnEl = document.getElementById('_ms_vlp_asr');
+        if (asrBtnEl) asrBtnEl.onclick = function() {
+            var useUrl = (audioUrl || currentVideoUrl) || '';
+            if (!useUrl) { toast(LANG.t('transcribeNoKey'), '#f59e0b'); return; }
+            UI.runTranscribe(useUrl, title);
         };
 
         // 复制链接按钮
@@ -6963,19 +7952,25 @@ VideoResolver.fillFromHtml(result, html);
             for (var i = 0; i < vs.length; i++) collectM3u8(vs[i]);
 
             // 2. 递归 iframe
+            // 原来注释写「递归」，实现却只查了顶层 + 直接子 iframe 一遍 ——
+            // 嵌两层以上（播放页外再包一层播放器 shell 很常见）的 m3u8 全漏。
+            // 现在照抄 scanVideos 的做法真递归，并用 visitedWins 防环
+            // （同源 iframe 可能出现 A 嵌 B、B 又嵌回 A 的「伪全屏」结构，
+            //  不防环会无限递归直到爆栈被外层 try-catch 吞掉，表现为「扫到一半就停」）。
+            var visitedWins = [];
             function scanFrames(win) {
+                if (!win || visitedWins.indexOf(win) >= 0) return;
+                visitedWins.push(win);
                 try {
-                    var docs = [win.document];
+                    var fels = win.document.querySelectorAll('video, audio, source, a[href]');
+                    for (var fi = 0; fi < fels.length; fi++) collectM3u8(fels[fi]);
                     var iframes = win.document.querySelectorAll('iframe, frame');
                     for (var f = 0; f < iframes.length; f++) {
                         try {
                             var cw = iframes[f].contentWindow;
-                            if (cw && cw !== win) docs.push(cw.document);
+                            if (!cw || cw === win) continue;
+                            scanFrames(cw);
                         } catch (e) {}
-                    }
-                    for (var d = 0; d < docs.length; d++) {
-                        var fels = docs[d].querySelectorAll('video, audio, source, a[href]');
-                        for (var fi = 0; fi < fels.length; fi++) collectM3u8(fels[fi]);
                     }
                 } catch (e) {}
             }
@@ -6994,7 +7989,11 @@ VideoResolver.fillFromHtml(result, html);
                 var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
                 var textNode;
                 var re = /(https?:\/\/[^\s"'<>]+\.m3u8?[^\s"'<>]*)/gi;
-                var textBudget = 8000;          // 最多检查 8000 个文本节点
+                // 原来是 8000。大型内容站（列表页 5 万+ 节点）在页面靠前的位置
+                // 就用完了预算，藏在后面的 m3u8 全漏。提一档到 30000；
+                // 真正兜住耗时的是下面那条「文本里没有 m3u8/.ts 就跳过」的早退，
+                // 平均每个节点的成本远低于上限给的心理预期。
+                var textBudget = 30000;         // 最多检查 30000 个文本节点
                 while (textBudget-- > 0 && (textNode = walker.nextNode()) !== null) {
                     var rawText = textNode.textContent;
                     if (!rawText || rawText.length < 8) continue;   // 纯空白/极短文本直接跳过
@@ -7148,17 +8147,33 @@ VideoResolver.fillFromHtml(result, html);
     };
 
     Scanner.doFull = function (cb) {
+        // 诊断：只记 O(1) 的计数与耗时（绝不在诊断里做全量遍历）
+        if (typeof Diag !== 'undefined') Diag.stats.fullScanCount++;   // Diag 模块在后段定义：未加载时静默跳过（模块顺序变化 / 测试沙箱）
+        if (typeof Diag !== 'undefined') Diag.stats.fullScanLastAt = U.now();   // Diag 模块在后段定义：未加载时静默跳过（模块顺序变化 / 测试沙箱）
+        var _diagT0 = U.monoNow();
         LOG.info('开始全量扫描...');
+        // 诊断收尾：两条路径（新 scanner / 旧 fallback）都要记，否则统计会缺口
+        function diagFinish() {
+            if (typeof Diag !== 'undefined') Diag.stats.fullScanLastMs = Math.round(U.monoNow() - _diagT0);   // Diag 模块在后段定义：未加载时静默跳过（模块顺序变化 / 测试沙箱）
+            // 必须写成**一条**赋值语句。原先写成两行、第一行末尾带分号，
+            // 第二行 `+ State.audios.length + ...` 就变成没有副作用的自增表达式语句 ——
+            // 结果「抓到 X 条」永远只等于 images + videos，音频与 m3u8 被静默丢掉，
+            // 用户照着这个数字报 bug 会把人带偏。
+            if (typeof Diag !== 'undefined') Diag.stats.fullScanLastFound = State.images.length + State.videos.length + State.audios.length + State.m3u8.length;   // Diag 未加载时静默跳过（模块加载顺序变化 / 测试沙箱）
+        }
         if (State.scanner) {
             State.scanner.scan().then(function () {
                 LOG.info('扫描完成: 图片', State.images.length, '视频', State.videos.length, '音频', State.audios.length, 'm3u8', State.m3u8.length, '视频链接', State.videoLinks.length);
+                diagFinish();
                 if (cb) cb();
             }).catch(function (e) {
                 LOG.warn('ScannerService.scan 失败:', e);
+                diagFinish();
                 if (cb) cb();
             });
             return;
         }
+
         // fallback：旧实现
         var imgUrls = Scanner.scanImages();
         var vidUrls = Scanner.scanVideos();
@@ -7173,6 +8188,7 @@ VideoResolver.fillFromHtml(result, html);
             State.videoLinks = vidLinks;
             Plugins.filterResources();
             LOG.info('扫描完成: 图片', State.images.length, '视频', State.videos.length, '音频', State.audios.length, 'm3u8', State.m3u8.length, '视频链接', State.videoLinks.length);
+            diagFinish();
             if (cb) cb();
             if (State.config.enableSync) State._broadcast({ type: 'resources', data: { images: State.images, videos: State.videos, audios: State.audios, m3u8: State.m3u8, videoLinks: State.videoLinks } });
         });
@@ -8514,11 +9530,17 @@ VideoResolver.fillFromHtml(result, html);
                 var buffers = [];
                 for (var i = 0; i < self.chunks.length; i++) buffers.push(self.chunks[i].buffer);
                 var blob = new Blob(buffers);
-                var blobUrl = URL.createObjectURL(blob);
-                Dl.fallback(blobUrl, self.task.filename, self.headers);
-                if (isFn(self.callbacks.onProgress)) self.callbacks.onProgress(self.totalBytes, self.totalBytes);
-                if (isFn(self.callbacks.onComplete)) self.callbacks.onComplete({ url: self.task.url, filename: self.task.filename, blob: blob, blobUrl: blobUrl, totalBytes: self.totalBytes });
-                self._cleanup();
+                // #3：完成信号必须等**真正落地**之后才发。
+                // 原来拿到「已接管」就立刻 onComplete，上传还在跑任务就已经记成完成，
+                // 而且上传失败回退本地后，历史里的 blobUrl 还是空串。
+                Dl.deliverBlob(blob, self.task.filename, self.headers, function (err, blobUrl) {
+                    if (isFn(self.callbacks.onProgress)) self.callbacks.onProgress(self.totalBytes, self.totalBytes);
+                    if (isFn(self.callbacks.onComplete)) self.callbacks.onComplete({
+                        url: self.task.url, filename: self.task.filename, blob: blob, blobUrl: blobUrl,
+                        totalBytes: self.totalBytes, storage: blobUrl ? 'local' : 'nas'
+                    });
+                    self._cleanup();
+                });
             } catch (e) {
                 if (isFn(self.callbacks.onError)) self.callbacks.onError({ message: 'Merge failed: ' + e.message });
             }
@@ -8526,8 +9548,11 @@ VideoResolver.fillFromHtml(result, html);
 
         HttpBackend.prototype._downloadSingle = function () {
             var self = this;
-            // 优先使用 GM_download（浏览器原生下载，不占用内存）
-            if (typeof GM_download === 'function') {
+            // #4：勾了「直接存 NAS」时必须跳过 GM_download。
+            // GM_download 是浏览器原生下载，全程不经过脚本 —— 拿不到 Blob 就无从转存，
+            // 结果是开关形同虚设（文件照旧落本地）。这里改走 XHR 路径把内容读进内存，
+            // 再由 deliverBlob 决定落 NAS 还是本地。
+            if (typeof GM_download === 'function' && !Dl.wantsNasSave()) {
                 try {
                     // FIX-13：原来只把 Referer 传给 GM_download，config 里配的
                     // User-Agent / Cookie（以及 task.options.headers）全部丢掉 ——
@@ -8576,11 +9601,14 @@ VideoResolver.fillFromHtml(result, html);
                 if (self.cancelled) return;
                 if (xhr.status >= 200 && xhr.status < 300) {
                     var blob = new Blob([xhr.response]);
-                    var blobUrl = URL.createObjectURL(blob);
-                    Dl.fallback(blobUrl, self.task.filename, self.headers);
-                    if (isFn(self.callbacks.onProgress)) self.callbacks.onProgress(xhr.response.byteLength, xhr.response.byteLength);
-                    if (isFn(self.callbacks.onComplete)) self.callbacks.onComplete({ url: self.task.url, filename: self.task.filename, blob: blob, blobUrl: blobUrl, totalBytes: xhr.response.byteLength });
-                    self._cleanup();
+                    Dl.deliverBlob(blob, self.task.filename, self.headers, function (err, blobUrl) {
+                        if (isFn(self.callbacks.onProgress)) self.callbacks.onProgress(xhr.response.byteLength, xhr.response.byteLength);
+                        if (isFn(self.callbacks.onComplete)) self.callbacks.onComplete({
+                            url: self.task.url, filename: self.task.filename, blob: blob, blobUrl: blobUrl,
+                            totalBytes: xhr.response.byteLength, storage: blobUrl ? 'local' : 'nas'
+                        });
+                        self._cleanup();
+                    });
                 } else {
                     if (isFn(self.callbacks.onError)) self.callbacks.onError({ message: 'HTTP ' + xhr.status });
                 }
@@ -8826,11 +9854,14 @@ VideoResolver.fillFromHtml(result, html);
                             if (isFn(self.callbacks.onError)) self.callbacks.onError({ message: err.message || 'm3u8 failed' });
                         } else if (mergedData && mergedData.length > 0) {
                             var blob = new Blob([mergedData], { type: 'video/mp2t' });
-                            var blobUrl = URL.createObjectURL(blob);
-                            Dl.fallback(blobUrl, self.task.filename, null);
                             LOG.info('m3u8 合并完成:', mergedData.length, '字节');
-                            if (isFn(self.callbacks.onProgress)) self.callbacks.onProgress(mergedData.length, mergedData.length);
-                            if (isFn(self.callbacks.onComplete)) self.callbacks.onComplete({ url: self.task.url, filename: self.task.filename, blob: blob, blobUrl: blobUrl, totalBytes: mergedData.length });
+                            Dl.deliverBlob(blob, self.task.filename, null, function (err, blobUrl) {
+                                if (isFn(self.callbacks.onProgress)) self.callbacks.onProgress(mergedData.length, mergedData.length);
+                                if (isFn(self.callbacks.onComplete)) self.callbacks.onComplete({
+                                    url: self.task.url, filename: self.task.filename, blob: blob, blobUrl: blobUrl,
+                                    totalBytes: mergedData.length, storage: blobUrl ? 'local' : 'nas'
+                                });
+                            });
                         } else {
                             if (isFn(self.callbacks.onError)) self.callbacks.onError({ message: 'Empty m3u8 data' });
                         }
@@ -8915,13 +9946,27 @@ VideoResolver.fillFromHtml(result, html);
         var finalName = name;
         var customHeaders = headers || State.config.customHeaders || {};
         function finish() { Dl._notifyDone(finalName, url); }
+        // #2：与 FIX-13 是同一类问题 —— GM_download 原来只把 Referer 传出去，
+        // config 里配的 User-Agent / Cookie 全丢。需要登录态或防盗链校验的资源
+        // 会直接下成 403 页面（而走 XHR 的路径是带的，两条路行为不一致）。
+        // 这里统一过滤出非空头整体透传。
+        function gmHeadersOf() {
+            var h = null;
+            for (var k in customHeaders) {
+                if (!Object.prototype.hasOwnProperty.call(customHeaders, k)) continue;
+                if (!customHeaders[k]) continue;
+                if (!h) h = {};
+                h[k] = customHeaders[k];
+            }
+            return h;
+        }
         try {
             if (typeof GM_download === 'function') {
                 try {
                     GM_download({
                         url: url,
                         name: finalName,
-                        headers: customHeaders.Referer ? { Referer: customHeaders.Referer } : undefined,
+                        headers: gmHeadersOf(),
                         onload: finish,
                         onerror: function () {
                             if (tries > 0) setTimeout(function () { Dl.one(url, finalName, tries - 1, headers, true); }, 600);
@@ -8934,6 +9979,73 @@ VideoResolver.fillFromHtml(result, html);
             Dl.fallback(url, finalName, headers);
             finish();
         } catch (e) { Dl.fallback(url, finalName, headers); finish(); }
+    };
+
+    // =========================================================================
+    // 下载落点分流：「直接存 NAS」这个开关原先是半个未完成功能 ——
+    // DEFAULT_CONFIG、设置页开关、i18n 都在，但全篇没有任何调用点，
+    // 用户勾上之后下载路径照旧只落本地。这里把它真正接上。
+    //
+    // 判定失败（未启用 / 未配置 / 抛出异常）一律返回 false，由调用方走原来的本地下载，
+    // 保证「文件不会因为一个开关而凭空消失」。
+    // =========================================================================
+    Dl.wantsNasSave = function () {
+        try {
+            return !!State.config.webdavUploadDownloads
+                && typeof WebDAV !== 'undefined' && WebDAV.enabled && WebDAV.enabled();
+        } catch (e) { return false; }
+    };
+
+    // 把已有 Blob 送到 NAS。返回 true 表示接管成功（已经发起上传，不需要再落本地）。
+    // 语义约定（#3）：**返回 true 表示已接管**，而「结束」是一个**异步**事件 ——
+    // 上传结果通过 cb(err) 告知。返回 false 表示没接管，调用方自己走本地下载。
+    //
+    // 原来这条函数的语义是混的：同步 return true/false 决定分流，
+    // 但真正的结束（上传完成 / 失败回退）发生在之后。调用方拿到 true 就
+    // **立刻**回调 onComplete，导致：
+    //   ① 任务在上传还没结束时就被记成「已完成」
+    //   ② 上传失败后虽然补了本地下载，但下载历史里的 blobUrl 已经是空串
+    //   ③ 完成提示 / 「打开文件」链接指向空地址
+    // 现在把「结束」收口到 Dl.deliverBlob，调用方只在真正结束时发完成信号。
+    Dl.routeBlobToNas = function (blob, name, cb) {
+        if (!blob || !Dl.wantsNasSave()) return false;
+        try {
+            WebDAV.uploadBlob(blob, name, function (err) { if (cb) cb(err || null); });
+            return true;
+        } catch (e) {
+            // 连发起都失败 → 交回调用方走本地
+            LOG.warn('[Dl] NAS 上传发起失败，回退本地:', e);
+            return false;
+        }
+    };
+
+    // 统一的 Blob 落地出口：优先 NAS，失败自动回退本地。
+    // onSettled(err, blobUrl) 只在**真正结束**时回调一次（NAS 上传完成 / 失败回退 / 本地已触发）。
+    // 注意：只有「先把文件读进内存」的路径才可能转存 NAS（单文件 XHR / 分片合并 / m3u8 合并）。
+    // 走 GM_download 的那条是浏览器原生下载，脚本拿不到 Blob —— 见 _downloadSingle 里的跳过判定。
+    Dl.deliverBlob = function (blob, name, headers, onSettled) {
+        var settled = false;
+        function settle(err, blobUrl) {
+            if (settled) return;
+            settled = true;
+            if (typeof onSettled === 'function') onSettled(err || null, blobUrl || '');
+        }
+        var taken = Dl.routeBlobToNas(blob, name, function (nasErr) {
+            if (!nasErr) {
+                toast(LANG.t('webdavUploaded', { name: name }), '#10b981');
+                settle(null, '');
+                return;
+            }
+            toast(LANG.t('webdavUploadFailed', { e: nasErr.message }), '#ef4444');
+            var u = '';
+            try { u = URL.createObjectURL(blob); Dl.fallback(u, name, headers); } catch (e) {}
+            settle(nasErr, u);
+        });
+        if (taken) return true;
+        var localUrl = '';
+        try { localUrl = URL.createObjectURL(blob); Dl.fallback(localUrl, name, headers); } catch (e) {}
+        settle(null, localUrl);
+        return false;
     };
 
     Dl.fallback = function (url, name, headers) {
@@ -9074,6 +10186,7 @@ VideoResolver.fillFromHtml(result, html);
     // 批量下载（含进度可视化）
     Dl.batch = function (urls, kind, progressCb, doneCb) {
         if (!urls || urls.length === 0) { toast(LANG.t('noDlResource'), '#f59e0b'); return; }
+        if (typeof Diag !== 'undefined') Diag.stats.downloadCount++;   // Diag 模块在后段定义：未加载时静默跳过（模块顺序变化 / 测试沙箱）
         if (State.downloading) { toast(LANG.t('downloading'), '#f59e0b'); return; }
         State.downloading = true;
         var total = urls.length;
@@ -9167,6 +10280,8 @@ VideoResolver.fillFromHtml(result, html);
     Dl.stop = function () {
         State.downloading = false;
         State.downloadProgress = null;
+        // DASH 合流跑在下载管理器之外（它需要先取两条轨再重组），stop 时要一起收掉
+        try { if (UI._vlpAbortMux) { UI._vlpAbortMux(); UI._vlpAbortMux = null; } } catch (eMux) {}
         if (Dl._dm) {
             var tasks = Dl._dm.getQueue();
             for (var i = 0; i < tasks.length; i++) {
@@ -9481,13 +10596,21 @@ VideoResolver.fillFromHtml(result, html);
     // （内联 !important 高于作者样式表 !important）。
     // 传空串会连同 !important 一起清掉，元素回落到各风格 CSS 的默认边框/阴影，
     // 正是「取消选中」期望的结果。
+    // 清空时显式走 removeProperty：部分旧 WebView 上
+    // setProperty(name, '', 'important') 会留下一条空值声明，
+    // 那之后的 `card.style.border` 读出来是空串而不是「各风格 CSS 的默认值」。
+    Selection._clearImportant = function (el, name) {
+        try { el.style.removeProperty(name); } catch (e) { try { el.style[name] = ''; } catch (e2) {} }
+    };
     Selection._setBorderImportant = function (el, val) {
         if (!el || !el.style) return;
+        if (val === '' || val == null) { Selection._clearImportant(el, 'border'); return; }
         try { el.style.setProperty('border', val, 'important'); }
         catch (e) { try { el.style.border = val; } catch (e2) {} }
     };
     Selection._setShadowImportant = function (el, val) {
         if (!el || !el.style) return;
+        if (val === '' || val == null) { Selection._clearImportant(el, 'box-shadow'); return; }
         try { el.style.setProperty('box-shadow', val, 'important'); }
         catch (e) { try { el.style.boxShadow = val; } catch (e2) {} }
     };
@@ -9800,6 +10923,2059 @@ VideoResolver.fillFromHtml(result, html);
 
     return PM;
     })();
+    // =========================================================================
+    // ===== 模块 10b：诊断 (Diag) =====
+    //
+    // 目的：用户报「某某功能不好用」时，我们能拿到客观现场，而不是靠猜。
+    // 三块内容：
+    //   1) 时间线 —— 脚本启动与各关键阶段的打点（Diag.mark / Diag.since）
+    //   2) 运行快照 —— 环境、GM API、资源统计、各缓存占用、observer / 定时器
+    //   3) 自检 —— 逐项探测关键能力，给出可用性清单
+    // 诊断视图（UI.renderDiag）负责把这三块呈现出来，并支持一键导出报告。
+    //
+    // 设计取舍：
+    //   · 打点用「覆盖式」而非「追加式」——同一个名字重复打点只保留最后一次，
+    //     这样常年运行也不会累积内存（不像日志那样需要环形裁剪）。
+    //   · 统计全部是 O(1) 的计数 / 最后一次耗时，绝不在这里做全量遍历，
+    //     否则「诊断工具本身成为性能问题」。
+    // =========================================================================
+    var Diag = (function () {
+        'use strict';
+        // UI 模块定义在本模块**之后**。它们同处一个函数作用域，正常运行时
+        // selfCheck() 都是在 UI 就绪后才调用；但为了让 Diag 能独立加载 / 测试
+        // （以及将来万一调整模块顺序），这里统一走一个受控取用器而不是裸引用 UI。
+        var ui = function () {
+            try { return (typeof UI !== 'undefined' && UI) ? UI : null; } catch (e) { return null; }
+        };
+        var Diag = {};
+
+        Diag.startedAt = U.now();
+        Diag.startedMono = U.monoNow();
+
+        // ---- 时间线打点 ----
+        Diag._marks = {};
+        Diag.mark = function (name) {
+            if (!name) return;
+            var m = Diag._marks[name] || (Diag._marks[name] = { count: 0 });
+            m.at = U.now();
+            m.count++;
+        };
+        // 距上次打点过去了多少毫秒（没打过点返回 null）
+        Diag.since = function (name) {
+            var m = Diag._marks[name];
+            return (m && m.at) ? (U.now() - m.at) : null;
+        };
+        Diag.marks = function () { return Diag._marks; };
+
+        // ---- 滚动统计（O(1)）----
+        Diag.stats = {
+            fullScanCount: 0, fullScanLastMs: 0, fullScanLastAt: 0, fullScanLastFound: 0,
+            renderCount: 0, renderLastMs: 0,
+            netFlushCount: 0, netFlushLastAt: 0,
+            toastCount: 0,
+            downloadCount: 0, downloadFailCount: 0,
+            resolveCount: 0, resolveFailCount: 0,
+            muxCount: 0, muxFailCount: 0,
+            audioIdCount: 0, audioIdFailCount: 0,
+            transcribeCount: 0, transcribeFailCount: 0,
+            webdavCount: 0, webdavFailCount: 0,
+        };
+        Diag.timed = function (name, fn) {
+            var t0 = U.monoNow();
+            try { return fn(); }
+            finally {
+                var dt = U.monoNow() - t0;
+                var m = Diag._marks[name] || (Diag._marks[name] = { count: 0, totalMs: 0 });
+                m.at = U.now();
+                m.count++;
+                m.totalMs = (m.totalMs || 0) + dt;
+                m.lastMs = dt;
+                m.maxMs = Math.max(m.maxMs || 0, dt);
+            }
+        };
+
+        // ---- 环境 / 能力探测 ----
+        Diag._gmApis = [
+            ['GM_xmlhttpRequest', 'function'],
+            ['GM_download', 'function'],
+            ['GM_setValue', 'function'],
+            ['GM_getValue', 'function'],
+            ['GM_deleteValue', 'function'],
+            ['GM_listValues', 'function'],
+            ['GM_addStyle', 'function'],
+            ['GM_openInTab', 'function'],
+            ['GM_setClipboard', 'function'],
+            ['GM_registerMenuCommand', 'function'],
+            ['GM_notification', 'function'],
+            ['GM_info', 'object'],
+            ['GM_getResourceText', 'function'],
+            ['GM_addValueChangeListener', 'function'],
+        ];
+        Diag.gmApis = function () {
+            var out = [];
+            for (var i = 0; i < Diag._gmApis.length; i++) {
+                var name = Diag._gmApis[i][0], want = Diag._gmApis[i][1];
+                var v = null, has = false;
+                try { v = eval(name); } catch (e) { v = undefined; }   // eslint-disable-line no-eval
+                has = (want === 'function') ? (typeof v === 'function') : (typeof v === 'object' && v !== null);
+                out.push({ name: name, ok: has });
+            }
+            return out;
+        };
+
+        // ---- 运行快照 ----
+        Diag.snapshot = function () {
+            var snap = {};
+            var safe = function (fn, def) { try { return fn(); } catch (e) { return def; } };
+
+            snap.version = U.VERSION;
+            snap.scriptVersion = safe(function () { return MS_CONFIG.VERSION; }, '');
+            snap.uptimeMs = U.now() - Diag.startedAt;
+            snap.now = U.now();
+
+            // 环境
+            snap.env = safe(function () {
+                return {
+                    href: location.href,
+                    host: location.hostname,
+                    isTop: (function () { try { return window.top === window.self; } catch (e) { return null; } })(),
+                    innerW: window.innerWidth, innerH: window.innerHeight,
+                    dpr: window.devicePixelRatio || 1,
+                    isMobile: U.isMobile(),
+                    online: (typeof navigator !== 'undefined' && 'onLine' in navigator) ? navigator.onLine : null,
+                    ua: (navigator && navigator.userAgent) || '',
+                };
+            }, {});
+
+            // 主题 / 风格
+            snap.ui = safe(function () {
+                return {
+                    uiStyle: State.config.uiStyle,
+                    themeSetting: State.config.theme,
+                    themeEffective: (ui() && ui().isEffectivelyDark) ? (ui().isEffectivelyDark() ? 'dark' : 'light') : 'n/a',
+                    palette: (ui() && ui().getPalette) ? ui().getPalette() : 'n/a',
+                    uiLang: State.config.uiLang,
+                    currentTab: State.tab,
+                };
+            }, {});
+
+            // 资源统计
+            snap.resources = safe(function () {
+                return {
+                    images: State.images.length,
+                    videos: State.videos.length,
+                    audios: State.audios.length,
+                    m3u8: State.m3u8.length,
+                    videoLinks: State.videoLinks.length,
+                    selected: State.selected.size,
+                    history: safe(function () { return State.getHistory().length; }, 0),
+                };
+            }, {});
+
+            // 缓存占用 / 上限
+            snap.caches = safe(function () {
+                var metaKeys = Object.keys(State.metaCache || {}).length;
+                return [
+                    { name: 'UI._thumbCache', size: Object.keys((ui() && ui()._thumbCache) || {}).length, limit: 240 },
+                    { name: 'State.translateCache', size: Object.keys(State.translateCache || {}).length, limit: 400 },
+                    { name: 'State.metaCache', size: metaKeys, limit: 2000 },
+                    { name: 'VideoResolver._cache', size: safe(function () { return Object.keys(VideoResolver._cache).length; }, 0), limit: 60 },
+                    { name: 'Dl._usedNames', size: safe(function () { return Dl._usedNames.size; }, 0), limit: 2000 },
+                ];
+            }, []);
+
+            // 运行时资源（observer / 定时器 / 在飞请求）
+            snap.runtime = safe(function () {
+                return {
+                    moConnected: !!(ui() && ui()._moConnectedFlag),
+                    floatMoTarget: (ui() && ui()._floatMOTarget) ? (ui()._floatMOTarget.id || ui()._floatMOTarget.nodeName) : null,
+                    floatGuardRunning: !!(ui() && ui()._floatGuardRunning),
+                    themeWatcherInstalled: !!State._themeWatcherInstalled,
+                    m3u8ActiveRuns: safe(function () { return M3U8._activeRuns.length; }, 0),
+                    m3u8Inflight: safe(function () { return M3U8._inflight.length; }, 0),
+                    durationQueue: safe(function () { return Meta._durationQueue.length; }, 0),
+                    panelBuilt: !!State.panel,
+                    panelOpen: !!State.panelOpen,
+                    quickbarIdle: safe(function () { return !!(document.body && document.body.classList && document.body.classList.contains('_ms_glass_idle')); }, null),
+                    iconFixCss: !!document.getElementById('_ms_icon_fix_css'),
+                };
+            }, {});
+
+            // 性能计数
+            snap.perf = safe(function () {
+                var out = [];
+                for (var k in Diag._marks) {
+                    if (!Object.prototype.hasOwnProperty.call(Diag._marks, k)) continue;
+                    var m = Diag._marks[k];
+                    out.push({ name: k, count: m.count, lastMs: m.lastMs == null ? null : Math.round(m.lastMs), maxMs: m.maxMs == null ? null : Math.round(m.maxMs), totalMs: m.totalMs == null ? null : Math.round(m.totalMs) });
+                }
+                out.sort(function (a, b) { return (b.totalMs || 0) - (a.totalMs || 0); });
+                return out;
+            }, []);
+
+            snap.stats = safe(function () { return JSON.parse(JSON.stringify(Diag.stats)); }, {});
+
+            snap.logCount = safe(function () { return LOG.buffer.length; }, 0);
+
+            return snap;
+        };
+
+        // ---- 自检 ----
+        // 逐项探测关键能力。每项同步（避免异步链条在诊断本身出问题时卡住）。
+        Diag.selfCheck = function () {
+            var items = [];
+            function add(name, ok, detail) { items.push({ name: name, ok: !!ok, detail: detail || '' }); }
+
+            // 1. GM API
+            var apis = Diag.gmApis();
+            var missCore = [];
+            apis.forEach(function (a) {
+                if (['GM_xmlhttpRequest', 'GM_setValue', 'GM_getValue'].indexOf(a.name) >= 0 && !a.ok) missCore.push(a.name);
+            });
+            add('GM 核心 API', missCore.length === 0,
+                missCore.length ? ('缺少 ' + missCore.join(' / ')) : ('可用 ' + apis.filter(function (a) { return a.ok; }).length + '/' + apis.length));
+
+            // 2. 存储读写往返
+            try {
+                var k = 'ms_diag_probe';
+                GM_setValue(k, { t: U.now() });
+                var back = GM_getValue(k, null);
+                var okStore = !!(back && back.t);
+                if (typeof GM_deleteValue === 'function') { try { GM_deleteValue(k); } catch (e2) {} }
+                add('配置存储往返', okStore, okStore ? 'GM_setValue → GM_getValue 一致' : '写入后读回为空/不匹配');
+            } catch (e) { add('配置存储往返', false, e.message); }
+
+            // 3. XHR
+            try {
+                var xhr = new XMLHttpRequest();
+                add('XMLHttpRequest', !!xhr, '可创建');
+            } catch (e) { add('XMLHttpRequest', false, e.message); }
+
+            // 4. Web Worker
+            try {
+                var wk = new Worker(URL.createObjectURL(new Blob(['self.onmessage=function(){}'], { type: 'application/javascript' })));
+                var okWk = !!wk;
+                try { wk.terminate(); } catch (e3) {}
+                add('Web Worker', okWk, okWk ? '分片并发下载可用' : '');
+            } catch (e) { add('Web Worker', false, '不可用（分片下载会退回单线程）: ' + e.message); }
+
+            // 5. IndexedDB（下载任务持久化 / 断点续传）
+            add('IndexedDB', typeof indexedDB !== 'undefined' && !!indexedDB,
+                typeof indexedDB !== 'undefined' && indexedDB ? '任务存储可用' : '不可用（断点续传失效）');
+
+            // 6. Blob / URL.createObjectURL（合并落盘）
+            var okBlob = false, detailBlob = '';
+            try {
+                var b = new Blob([new Uint8Array([1, 2, 3])]);
+                var u = URL.createObjectURL(b);
+                okBlob = !!u;
+                if (u) URL.revokeObjectURL(u);
+                detailBlob = okBlob ? '分片合并落盘可用' : '';
+            } catch (e) { detailBlob = e.message; }
+            add('Blob / ObjectURL', okBlob, detailBlob);
+
+            // 7. backdrop-filter（iOS 27 液态玻璃能否真正出效果）
+            var okBlur = false;
+            try {
+                var d = document.createElement('div');
+                d.style.cssText = 'backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px);';
+                okBlur = !!(d.style.backdropFilter || d.style.webkitBackdropFilter);
+            } catch (e) {}
+            add('backdrop-filter', okBlur, okBlur ? '液态玻璃可用' : '不支持（ios27 会退回不透明底）');
+
+            // 8. Pointer Events（性能 2 的事件单绑依赖它）
+            var hasPointer = !!(ui() && ui()._hasPointerEvents);
+            add('Pointer Events', hasPointer,
+                hasPointer ? '动效只绑 pointer 一套' : '退回 touch 一套');
+
+            // 9. requestIdleCallback（初始化重试与扫描分批）
+            add('requestIdleCallback', typeof requestIdleCallback === 'function',
+                typeof requestIdleCallback === 'function' ? '空闲调度可用' : '退回 setTimeout(…,1)');
+
+            // 10. ResizeObserver（虚拟列表按需重量依赖它）
+            add('ResizeObserver', typeof ResizeObserver === 'function',
+                typeof ResizeObserver === 'function' ? '虚拟列表可按需重量' : '退回 window.resize');
+
+            // 11. 面板与样式注入
+            add('面板 DOM', !!State.panel, State.panel ? '已构建' : '尚未构建（点开面板后再看）');
+            add('样式表注入', !!document.getElementById('_ms_ui_style_css'), '');
+            add('图标修正 CSS', !!document.getElementById('_ms_icon_fix_css'),
+                document.getElementById('_ms_icon_fix_css') ? '宿主 svg{display:block} 已被覆盖' : '未注入（图标可能被宿主 CSS 拆行）');
+
+            // 12. 资源扫描结果
+            var total = State.images.length + State.videos.length + State.audios.length + State.m3u8.length;
+            add('资源扫描', total > 0, total > 0 ? ('已抓到 ' + total + ' 条') : '当前页未抓到资源（可在媒体标签页点「重新扫描」）');
+
+            // 13. 宿主 CSS 干扰探测：我们面板内的 svg 是否真的被解析成行内元素
+            try {
+                var probe = document.querySelector('#_ms_panel svg');
+                if (probe && window.getComputedStyle) {
+                    var disp = window.getComputedStyle(probe).display;
+                    add('图标 display 实测', disp === 'inline-block', '实测 display = ' + disp + (disp === 'inline-block' ? '' : '（应为 inline-block，否则按钮会被拆成两行）'));
+                } else {
+                    add('图标 display 实测', !State.panel, State.panel ? '面板内暂无可探测的图标' : '面板未构建，跳过');
+                }
+            } catch (e) { add('图标 display 实测', false, e.message); }
+
+            return items;
+        };
+
+        // ---- 报告 ----
+        Diag.report = function (opts) {
+            opts = opts || {};
+            var L = [];
+            var now = new Date();
+            L.push('===== Media Sniffer Pro 诊断报告 =====');
+            L.push('生成时间: ' + now.toISOString() + ' (本地 ' + now.toLocaleString() + ')');
+            L.push('');
+
+            var snap = Diag.snapshot();
+            L.push('## 版本');
+            L.push('  userscript  : v' + snap.version);
+            L.push('  MS_CONFIG   : v' + snap.scriptVersion);
+            L.push('  已运行      : ' + Math.round(snap.uptimeMs / 1000) + ' 秒');
+            L.push('');
+
+            L.push('## 环境');
+            var e = snap.env || {};
+            L.push('  页面        : ' + (e.href || ''));
+            L.push('  域名        : ' + (e.host || ''));
+            L.push('  顶层窗口    : ' + (e.isTop === null ? '未知（跨域）' : e.isTop));
+            L.push('  视口        : ' + e.innerW + ' × ' + e.innerH + '  @' + e.dpr + 'x');
+            L.push('  移动端判定  : ' + e.isMobile);
+            L.push('  UA          : ' + (e.ua || ''));
+            L.push('');
+
+            L.push('## 界面');
+            var ui = snap.ui || {};
+            L.push('  风格 / 主题 : ' + ui.uiStyle + ' / ' + ui.themeSetting + ' (生效 ' + ui.themeEffective + ')');
+            L.push('  配色 / 语言 : ' + ui.palette + ' / ' + ui.uiLang);
+            L.push('  当前标签    : ' + ui.currentTab);
+            L.push('');
+
+            L.push('## 资源');
+            var r = snap.resources || {};
+            L.push('  图片 ' + r.images + ' · 视频 ' + r.videos + ' · 音频 ' + r.audios + ' · m3u8 ' + r.m3u8 + ' · 视频链接 ' + r.videoLinks);
+            L.push('  已选中 ' + r.selected + ' · 历史 ' + r.history);
+            L.push('');
+
+            L.push('## 缓存');
+            (snap.caches || []).forEach(function (c) {
+                L.push('  ' + c.name + ' : ' + c.size + ' / ' + c.limit);
+            });
+            L.push('');
+
+            L.push('## 运行时');
+            var rt = snap.runtime || {};
+            Object.keys(rt).forEach(function (k) { L.push('  ' + k + ' : ' + rt[k]); });
+            L.push('');
+
+            L.push('## 耗时打点（按累计降序）');
+            if ((snap.perf || []).length === 0) L.push('  （无）');
+            (snap.perf || []).forEach(function (p) {
+                L.push('  ' + p.name.padEnd(22) + ' 次数 ' + p.count
+                    + '  最近 ' + p.lastMs + 'ms  峰值 ' + p.maxMs + 'ms  累计 ' + p.totalMs + 'ms');
+            });
+            L.push('');
+
+            L.push('## GM API');
+            Diag.gmApis().forEach(function (a) {
+                L.push('  ' + (a.ok ? '[✓]' : '[×]') + ' ' + a.name);
+            });
+            L.push('');
+
+            if (opts.selfCheck !== false) {
+                L.push('## 自检');
+                Diag.selfCheck().forEach(function (it) {
+                    L.push('  ' + (it.ok ? '[✓]' : '[×]') + ' ' + it.name + (it.detail ? '  — ' + it.detail : ''));
+                });
+                L.push('');
+            }
+
+            var logs = LOG.dump(opts.logLevel == null ? 0 : opts.logLevel);
+            if (opts.logs !== false) {
+                L.push('## 日志（最近 ' + logs.length + ' 条，级别 ' + (LOG.LEVEL_NAMES[opts.logLevel] || 'ALL') + ' 以上）');
+                if (logs.length === 0) L.push('  （空）');
+                logs.forEach(function (g) {
+                    var d = new Date(g.t);
+                    L.push('  ' + d.toTimeString().slice(0, 8) + '.' + String(d.getMilliseconds()).padStart(3, '0')
+                        + ' [' + LOG.LEVEL_NAMES[g.lvl] + '] ' + g.msg);
+                });
+            }
+            var reportText = L.join('\n');
+            // 报告是要贴给别人的，凭据必须抹掉（WebDAV 密码 / ASR & AI 密钥 / AudD token）
+            try {
+                if (typeof WebDAV !== 'undefined' && WebDAV.redact) reportText = WebDAV.redact(reportText);
+            } catch (eRedact) {}
+            return reportText;
+        };
+
+        return Diag;
+    })();
+
+    // =========================================================================
+    // ===== 模块 10c：DASH 音视频合流 (VideoMux) =====
+    //
+    // 解决的问题：B 站等内容站现在默认下发 **DASH** 格式 —— 视频轨与音频轨是
+    // 两条独立地址（videoUrl / audioUrl）。原来下载按钮只取 currentVideoUrl，
+    // 于是**下下来的文件是静音的**，用户直接弃用。
+    //
+    // 为什么不能像 m3u8 那样简单拼接：m3u8 是 MPEG-TS 裸流，首尾相接就合法；
+    // 而 DASH 用的是 **fMP4**，一个 MP4 只能有一个 moov，两条流各自的 moov/trak
+    // 必须真正合并，并重写 moof/trun 的轨道号与时间戳。简单拼出来的不是合法 MP4。
+    //
+    // 实现路线（已用合成数据做完整往返验证）：
+    //   1) 分别下载两条流
+    //   2) 用 mp4box.js 解析，取出「轨道信息 + sample description + 全部样本」
+    //      —— sample description 里就是解码配置（视频 avcC / 音频 esds），必须原样带走
+    //   3) 新建一个文件，addTrack ×2 + addSample ×全部，再 getBuffer()
+    //   4) **再解析一遍产物**做校验（轨道数 / 样本数 / 解码配置），校验不过就降级
+    //
+    // 三个已踩过的坑（都靠往返测试才发现）：
+    //   · write() 只写 this.boxes —— 但 addSample 会把分片追加进去，所以
+    //     getBuffer() 实际产出的是完整的 ftyp+moov+moof×N，不是空壳
+    //   · 音频 sample entry 的 write 自带 `<<16`，所以 options.samplerate 要传
+    //     **普通整数**（44100），传 44100<<16 会 int32 溢出变成 0Hz
+    //   · 对 write 未实现的 box（如 esds），mp4box 走 parseDataAndRewind 保留原始
+    //     字节，往返是字节精确的 —— 所以解码配置不会丢
+    // =========================================================================
+    var VideoMux = (function () {
+        'use strict';
+        var VideoMux = {};
+
+        // 固定版本（与 hls.js 同一策略：不追 latest，避免上游改行为把功能打崩）
+        VideoMux.LIB_URL = 'https://cdn.jsdelivr.net/npm/mp4box@0.5.4/dist/mp4box.all.min.js';
+        VideoMux.LIB_TIMEOUT = 20000;
+        // 双轨合计上限：muxing 需要把两条流同时放在内存里（再加一份产物），
+        // 大文件在移动端必被系统杀掉。超限直接引导走「生成下载脚本」。
+        VideoMux.MAX_TOTAL_BYTES = 480 * 1024 * 1024;
+
+        VideoMux._lib = null;
+        VideoMux._queue = null;
+
+        VideoMux._pickLib = function () {
+            try { if (typeof MP4Box !== 'undefined' && MP4Box && MP4Box.createFile) return MP4Box; } catch (e) {}
+            try {
+                if (typeof window !== 'undefined' && window.MP4Box && window.MP4Box.createFile) return window.MP4Box;
+            } catch (e) {}
+            return null;
+        };
+
+        VideoMux.ensureLib = function (cb) {
+            if (VideoMux._lib) { cb(null, VideoMux._lib); return; }
+            var have = VideoMux._pickLib();
+            if (have) { VideoMux._lib = have; cb(null, have); return; }
+            // 并发合并：两处同时触发也只加载一次
+            if (VideoMux._queue) { VideoMux._queue.push(cb); return; }
+            VideoMux._queue = [cb];
+            var done = function (err, lib) {
+                if (lib) VideoMux._lib = lib;
+                var q = VideoMux._queue || [];
+                VideoMux._queue = null;
+                for (var i = 0; i < q.length; i++) { try { q[i](err, lib); } catch (e) {} }
+            };
+            var settled = false;
+            var once = function (err, lib) { if (settled) return; settled = true; done(err, lib); };
+            try {
+                var sc = document.createElement('script');
+                sc.src = VideoMux.LIB_URL;
+                sc.async = true;
+                sc.onload = function () {
+                    var lib = VideoMux._pickLib();
+                    once(lib ? null : new Error('mp4box 加载完成但未挂载全局'), lib);
+                };
+                sc.onerror = function () { once(new Error('mp4box 加载失败（网络不通或被站点 CSP 拦截）')); };
+                (document.head || document.documentElement).appendChild(sc);
+                setTimeout(function () { once(new Error('mp4box 加载超时')); }, VideoMux.LIB_TIMEOUT);
+            } catch (e) { once(e); }
+        };
+
+        /* ---------- 下载一条流（带进度 + 可中止） ---------- */
+        VideoMux.fetchStream = function (url, onProgress, cb) {
+            var headers = {};
+            var ch = State.config.customHeaders || {};
+            if (ch.Referer) headers.Referer = ch.Referer;
+            if (ch.UserAgent) headers['User-Agent'] = ch.UserAgent;
+            if (ch.Cookie) headers.Cookie = ch.Cookie;
+            var done = false;
+            var handle = { abort: function () {} };
+            var finish = function (err, ab) { if (done) return; done = true; cb(err, ab); };
+            var viaXHR = function () {
+                var xhr = new XMLHttpRequest();
+                handle.abort = function () { try { xhr.abort(); } catch (e) {} };
+                try {
+                    xhr.open('GET', url, true);
+                    xhr.responseType = 'arraybuffer';
+                    xhr.timeout = 180000;
+                    for (var k in headers) { try { xhr.setRequestHeader(k, headers[k]); } catch (e) {} }
+                    xhr.onprogress = function (e) {
+                        if (onProgress && e.lengthComputable) onProgress(e.loaded, e.total);
+                    };
+                    xhr.onload = function () {
+                        if (xhr.status >= 200 && xhr.status < 300) finish(null, xhr.response);
+                        else finish(new Error('HTTP ' + xhr.status));
+                    };
+                    xhr.onerror = function () { finish(new Error('网络错误')); };
+                    xhr.ontimeout = function () { finish(new Error('超时')); };
+                    xhr.onabort = function () { finish(new Error('已取消')); };
+                    xhr.send();
+                } catch (e) { finish(e); }
+            };
+            if (typeof GM_xmlhttpRequest !== 'function') { viaXHR(); return handle; }
+            try {
+                var gm = GM_xmlhttpRequest({
+                    method: 'GET', url: url, responseType: 'arraybuffer',
+                    timeout: 180000, headers: headers,
+                    onprogress: function (r) { if (onProgress && r.lengthComputable) onProgress(r.loaded, r.total); },
+                    onload: function (r) {
+                        if (r.status >= 200 && r.status < 300) finish(null, r.response);
+                        else if (r.status === 0) viaXHR();          // 部分管理器跨域时 status 为 0
+                        else finish(new Error('HTTP ' + r.status));
+                    },
+                    onerror: function () { viaXHR(); },            // 降级 XHR 再试一次
+                    ontimeout: function () { finish(new Error('超时')); },
+                    onabort: function () { finish(new Error('已取消')); }
+                });
+                if (gm && typeof gm.abort === 'function') handle.abort = function () { try { gm.abort(); } catch (e) {} };
+            } catch (e) { viaXHR(); }
+            return handle;
+        };
+
+        /* ---------- 解析一条单轨流，取出轨道信息 + 解码配置 + 全部样本 ---------- */
+        VideoMux.extract = function (lib, ab, want, cb) {
+            var file = lib.createFile();
+            var out = null, settled = false;
+            var finish = function (err, res) { if (settled) return; settled = true; cb(err, res); };
+            file.onError = function (e) { finish(new Error('mp4box 解析出错: ' + e)); };
+            file.onReady = function (info) {
+                var list = want === 'video' ? info.videoTracks : info.audioTracks;
+                if (!list || !list.length) { finish(new Error('这条流里没有' + (want === 'video' ? '视频' : '音频') + '轨')); return; }
+                var track = list[0];
+                var trak = file.getTrackById(track.id);
+                var stsd = trak && trak.mdia && trak.mdia.minf && trak.mdia.minf.stbl && trak.mdia.minf.stbl.stsd;
+                var entry = stsd && stsd.entries && stsd.entries[0];
+                if (!entry) { finish(new Error('缺少 sample description（拿不到解码配置）')); return; }
+                out = {
+                    track: track, entry: entry, entryType: entry.type,
+                    timescale: track.timescale,
+                    duration: track.samples_duration || track.duration || 0,
+                    samples: []
+                };
+                try {
+                    file.setExtractionOptions(track.id, null, { nbSamples: 1e9 });
+                    file.start();
+                } catch (e) { finish(e); }
+            };
+            file.onSamples = function (id, user, list) {
+                if (!out) return;
+                for (var i = 0; i < list.length; i++) {
+                    var s = list[i];
+                    out.samples.push({
+                        data: s.data, dts: s.dts || 0, cts: s.cts || 0,
+                        duration: s.duration || 1, is_sync: !!s.is_sync
+                    });
+                }
+            };
+            try {
+                ab.fileStart = 0;
+                file.appendBuffer(ab, true);
+                file.flush();
+                // 样本在 appendBuffer 内同步回调完毕；这里只做一次「等一帧」的兜底
+                setTimeout(function () {
+                    if (!out) { finish(new Error('解析未完成')); return; }
+                    if (!out.samples.length) { finish(new Error('没解析出任何样本')); return; }
+                    finish(null, out);
+                }, 0);
+            } catch (e) { finish(e); }
+        };
+
+        /* ---------- 重组：双轨写进一个新文件 ---------- */
+        VideoMux.build = function (lib, v, a, cb) {
+            try {
+                var out = lib.createFile();
+                // description_boxes 传的必须是 **sample entry 的子 box**（avcC / esds），
+                // 不是 entry 本身 —— mp4box 的 addTrack 是
+                //   description_boxes.forEach(function(b){ s.addBox(b) })
+                // 即把每个元素当作「新 entry 的子 box」。
+                // 传整个 entry 会得到 `avc1 > avc1 > ...` 的嵌套垃圾：文件还能解析出轨道，
+                // 但解码配置读不到（codec 只剩 "avc1"，没有 profile/level），
+                // 部分播放器直接黑屏 / 拒播。
+                var vDescBoxes = (v.entry.boxes && v.entry.boxes.length) ? v.entry.boxes : [v.entry];
+                var vOpts = {
+                    id: 1, type: v.entryType, timescale: v.timescale, hdlr: 'vide',
+                    language: (v.track && v.track.language) || 'und',
+                    media_duration: v.duration, duration: v.duration,
+                    description_boxes: vDescBoxes
+                };
+                if (v.track && v.track.video) {
+                    vOpts.width = v.track.video.width;
+                    vOpts.height = v.track.video.height;
+                }
+                var vId = out.addTrack(vOpts);
+                if (!vId) { cb(new Error('视频轨创建失败（不支持的编码格式 ' + v.entryType + '）')); return; }
+
+                var aDescBoxes = (a.entry.boxes && a.entry.boxes.length) ? a.entry.boxes : [a.entry];
+                var aOpts = {
+                    id: 2, type: a.entryType, timescale: a.timescale, hdlr: 'soun',
+                    language: (a.track && a.track.language) || 'und',
+                    media_duration: a.duration, duration: a.duration,
+                    description_boxes: aDescBoxes
+                };
+                if (a.track && a.track.audio) {
+                    aOpts.channel_count = a.track.audio.channel_count || 2;
+                    aOpts.samplesize = a.track.audio.sample_size || 16;
+                    // 注意：mp4box 的 AudioSampleEntry.write 内部会做 `<<16`，
+                    // 所以这里必须传**普通整数**采样率。传 44100<<16 会 int32 溢出 → 0Hz。
+                    aOpts.samplerate = Math.round(a.track.audio.sample_rate) || 44100;
+                }
+                var aId = out.addTrack(aOpts);
+                if (!aId) { cb(new Error('音频轨创建失败（不支持的编码格式 ' + a.entryType + '）')); return; }
+
+                var i;
+                for (i = 0; i < v.samples.length; i++) {
+                    var vs = v.samples[i];
+                    out.addSample(vId, vs.data, { duration: vs.duration, cts: vs.cts, dts: vs.dts, is_sync: vs.is_sync });
+                }
+                for (i = 0; i < a.samples.length; i++) {
+                    var as = a.samples[i];
+                    out.addSample(aId, as.data, { duration: as.duration, cts: as.cts, dts: as.dts, is_sync: as.is_sync });
+                }
+                cb(null, out.getBuffer());
+            } catch (e) { cb(e); }
+        };
+
+        /* ---------- 校验产物：解析一遍，核对轨道 / 样本 / 解码配置 ---------- */
+        VideoMux.verify = function (lib, ab, expectV, expectA, cb) {
+            var file = lib.createFile();
+            var settled = false, info = null;
+            var vN = 0, aN = 0, vCodec = '', aCodec = '';
+            var finish = function (res) { if (settled) return; settled = true; cb(res); };
+            file.onError = function () { finish({ ok: false, reason: '产物无法解析' }); };
+            file.onReady = function (i) {
+                info = i;
+                try {
+                    i.videoTracks.forEach(function (t) { vCodec = t.codec || ''; file.setExtractionOptions(t.id, 'v', { nbSamples: 1e9 }); });
+                    i.audioTracks.forEach(function (t) { aCodec = t.codec || ''; file.setExtractionOptions(t.id, 'a', { nbSamples: 1e9 }); });
+                    file.start();
+                } catch (e) { finish({ ok: false, reason: e.message }); }
+            };
+            file.onSamples = function (id, user, list) {
+                for (var i = 0; i < list.length; i++) {
+                    if (user === 'v') vN++; else aN++;
+                }
+            };
+            try {
+                ab.fileStart = 0;
+                file.appendBuffer(ab, true);
+                setTimeout(function () {
+                    if (!info) { finish({ ok: false, reason: '产物没有 moov' }); return; }
+                    var okTracks = info.videoTracks.length >= 1 && info.audioTracks.length >= 1;
+                    // 严格相等过脆：mp4box 在个别流上会少吐 1~2 个 sync sample
+                    // （分片边界 / 编辑列表），这时产物其实是可用的，
+                    // 却会被判成失败并降级为「分别下载」——把一个能用的合并结果丢掉。
+                    // 放宽为「相差 ≤ 2 个」**或**「不少于期望的 99%」：
+                    // 前者管小样本（少 1~2 个就是全部），后者管大样本（比例抖动）。
+                    var nearEnough = function (got, want) {
+                        if (want <= 0) return got === want;
+                        return Math.abs(got - want) <= 2 || got >= Math.ceil(want * 0.99);
+                    };
+                    var okSamples = nearEnough(vN, expectV) && nearEnough(aN, expectA);
+                    finish({
+                        ok: okTracks && okSamples,
+                        video: vN, audio: aN, vCodec: vCodec, aCodec: aCodec,
+                        reason: !okTracks ? '产物缺少视频或音频轨'
+                            : (!okSamples ? ('样本数不符（视频 ' + vN + '/' + expectV + '，音频 ' + aN + '/' + expectA + '）') : '')
+                    });
+                }, 0);
+            } catch (e) { finish({ ok: false, reason: e.message }); }
+        };
+
+        /* ---------- 失败降级：把两条流分别存下来 ---------- */
+        VideoMux.saveSeparate = function (videoUrl, audioUrl, baseName) {
+            var name = SEC.safeFilename(baseName || 'dash');
+            try {
+                Dl.one(videoUrl, name + '.video.mp4', 0, State.config.customHeaders, true);
+                if (audioUrl) Dl.one(audioUrl, name + '.audio.m4a', 0, State.config.customHeaders, true);
+            } catch (e) { LOG.warn('降级下载两条流失败:', e); }
+        };
+
+        /* ---------- 主流程 ---------- */
+        VideoMux.run = function (opts, cb) {
+            var videoUrl = opts.videoUrl, audioUrl = opts.audioUrl, baseName = opts.baseName || 'video';
+            var onStage = opts.onStage || function () {};
+            var aborted = false;
+            var handles = [];
+            var result = { ok: false, reason: '', blob: null, filename: '' };
+            var done = function (err, blob) {
+                if (aborted) return;
+                if (err) { result.reason = err.message || String(err); cb(result); return; }
+                result.ok = true; result.blob = blob;
+                result.filename = SEC.safeFilename(baseName) + '.mp4';
+                cb(result);
+            };
+            var fail = function (msg) { result.ok = false; result.reason = msg; cb(result); };
+
+            if (!videoUrl) { fail('没有视频地址'); return { abort: function () {} }; }
+            if (!audioUrl) { fail('这条流没有独立音频轨（可能是普通 MP4，无需合流）'); return { abort: function () {} }; }
+
+            Diag.stats.muxCount++;
+            onStage('lib', 0, 0);
+            VideoMux.ensureLib(function (libErr, lib) {
+                if (aborted) return;
+                if (libErr) { Diag.stats.muxFailCount++; fail('mp4box 加载失败：' + libErr.message); return; }
+
+                onStage('video', 0, 0);
+                var vBytes = 0, aBytes = 0;
+                var checkSize = function () {
+                    if (vBytes + aBytes > VideoMux.MAX_TOTAL_BYTES) {
+                        try { handles.forEach(function (h) { h.abort && h.abort(); }); } catch (e) {}
+                        Diag.stats.muxFailCount++;
+                        fail('文件过大（合计约 ' + Math.round((vBytes + aBytes) / 1048576)
+                            + 'MB），浏览器内合流需要把两轨同时放进内存，可能耗尽内存。请改用「生成下载脚本」用 aria2 / ffmpeg 合并。');
+                        return true;
+                    }
+                    return false;
+                };
+
+                handles.push(VideoMux.fetchStream(videoUrl, function (l, t) {
+                    vBytes = l;
+                    if (!checkSize()) onStage('video', l, t);
+                }, function (vErr, vAb) {
+                    if (aborted) return;
+                    if (vErr) { Diag.stats.muxFailCount++; fail('视频轨下载失败：' + vErr.message); return; }
+                    onStage('audio', 0, 0);
+                    handles.push(VideoMux.fetchStream(audioUrl, function (l, t) {
+                        aBytes = l;
+                        if (!checkSize()) onStage('audio', l, t);
+                    }, function (aErr, aAb) {
+                        if (aborted) return;
+                        if (aErr) { Diag.stats.muxFailCount++; fail('音频轨下载失败：' + aErr.message); return; }
+
+                        onStage('parse', 0, 0);
+                        VideoMux.extract(lib, vAb, 'video', function (ev, V) {
+                            if (aborted) return;
+                            if (ev) { Diag.stats.muxFailCount++; fail('视频轨解析失败：' + ev.message); return; }
+                            VideoMux.extract(lib, aAb, 'audio', function (ea, A) {
+                                if (aborted) return;
+                                if (ea) { Diag.stats.muxFailCount++; fail('音频轨解析失败：' + ea.message); return; }
+                                onStage('mux', 0, 0);
+                                VideoMux.build(lib, V, A, function (eb, muxed) {
+                                    if (aborted) return;
+                                    if (eb) { Diag.stats.muxFailCount++; fail('合流失败：' + eb.message); return; }
+                                    onStage('verify', 0, 0);
+                                    VideoMux.verify(lib, muxed, V.samples.length, A.samples.length, function (res) {
+                                        if (aborted) return;
+                                        if (!res.ok) {
+                                            Diag.stats.muxFailCount++;
+                                            fail('合流结果校验未通过（' + res.reason + '），已保留下载的两条原始流');
+                                            VideoMux.saveSeparate(videoUrl, audioUrl, baseName);
+                                            return;
+                                        }
+                                        var blob = null;
+                                        try { blob = new Blob([muxed], { type: 'video/mp4' }); } catch (eBlob) {}
+                                        if (!blob) { Diag.stats.muxFailCount++; fail('产物打包失败'); return; }
+                                        LOG.info('[VideoMux] 合流成功: 视频', res.video, '样本 / 音频', res.audio,
+                                            '样本 · 视频码', res.vCodec, '/ 音频码', res.aCodec);
+                                        done(null, blob);
+                                    });
+                                });
+                            });
+                        });
+                    }));
+                }));
+            });
+            return { abort: function () { aborted = true; try { handles.forEach(function (h) { h.abort && h.abort(); }); } catch (e) {} } };
+        };
+
+        return VideoMux;
+    })();
+
+
+    // =========================================================================
+    // ===== 模块 10d：WebDAV 后端 (WebDAV) =====
+    //
+    // 两种用途，NAS 用户两个都要：
+    //   1) **数据后端**：把配置 / 识曲历史 / 转写记录 / 下载历史打包同步到 WebDAV，
+    //      换设备、换浏览器、脚本重装后一键恢复。
+    //   2) **下载后端**：合流出来的视频、转写出来的文本，直接 PUT 到 NAS，
+    //      不走浏览器下载目录（手机上尤其省事，也避免大 Blob 落盘失败）。
+    //
+    // 安全约定（重要）：
+    //   · 密码**只**存在本地 State.config 里，不进日志、不进诊断报告、不出现在任何 toast。
+    //   · 认证用 Basic（Authorization 头），失败时只报 HTTP 状态码，不回显凭据。
+    //   · 所有出口 URL 只允许 http/https。
+    // =========================================================================
+    var WebDAV = (function () {
+        'use strict';
+        var WebDAV = {};
+
+        WebDAV.TIMEOUT = 25000;
+        WebDAV.MAX_BLOB = 512 * 1024 * 1024;    // 单个文件上限
+        WebDAV.BACKUP_NAME = 'media-sniffer-backup.json';
+
+        // 需要从日志 / 报告里抹掉的字符串。用 Set 去重：原来每次请求都 push，
+        // 200 个文件的备份就会攒下 400 条完全重复的字符串，redact 时白跑。
+        WebDAV._secrets = new Set();
+
+        // 只允许 http/https，挡掉 file: / data: / 相对协议等
+        WebDAV.isSafeUrl = function (u) {
+            return typeof u === 'string' && /^https?:\/\//i.test(u.trim());
+        };
+
+        WebDAV.enabled = function () {
+            return !!State.config.webdavEnabled && !!WebDAV._base();
+        };
+
+        WebDAV._base = function () {
+            var u = String(State.config.webdavUrl || '').trim();
+            if (!u || !WebDAV.isSafeUrl(u)) return '';
+            return u.charAt(u.length - 1) === '/' ? u : u + '/';
+        };
+
+        // 目录名做一次白名单清洗：防止 「../」 把文件写到别的路径去
+        WebDAV._dir = function () {
+            var d = String(State.config.webdavDir || '').trim();
+            d = d.replace(/^\/+|\/+$/g, '');
+            d = d.split('/').filter(function (seg) {
+                return seg && seg !== '.' && seg !== '..';
+            }).join('/');
+            return d ? d + '/' : '';
+        };
+
+        WebDAV._fileUrl = function (name) {
+            var base = WebDAV._base();
+            if (!base) return '';
+            return base + WebDAV._dir() + String(name == null ? '' : name).replace(/^\/+/, '');
+        };
+
+        // UTF-8 安全的 base64：密码里带中文 / emoji 时 btoa 会直接抛 InvalidCharacterError
+        WebDAV._b64 = function (str) {
+            var s = String(str == null ? '' : str);
+            try {
+                var bytes = new TextEncoder().encode(s);
+                var bin = '';
+                for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+                return btoa(bin);
+            } catch (e) {
+                try { return btoa(unescape(encodeURIComponent(s))); } catch (e2) { return ''; }
+            }
+        };
+
+        WebDAV._headers = function (extra) {
+            var h = extra || {};
+            h['User-Agent'] = h['User-Agent'] || (MS_CONFIG.UA || 'MediaSniffer');
+            var user = String(State.config.webdavUser || '');
+            var pass = String(State.config.webdavPass || '');
+            if (user || pass) {
+                h['Authorization'] = 'Basic ' + WebDAV._b64(user + ':' + pass);
+                if (pass) WebDAV._secrets.add(pass);
+                if (user) WebDAV._secrets.add(user + ':' + pass);
+            }
+            return h;
+        };
+
+        // 统一请求口（所有出网都在这里，方便审计与测试）
+        WebDAV._req = function (method, url, body, opts, cb) {
+            opts = opts || {};
+            if (!WebDAV.isSafeUrl(url)) { cb(new Error('URL 不被允许（只支持 http/https）')); return; }
+            if (typeof GM_xmlhttpRequest !== 'function') { cb(new Error('需要 Tampermonkey 环境')); return; }
+            var done = false;
+            var finish = function (err, res) { if (done) return; done = true; cb(err, res); };
+            var req = {
+                method: method,
+                url: url,
+                headers: WebDAV._headers(opts.headers),
+                // 用 == null 判断：调用方显式传 timeout:0（大文件不超时）不能被
+                // `|| 默认值` 吃成 25 秒。与 Transcribe._req 保持一致。
+                timeout: opts.timeout == null ? WebDAV.TIMEOUT : opts.timeout,
+                data: body,
+                onload: function (res) { finish(null, res); },
+                onerror: function () { finish(new Error('网络请求失败')); },
+                ontimeout: function () { finish(new Error('请求超时')); }
+            };
+            if (opts.responseType) req.responseType = opts.responseType;
+            if (opts.onprogress) req.onprogress = opts.onprogress;
+            try { GM_xmlhttpRequest(req); } catch (e) { finish(e); }
+        };
+
+        // 把 HTTP 状态翻译成人话（不回显凭据）
+        WebDAV._statusHint = function (code) {
+            if (code === 401) return '认证失败（401）—— 检查用户名 / 密码';
+            if (code === 403) return '无权限（403）';
+            if (code === 404) return '路径不存在（404）';
+            if (code === 405) return '服务器不允许该操作（405）';
+            if (code === 409) return '父目录不存在（409）—— 需要先创建目录';
+            if (code === 423) return '资源被锁定（423）';
+            if (code === 507) return '空间不足（507）';
+            if (code >= 500) return '服务器错误（' + code + '）';
+            return 'HTTP ' + code;
+        };
+
+        /* ---------------- 基础操作 ---------------- */
+
+        // MKCOL：建目录（逐级建，某些服务器不支持递归）
+        WebDAV.mkcol = function (path, cb) {
+            var base = WebDAV._base();
+            if (!base) { cb(new Error('未配置 WebDAV 地址')); return; }
+            var segs = String(path || '').replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
+            var i = 0;
+            var url = base;
+            (function step() {
+                if (i >= segs.length) { cb(null, true); return; }
+                url += segs[i] + '/';
+                i++;
+                WebDAV._req('MKCOL', url, '', {}, function (err, res) {
+                    if (err) { cb(err); return; }
+                    // 201 创建成功 / 405 已存在，都算通过
+                    if (res.status === 201 || res.status === 405) { step(); return; }
+                    cb(new Error(WebDAV._statusHint(res.status)));
+                });
+            })();
+        };
+
+        WebDAV.put = function (name, data, cb) {
+            var url = WebDAV._fileUrl(name);
+            if (!url) { cb(new Error('未配置 WebDAV 地址')); return; }
+            WebDAV._req('PUT', url, data, {}, function (err, res) {
+                if (err) { cb(err); return; }
+                if (res.status >= 200 && res.status < 300) { cb(null, true); return; }
+                cb(new Error(WebDAV._statusHint(res.status)));
+            });
+        };
+
+        WebDAV.get = function (name, cb) {
+            var url = WebDAV._fileUrl(name);
+            if (!url) { cb(new Error('未配置 WebDAV 地址')); return; }
+            WebDAV._req('GET', url, null, {}, function (err, res) {
+                if (err) { cb(err); return; }
+                if (res.status === 404) { cb(new Error('文件不存在')); return; }
+                if (res.status < 200 || res.status >= 300) { cb(new Error(WebDAV._statusHint(res.status))); return; }
+                cb(null, res.responseText);
+            });
+        };
+
+        WebDAV.del = function (name, cb) {
+            var url = WebDAV._fileUrl(name);
+            if (!url) { cb(new Error('未配置 WebDAV 地址')); return; }
+            WebDAV._req('DELETE', url, null, {}, function (err, res) {
+                if (err) { cb(err); return; }
+                if (res.status >= 200 && res.status < 300 || res.status === 404) { cb(null, true); return; }
+                cb(new Error(WebDAV._statusHint(res.status)));
+            });
+        };
+
+        // PROPFIND 列出目录（Depth: 1）。有些服务器对 PROPFIND 返回 207 Multi-Status
+        WebDAV.list = function (cb) {
+            var base = WebDAV._base();
+            if (!base) { cb(new Error('未配置 WebDAV 地址')); return; }
+            var url = base + WebDAV._dir();
+            var body = '<?xml version="1.0" encoding="utf-8"?>'
+                + '<d:propfind xmlns:d="DAV:"><d:prop>'
+                + '<d:displayname/><d:getcontentlength/><d:getlastmodified/>'
+                + '</d:prop></d:propfind>';
+            WebDAV._req('PROPFIND', url, body, {
+                headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Depth': '1' }
+            }, function (err, res) {
+                if (err) { cb(err); return; }
+                if (res.status !== 207 && (res.status < 200 || res.status >= 300)) {
+                    cb(new Error(WebDAV._statusHint(res.status))); return;
+                }
+                cb(null, WebDAV._parsePropfind(res.responseText, url));
+            });
+        };
+
+        // 解析 207 多状态响应。用 DOMParser 而不是正则 —— 服务器返回的命名空间前缀五花八门
+        // 从 href 里剥掉协议+主机，拿到路径（服务器返回相对 / 绝对两种都有）
+        WebDAV._pathOf = function (href) {
+            var s = String(href || '').split('?')[0].split('#')[0];
+            s = s.replace(/^https?:\/\/[^/]*/i, '');
+            try { return decodeURIComponent(s); } catch (e) { return s; }
+        };
+        WebDAV._normPath = function (p) { return String(p || '').replace(/\/+$/, ''); };
+
+        WebDAV._parsePropfind = function (xml, baseUrl) {
+            var out = [];
+            if (!xml) return out;
+            var doc = null;
+            try {
+                doc = new DOMParser().parseFromString(xml, 'application/xml');
+            } catch (e) { return out; }
+            if (!doc || !doc.getElementsByTagName) return out;
+            // 207 里**一定**包含「目录自己」这一条（href 就是请求的 URL）。
+            // 不过滤掉的话，文件列表里会永远多出一个跟目录同名的假文件。
+            var basePath = WebDAV._normPath(WebDAV._pathOf(baseUrl));
+            var responses = doc.getElementsByTagNameNS ? doc.getElementsByTagNameNS('DAV:', 'response') : null;
+            if (!responses || !responses.length) responses = doc.getElementsByTagName('response');
+            for (var i = 0; i < responses.length; i++) {
+                var r = responses[i];
+                var hrefEl = r.getElementsByTagName('href')[0];
+                if (!hrefEl) continue;
+                var href = hrefEl.textContent || '';
+                var path = WebDAV._normPath(WebDAV._pathOf(href));
+                if (basePath && path === basePath) continue;          // 目录自己
+                var name = decodeURIComponent(href.replace(/\/+$/, '').split('/').pop() || '');
+                if (!name) continue;
+                var sizeEl = r.getElementsByTagName('getcontentlength')[0];
+                var modEl = r.getElementsByTagName('getlastmodified')[0];
+                out.push({
+                    name: name,
+                    href: href,
+                    dir: /\/$/.test(href),
+                    size: sizeEl ? parseInt(sizeEl.textContent, 10) || 0 : 0,
+                    mtime: modEl ? (modEl.textContent || '') : ''
+                });
+            }
+            return out;
+        };
+
+        WebDAV.test = function (cb) {
+            var base = WebDAV._base();
+            if (!base) { cb(new Error('请先填写 WebDAV 地址')); return; }
+            var dir = WebDAV._dir().replace(/\/$/, '');
+            var go = function () {
+                WebDAV.list(function (err, items) {
+                    if (err) { cb(err); return; }
+                    cb(null, { ok: true, count: items.length, items: items.slice(0, 20) });
+                });
+            };
+            if (!dir) { go(); return; }
+            // 目录可能还不存在 —— 先建再列，避免用户第一次用就吃 404
+            WebDAV.mkcol(dir, function (e1) {
+                if (e1) { cb(e1); return; }
+                go();
+            });
+        };
+
+        /* ---------------- 上传 Blob（下载后端） ---------------- */
+
+        // 从 URL 拉成 Blob 再 PUT 上去。移动端大文件落盘容易失败，走这条路更稳。
+        // 走 _req（出网口只有一个，认证头 / 超时 / 错误处理都只有一份）
+        WebDAV.uploadUrl = function (url, name, onProgress, cb) {
+            WebDAV._req('GET', url, null, {
+                responseType: 'blob',
+                timeout: 0,               // 大文件不设总超时
+                onprogress: function (e) {
+                    if (onProgress && e && e.lengthComputable) onProgress(e.loaded, e.total);
+                }
+            }, function (err, res) {
+                if (err) { cb(new Error('源文件下载失败: ' + err.message)); return; }
+                if (res.status < 200 || res.status >= 300) { cb(new Error(WebDAV._statusHint(res.status))); return; }
+                var blob = res.response;
+                if (!blob) { cb(new Error('未取到文件内容')); return; }
+                if (blob.size > WebDAV.MAX_BLOB) { cb(new Error('文件过大（超过 ' + Math.round(WebDAV.MAX_BLOB / 1048576) + 'MB）')); return; }
+                WebDAV.put(name, blob, cb);
+            });
+        };
+
+        WebDAV.uploadBlob = function (blob, name, cb) {
+            if (!blob) { cb(new Error('内容为空')); return; }
+            if (blob.size > WebDAV.MAX_BLOB) { cb(new Error('文件过大')); return; }
+            WebDAV.put(name, blob, cb);
+        };
+
+        /* ---------------- 数据后端：备份 / 恢复 ---------------- */
+
+        WebDAV.BACKUP_KEYS = [
+            'theme', 'uiStyle', 'palette', 'customPalettes', 'uiLang', 'nameTpl',
+            'whitelist', 'blacklist', 'whitelistMode',
+            'panelWidth', 'panelHeight', 'panelX', 'panelY', 'panelSnapEdge', 'panelMinimized', 'lastTab',
+            'batchConcurrency', 'batchRetry', 'batchDelay', 'askBeforeDownload', 'showStatusBar', 'logLevel',
+            'minImageSize', 'minImageWidth', 'minImageHeight', 'minVideoDuration', 'maxVideoDuration', 'minAudioDuration',
+            'showMinSizeKB', 'showMaxSizeKB', 'autoExtractThumb', 'autoPlayPreview', 'persistSelection',
+            'customHeaders', 'm3u8Quality', 'm3u8Concurrency', 'm3u8AutoMerge',
+            'enableSync', 'enableHistory', 'autoCheckUpdate', 'settingsExpanded',
+            'domainRules', 'customRules', 'parserPlugins', 'plugins',
+            'aria2RpcUrl',          // 注意：不含 aria2RpcSecret（secret 不上云）
+            'translateFrom', 'translateTo', 'translateEngine',
+            'shortcutToggle', 'shortcutTranslate', 'shortcutClose',
+            'shortcutToggleMod', 'shortcutTranslateMod', 'shortcutCloseMod',
+            'audioIdProvider', 'audioIdSeconds', 'audioIdSource', 'audioIdAutoSave',
+            'asrProvider', 'asrBaseUrl', 'asrModel', 'asrLang', 'asrMaxMB',
+            'aiBaseUrl', 'aiModel', 'aiPromptStyle',
+            'webdavUrl', 'webdavDir'   // 注意：不含 webdavUser / webdavPass（凭据不上云）
+        ];
+
+        // 明确**永不**上云 / 永不出现在导出物里的键
+        WebDAV.NEVER_BACKUP = ['webdavPass', 'webdavUser', 'aria2RpcSecret', 'audioIdToken',
+            'audioIdAcrKey', 'audioIdAcrSecret', 'asrKey', 'aiKey'];
+
+        WebDAV.buildBackup = function () {
+            var cfg = {};
+            for (var i = 0; i < WebDAV.BACKUP_KEYS.length; i++) {
+                var k = WebDAV.BACKUP_KEYS[i];
+                if (WebDAV.NEVER_BACKUP.indexOf(k) >= 0) continue;
+                if (Object.prototype.hasOwnProperty.call(State.config, k)) {
+                    cfg[k] = JSON.parse(JSON.stringify(State.config[k]));
+                }
+            }
+            var payload = {
+                app: 'media-sniffer',
+                schema: 1,
+                version: (typeof MS_CONFIG !== 'undefined' && MS_CONFIG.VERSION) || '',
+                savedAt: U.now(),
+                host: (function () { try { return location.hostname; } catch (e) { return ''; } })(),
+                config: cfg,
+                history: {
+                    audioId: U.isArr(State.config.audioIdHistory) ? State.config.audioIdHistory.slice(0, 50) : [],
+                    transcribe: U.isArr(State.config.transcribeHistory) ? State.config.transcribeHistory.slice(0, 30) : [],
+                    downloads: U.isArr(State.downloadHistory) ? State.downloadHistory.slice(0, 200) : []
+                }
+            };
+            return JSON.stringify(payload, null, 2);
+        };
+
+        WebDAV.backup = function (cb) {
+            if (!WebDAV.enabled()) { cb(new Error('WebDAV 未启用或未配置地址')); return; }
+            var dir = WebDAV._dir().replace(/\/$/, '');
+            var doPut = function () {
+                var text = WebDAV.buildBackup();
+                WebDAV.put(WebDAV.BACKUP_NAME, text, function (err) {
+                    if (err) { Diag.stats.webdavFailCount++; cb(err); return; }
+                    State.config.webdavLastSyncAt = U.now();
+                    State.save();
+                    Diag.stats.webdavCount++;
+                    cb(null, { bytes: text.length });
+                });
+            };
+            if (dir) WebDAV.mkcol(dir, function () { doPut(); });
+            else doPut();
+        };
+
+        // 只合并**允许**的键，且跳过 NEVER_BACKUP 里的（防手改备份文件塞凭据）
+        WebDAV.applyBackup = function (obj) {
+            if (!obj || obj.app !== 'media-sniffer' || !obj.config || typeof obj.config !== 'object') {
+                return { ok: false, reason: '不是本脚本的备份文件' };
+            }
+            var applied = 0;
+            for (var i = 0; i < WebDAV.BACKUP_KEYS.length; i++) {
+                var k = WebDAV.BACKUP_KEYS[i];
+                if (WebDAV.NEVER_BACKUP.indexOf(k) >= 0) continue;
+                if (!Object.prototype.hasOwnProperty.call(obj.config, k)) continue;
+                if (obj.config[k] === undefined) continue;
+                State.config[k] = obj.config[k];
+                applied++;
+            }
+            if (obj.history) {
+                if (U.isArr(obj.history.audioId)) State.config.audioIdHistory = obj.history.audioId.slice(0, 50);
+                if (U.isArr(obj.history.transcribe)) State.config.transcribeHistory = obj.history.transcribe.slice(0, 30);
+                if (U.isArr(obj.history.downloads)) State.downloadHistory = obj.history.downloads.slice(0, 200);
+            }
+            State.save();
+            return { ok: true, applied: applied };
+        };
+
+        WebDAV.restore = function (cb) {
+            if (!WebDAV.enabled()) { cb(new Error('WebDAV 未启用或未配置地址')); return; }
+            WebDAV.get(WebDAV.BACKUP_NAME, function (err, text) {
+                if (err) { Diag.stats.webdavFailCount++; cb(err); return; }
+                var obj = U.safeJson(text, null);
+                if (!obj) { cb(new Error('备份文件不是合法 JSON')); return; }
+                var r = WebDAV.applyBackup(obj);
+                if (!r.ok) { cb(new Error(r.reason)); return; }
+                Diag.stats.webdavCount++;
+                cb(null, r);
+            });
+        };
+
+        // 抹掉日志 / 报告里可能出现的凭据
+        WebDAV.redact = function (text) {
+            var s = String(text == null ? '' : text);
+            var secrets = Array.from(WebDAV._secrets);
+            ['webdavPass', 'webdavUser', 'aria2RpcSecret', 'audioIdToken', 'audioIdAcrKey',
+                'audioIdAcrSecret', 'asrKey', 'aiKey'].forEach(function (k) {
+                var v = State.config[k];
+                if (v) secrets.push(String(v));
+            });
+            for (var i = 0; i < secrets.length; i++) {
+                var sec = secrets[i];
+                if (!sec || sec.length < 4) continue;
+                s = s.split(sec).join('***');
+            }
+            // 顺手兜住 "sk-xxxx" 这类密钥字面量
+            s = s.replace(/\b(sk|key|token)-[A-Za-z0-9_\-]{8,}/gi, '$1-***');
+            return s;
+        };
+
+        return WebDAV;
+    })();
+
+    // =========================================================================
+    // ===== 模块 10e：听歌识曲 (AudioID) =====
+    //
+    // 场景：听到一段 BGM / 直播 / 短视频配乐，想知道是什么歌 —— 这是最有分享欲的一步，
+    // 用户识别成功会自动截图发群里，等于免费推广。
+    //
+    // 两条音频来源：
+    //   · page：页面里正在播放的 <video>/<audio>，用 captureStream() 抓流 ——
+    //           **不需要任何权限**，也不受麦克风环境影响，是首选
+    //   · mic ：对着外放录音（getUserMedia）—— 页面里没有可控 media 元素时的兜底
+    //
+    // 三个识别通道（全部**自带密钥**，脚本里不写死任何 token）：
+    //   · audd    ：一次 multipart POST，最省事
+    //   · acrcloud：需要 HMAC-SHA1 签名（用 SubtleCrypto 算，不引第三方库）
+    //   · custom  ：POST 音频到自己的服务，返回 JSON
+    //
+    // 录制的编码选择：优先 audio/webm;codecs=opus —— 8 秒大约 30KB，
+    // 而 wav 8 秒要 1.4MB。移动网络下这个差别就是「能不能传上去」。
+    // =========================================================================
+    var AudioID = (function () {
+        'use strict';
+        var AudioID = {};
+
+        AudioID.MIN_SECONDS = 3;
+        AudioID.MAX_SECONDS = 20;
+        AudioID.MAX_UPLOAD = 12 * 1024 * 1024;
+        AudioID.HISTORY_MAX = 30;
+
+        // MediaRecorder 在 Safari 上不支持 webm，退回默认
+        AudioID._mimeCandidates = [
+            'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/ogg', 'audio/mp4'
+        ];
+
+        AudioID.pickMime = function () {
+            if (typeof MediaRecorder === 'undefined' || !MediaRecorder.isTypeSupported) return '';
+            for (var i = 0; i < AudioID._mimeCandidates.length; i++) {
+                try { if (MediaRecorder.isTypeSupported(AudioID._mimeCandidates[i])) return AudioID._mimeCandidates[i]; } catch (e) {}
+            }
+            return '';
+        };
+
+        /* ---------------- 找音源 ---------------- */
+
+        // 页面里「正在发声」的媒体元素。要求 readyState>=2 且 currentTime>0，
+        // 否则会抓到还没开始解码的元素，录出来是静音。
+        AudioID.findPlayingMedia = function () {
+            var list;
+            try { list = document.querySelectorAll('video,audio'); } catch (e) { return null; }
+            for (var i = 0; i < list.length; i++) {
+                var el = list[i];
+                try {
+                    if (el.paused || el.ended) continue;
+                    if (!(el.currentTime > 0)) continue;
+                    if (el.readyState < 2) continue;
+                    if (!(el.captureStream || el.mozCaptureStream)) continue;
+                    return el;
+                } catch (e2) {}
+            }
+            return null;
+        };
+
+        AudioID._streamOf = function (el) {
+            try {
+                if (el.captureStream) return el.captureStream();
+                if (el.mozCaptureStream) return el.mozCaptureStream();
+            } catch (e) {}
+            return null;
+        };
+
+        /* ---------------- 录音 ---------------- */
+
+        // source: 'page' | 'mic'
+        AudioID.capture = function (seconds, source, onTick, cb) {
+            var secs = Math.max(AudioID.MIN_SECONDS, Math.min(AudioID.MAX_SECONDS, Number(seconds) || 8));
+            // 分两类收尾：
+            //   stopAll  —— 外部资源（计时器、麦克风 track…），这里逐项清理
+            //   stopRec  —— 录音器本身，单独一个钩子
+            // P3-16：原来把 rec.stop() 也塞进 stopAll，而 finish() 又是在 rec.onstop
+            // 里被回调的 —— 等于「停止录音」这个动作会从 onstop 里再调一次自己
+            // （空操作，但读代码的人得绕一圈才能确认它是安全的）。分开之后语义清楚。
+            var stopAll = [];
+            var stopRec = null;
+            var settled = false;
+            var finish = function (err, blob, mime) {
+                if (settled) return;
+                settled = true;
+                if (stopRec) { try { stopRec(); } catch (e) {} stopRec = null; }
+                stopAll.forEach(function (f) { try { f(); } catch (e) {} });
+                cb(err, blob, mime);
+            };
+
+            if (typeof MediaRecorder === 'undefined' || !MediaRecorder) { finish(new Error('浏览器不支持 MediaRecorder，无法录音识别')); return { abort: function () {} }; }
+
+            function begin(stream, ownStream) {
+                if (!stream) { finish(new Error('没有可用的音频流')); return; }
+                var mime = AudioID.pickMime();
+                var rec;
+                try {
+                    rec = mime ? new MediaRecorder(stream, { mimeType: mime, audioBitsPerSecond: 64000 })
+                        : new MediaRecorder(stream);
+                } catch (e) {
+                    try { rec = new MediaRecorder(stream); }
+                    catch (e2) { finish(new Error('无法创建录音器: ' + e2.message)); return; }
+                }
+                var chunks = [];
+                rec.ondataavailable = function (e) { if (e && e.data && e.data.size > 0) chunks.push(e.data); };
+                rec.onerror = function (e) { finish(new Error('录音失败: ' + ((e && e.error && e.error.name) || '未知'))); };
+                rec.onstop = function () {
+                    var type = rec.mimeType || mime || 'audio/webm';
+                    var blob = null;
+                    try { blob = new Blob(chunks, { type: type }); } catch (e) {}
+                    if (!blob || !blob.size) { finish(new Error('没录到音频（页面是否静音 / 麦克风被占用？）')); return; }
+                    if (blob.size > AudioID.MAX_UPLOAD) { finish(new Error('录音过大（' + Math.round(blob.size / 1048576) + 'MB），请缩短时长')); return; }
+                    finish(null, blob, type);
+                };
+                // 录音器自己的停止钩子（finish 会先调它，且只在还没停时才真的 stop）
+                stopRec = function () { try { if (rec.state !== 'inactive') rec.stop(); } catch (e) {} };
+                if (ownStream) stopAll.push(function () { try { ownStream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} });
+
+                var left = Math.ceil(secs);
+                onTick && onTick(left, secs);
+                var timer = setInterval(function () {
+                    left--;
+                    onTick && onTick(Math.max(0, left), secs);
+                    if (left <= 0) { clearInterval(timer); try { rec.stop(); } catch (e) {} }
+                }, 1000);
+                stopAll.push(function () { clearInterval(timer); });
+
+                try { rec.start(250); }          // 250ms 一片，短录音也能拿到数据
+                catch (e) { finish(new Error('启动录音失败: ' + e.message)); }
+            }
+
+            if (source === 'mic') {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    finish(new Error('浏览器不支持麦克风录音（需要 HTTPS）')); return { abort: function () {} };
+                }
+                navigator.mediaDevices.getUserMedia({
+                    // 关掉三件套处理 —— 它们是给语音通话设计的，会把音乐削得没法识别
+                    audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+                }).then(function (stream) {
+                    begin(stream, stream);
+                }).catch(function (err) {
+                    finish(new Error('麦克风不可用: ' + (err && err.name ? err.name : '权限被拒绝')));
+                });
+            } else {
+                var el = AudioID.findPlayingMedia();
+                if (!el) {
+                    finish(new Error('页面里没有正在播放的媒体（可以改用「麦克风」模式）'));
+                    return { abort: function () {} };
+                }
+                var stream = AudioID._streamOf(el);
+                if (!stream) { finish(new Error('无法从播放器抓取音频流')); return { abort: function () {} }; }
+                begin(stream, null);
+            }
+
+            return { abort: function () { finish(new Error('已取消')); } };
+        };
+
+        /* ---------------- 通道 1：AudD ---------------- */
+
+        AudioID._identifyAudD = function (blob, cb) {
+            var token = String(State.config.audioIdToken || '').trim();
+            if (!token) { cb(new Error('未填写 AudD API Token')); return; }
+            var fd;
+            try {
+                fd = new FormData();
+                fd.append('api_token', token);
+                fd.append('return', 'apple_music,spotify,deezer,lyrics');
+                var ext = /ogg/.test(blob.type) ? 'ogg' : (/mp4/.test(blob.type) ? 'mp4' : 'webm');
+                fd.append('file', blob, 'sample.' + ext);
+            } catch (e) { cb(new Error('组装请求失败: ' + e.message)); return; }
+            AudioID._post('https://api.audd.io/', fd, {}, function (err, res) {
+                if (err) { cb(err); return; }
+                if (res.status < 200 || res.status >= 300) { cb(new Error('识别服务返回 HTTP ' + res.status)); return; }
+                var data = U.safeJson(res.responseText, null);
+                if (!data) { cb(new Error('识别服务返回非 JSON')); return; }
+                if (data.status === 'error') {
+                    // P3-15：原来写成 `(a && a.m) || a && a.c || '未知'`，
+                    // 靠 && / || 的优先级「碰巧」对，但读的人得在心里算一遍。
+                    // 显式加括号，意图一目了然。
+                    var errMsg = (data.error && (data.error.error_message || data.error.error_code)) || '未知';
+                    cb(new Error('识别服务报错: ' + errMsg));
+                    return;
+                }
+                if (!data.result) { cb(null, null); return; }     // 没听出来：不是错误
+                cb(null, AudioID._normalizeAudD(data.result));
+            });
+        };
+
+        AudioID._normalizeAudD = function (r) {
+            var links = [];
+            if (r.song_link) links.push({ label: 'AudD', url: r.song_link });
+            if (r.spotify && r.spotify.external_urls && r.spotify.external_urls.spotify) {
+                links.push({ label: 'Spotify', url: r.spotify.external_urls.spotify });
+            }
+            if (r.apple_music && r.apple_music.url) links.push({ label: 'Apple Music', url: r.apple_music.url });
+            if (r.deezer && r.deezer.link) links.push({ label: 'Deezer', url: r.deezer.link });
+            return {
+                artist: r.artist || '', title: r.title || '', album: r.album || '',
+                cover: (r.spotify && r.spotify.album && r.spotify.album.images && r.spotify.album.images[0]
+                    && r.spotify.album.images[0].url) || (r.apple_music && r.apple_music.artwork && r.apple_music.artwork.url) || '',
+                releaseDate: r.release_date || '', label: r.label || '',
+                links: links, provider: 'audd', lyrics: (r.lyrics && r.lyrics.lyrics) || ''
+            };
+        };
+
+        /* ---------------- 通道 2：ACRCloud ---------------- */
+
+        // 把字符串转成字节：优先 TextEncoder，没有就退回 UTF-8 手工编码。
+        // TextEncoder 在 iOS 14 以下 / 部分老 WebView 里不存在，原来直接 new 会抛，
+        // 用户只会看到「签名计算失败」这种指不到原因的提示。
+        AudioID._utf8 = function (str) {
+            var s = String(str == null ? '' : str);
+            try {
+                if (typeof TextEncoder === 'function') return new TextEncoder().encode(s);
+            } catch (e) {}
+            try {
+                // 与 WebDAV._b64 同一套兜底：先做 UTF-8 百分号编码，再逐字节取出
+                var bin = unescape(encodeURIComponent(s));
+                var out = new Uint8Array(bin.length);
+                for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+                return out;
+            } catch (e2) {
+                var fb = new Uint8Array(s.length);
+                for (var j = 0; j < s.length; j++) fb[j] = s.charCodeAt(j) & 0xff;
+                return fb;
+            }
+        };
+
+        AudioID._hmacSha1B64 = function (secret, message) {
+            return new Promise(function (resolve, reject) {
+                try {
+                    if (!(window.crypto && window.crypto.subtle && window.crypto.subtle.importKey)) {
+                        reject(new Error('环境不支持 SubtleCrypto，无法为 ACRCloud 计算签名')); return;
+                    }
+                    window.crypto.subtle.importKey('raw', AudioID._utf8(secret), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign'])
+                        .then(function (key) { return window.crypto.subtle.sign('HMAC', key, AudioID._utf8(message)); })
+                        .then(function (sig) {
+                            var bytes = new Uint8Array(sig), bin = '';
+                            for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+                            resolve(btoa(bin));
+                        })
+                        .catch(function (e) { reject(new Error('签名计算失败: ' + e.message)); });
+                } catch (e) { reject(e); }
+            });
+        };
+
+        AudioID._identifyAcrCloud = function (blob, cb) {
+            var host = String(State.config.audioIdAcrHost || '').trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '');
+            var key = String(State.config.audioIdAcrKey || '').trim();
+            var secret = String(State.config.audioIdAcrSecret || '').trim();
+            if (!host || !key || !secret) { cb(new Error('ACRCloud 需要填 Host / Access Key / Access Secret 三项')); return; }
+            // 只挡「空白」和「路径/协议残留」这类明显填错；原先只允许 [a-z0-9.-]，
+            // 会把带下划线或国际化域名的自建代理误判成非法。
+            if (/\s/.test(host) || host.indexOf('/') >= 0 || host.indexOf('\\') >= 0) {
+                cb(new Error('ACRCloud Host 格式不对（只填域名，如 identify-us-west-1.acrcloud.com）'));
+                return;
+            }
+
+            var uri = '/v1/identify';
+            var dataType = 'audio';
+            var sigVersion = '1';
+            var ts = String(Math.floor(U.now() / 1000));
+            var stringToSign = ['POST', uri, key, dataType, sigVersion, ts].join('\n');
+
+            AudioID._hmacSha1B64(secret, stringToSign).then(function (sig) {
+                var fd;
+                try {
+                    fd = new FormData();
+                    fd.append('access_key', key);
+                    fd.append('data_type', dataType);
+                    fd.append('signature_version', sigVersion);
+                    fd.append('signature', sig);
+                    fd.append('sample_bytes', String(blob.size));
+                    fd.append('timestamp', ts);
+                    fd.append('sample', blob, 'sample.webm');
+                } catch (e) { cb(new Error('组装请求失败: ' + e.message)); return; }
+                AudioID._post('https://' + host + uri, fd, {}, function (err, res) {
+                    if (err) { cb(err); return; }
+                    if (res.status < 200 || res.status >= 300) { cb(new Error('识别服务返回 HTTP ' + res.status)); return; }
+                    var data = U.safeJson(res.responseText, null);
+                    if (!data) { cb(new Error('识别服务返回非 JSON')); return; }
+                    if (data.status && data.status.code && data.status.code !== 0) {
+                        // 1001 = 没识别出来，属于正常结果
+                        if (data.status.code === 1001) { cb(null, null); return; }
+                        cb(new Error('识别服务报错: ' + (data.status.msg || data.status.code)));
+                        return;
+                    }
+                    var m = data.metadata;
+                    if (!m || !m.music || !m.music.length) { cb(null, null); return; }
+                    cb(null, AudioID._normalizeAcr(m.music[0]));
+                });
+            }).catch(function (e) { cb(e); });
+        };
+
+        AudioID._normalizeAcr = function (m) {
+            var links = [];
+            if (m.external_metadata) {
+                ['spotify', 'youtube', 'deezer', 'apple_music'].forEach(function (k) {
+                    var v = m.external_metadata[k];
+                    if (!v) return;
+                    var url = v.url || (v.external_ids && v.external_ids[k]);
+                    if (typeof url === 'string' && /^https?:/.test(url)) links.push({ label: k, url: url });
+                });
+            }
+            var artists = (m.artists || []).map(function (a) { return a.name; }).filter(Boolean).join(', ');
+            var album = (m.album && m.album.name) || '';
+            return {
+                artist: artists, title: m.title || '', album: album,
+                cover: '', releaseDate: (m.release_date || ''), label: (m.label || ''),
+                links: links, provider: 'acrcloud', lyrics: ''
+            };
+        };
+
+        /* ---------------- 通道 3：自定义 ---------------- */
+
+        AudioID._identifyCustom = function (blob, cb) {
+            var url = String(State.config.audioIdCustomUrl || '').trim();
+            if (!url) { cb(new Error('未填写自定义识别接口地址')); return; }
+            if (!/^https?:\/\//i.test(url)) { cb(new Error('自定义接口只支持 http/https')); return; }
+            var fd;
+            try { fd = new FormData(); fd.append('file', blob, 'sample.webm'); }
+            catch (e) { cb(new Error('组装请求失败: ' + e.message)); return; }
+            AudioID._post(url, fd, {}, function (err, res) {
+                if (err) { cb(err); return; }
+                if (res.status < 200 || res.status >= 300) { cb(new Error('接口返回 HTTP ' + res.status)); return; }
+                var data = U.safeJson(res.responseText, null);
+                if (!data) { cb(new Error('接口返回非 JSON')); return; }
+                var r = data.result || data.data || data;
+                if (data.status && data.status !== 'success' && !r.title) { cb(null, null); return; }
+                if (!r || (!r.title && !r.song)) { cb(null, null); return; }
+                var links = [];
+                if (Array.isArray(r.links)) {
+                    r.links.forEach(function (l) {
+                        if (!l || !l.url) return;
+                        var u = String(l.url);
+                        // 只接受 http(s)：远端服务返回 javascript: / data: 时不能进链接列表
+                        if (!/^https?:\/\//i.test(u)) return;
+                        links.push({ label: String(l.label || l.name || 'Link'), url: u });
+                    });
+                }
+                cb(null, {
+                    artist: r.artist || r.singer || '', title: r.title || r.song || '',
+                    album: r.album || '', cover: r.cover || r.pic || '', releaseDate: r.release_date || '',
+                    label: r.label || '', links: links, provider: 'custom', lyrics: r.lyrics || ''
+                });
+            });
+        };
+
+        // 统一 POST（所有识别请求都从这里出去）
+        AudioID._post = function (url, data, headers, cb) {
+            if (typeof GM_xmlhttpRequest !== 'function') { cb(new Error('需要 Tampermonkey 环境')); return; }
+            var done = false;
+            var finish = function (err, res) { if (done) return; done = true; cb(err, res); };
+            var h = headers || {};
+            try { GM_xmlhttpRequest({
+                method: 'POST',
+                url: url,
+                data: data,
+                headers: h,
+                timeout: 30000,
+                onload: function (res) { finish(null, res); },
+                onerror: function () { finish(new Error('网络请求失败')); },
+                ontimeout: function () { finish(new Error('识别请求超时')); }
+            }); } catch (e) { finish(e); }
+        };
+
+        AudioID.identify = function (blob, cb) {
+            var p = String(State.config.audioIdProvider || 'audd');
+            if (p === 'acrcloud') { AudioID._identifyAcrCloud(blob, cb); return; }
+            if (p === 'custom') { AudioID._identifyCustom(blob, cb); return; }
+            AudioID._identifyAudD(blob, cb);
+        };
+
+        /* ---------------- 组合流程 ---------------- */
+
+        AudioID.run = function (opts, cb) {
+            opts = opts || {};
+            var onStage = opts.onStage || function () {};
+            var aborted = false;
+            var handle = null;
+            Diag.stats.audioIdCount++;
+            onStage('capture', 0);
+            handle = AudioID.capture(opts.seconds, opts.source, function (left) {
+                if (!aborted) onStage('capture', left);
+            }, function (err, blob) {
+                if (aborted) return;
+                if (err) { Diag.stats.audioIdFailCount++; cb({ ok: false, reason: err.message }); return; }
+                onStage('identify', blob.size);
+                AudioID.identify(blob, function (e2, res) {
+                    if (aborted) return;
+                    if (e2) { Diag.stats.audioIdFailCount++; cb({ ok: false, reason: e2.message }); return; }
+                    if (!res) { cb({ ok: false, reason: 'no-match' }); return; }
+                    res.at = U.now();
+                    res.bytes = blob.size;
+                    AudioID.pushHistory(res);
+                    cb({ ok: true, result: res });
+                });
+            });
+            return { abort: function () { aborted = true; if (handle && handle.abort) handle.abort(); } };
+        };
+
+        AudioID.pushHistory = function (r) {
+            if (!U.isArr(State.config.audioIdHistory)) State.config.audioIdHistory = [];
+            State.config.audioIdHistory.unshift({
+                artist: r.artist, title: r.title, album: r.album, cover: r.cover,
+                links: r.links, provider: r.provider, at: r.at || U.now()
+            });
+            if (State.config.audioIdHistory.length > AudioID.HISTORY_MAX) {
+                State.config.audioIdHistory.length = AudioID.HISTORY_MAX;
+            }
+            State.save();
+        };
+
+        AudioID.clearHistory = function () {
+            State.config.audioIdHistory = [];
+            State.save();
+        };
+
+        // 拼一行可复制 / 可分享的文本
+        AudioID.format = function (r) {
+            var s = [r.title || '未知曲目'];
+            if (r.artist) s.push('— ' + r.artist);
+            if (r.album) s.push('《' + r.album + '》');
+            var line = s.join(' ');
+            if (r.releaseDate) line += ' (' + r.releaseDate + ')';
+            return line;
+        };
+
+        return AudioID;
+    })();
+
+    // =========================================================================
+    // ===== 模块 10f：转文字 + AI 摘要 (Transcribe) =====
+    //
+    // 场景：B 站视频 / 播客 / 直播回放 —— 脚本本来就能拿到**独立的音频轨地址**
+    // （DASH 的 audioUrl），这条轨往往只有十几 MB，直接丢给 ASR 就出文稿了。
+    // 这是这个脚本独有的便利：别的转写工具得先让用户把视频下下来。
+    //
+    // 三个通道全部「自带密钥」，脚本内不写死任何 key：
+    //   · ASR：任何 Whisper 兼容的 /audio/transcriptions 端点
+    //          （OpenAI / Groq / SiliconFlow / 自建 faster-whisper 都可以）
+    //   · 摘要：任何 OpenAI 兼容的 /chat/completions 端点
+    //   · 也支持「只转写不摘要」（不填 AI 配置就跳过）
+    //
+    // 大文件处理：单次上传有上限（多数服务 25MB）。超了就本地解码 → 降采样成
+    // 16kHz 单声道 → 切片 → 逐片上传 → 拼接。**不做流式**，因为逐片重试
+    // 比流式断在半路好收拾得多。
+    // =========================================================================
+    var Transcribe = (function () {
+        'use strict';
+        var Transcribe = {};
+
+        Transcribe.MAX_UPLOAD = 24 * 1024 * 1024;    // 单次上传上限（Whisper 系普遍 25MB）
+        Transcribe.MAX_SOURCE = 300 * 1024 * 1024;   // 音频源文件上限
+        Transcribe.DECODE_LIMIT = 64 * 1024 * 1024;  // 超过这个大小就不本地解码（内存扛不住）
+        Transcribe.CHUNK_SECONDS = 600;              // 每片 10 分钟（16kHz 单声道 ≈ 19MB）
+        Transcribe.TARGET_RATE = 16000;
+        Transcribe.HISTORY_MAX = 30;
+
+        // 14：原来这里有个 Transcribe.styles 常量数组，全篇没有任何引用 —— 已删除。
+        // （风格白名单的唯一真源是 validateConfig 里的校验，UI 的下拉选项也直接列在那里。）
+
+        Transcribe.ready = function () {
+            return !!String(State.config.asrKey || '').trim();
+        };
+
+        Transcribe.summaryReady = function () {
+            return !!String(State.config.aiKey || '').trim();
+        };
+
+        /* ---------------- URL / 请求 ---------------- */
+
+        Transcribe._join = function (base, path) {
+            var b = String(base || '').trim().replace(/\/+$/, '');
+            if (!b) return '';
+            return b + (path.charAt(0) === '/' ? path : '/' + path);
+        };
+
+        Transcribe._asrEndpoint = function () {
+            return Transcribe._join(State.config.asrBaseUrl || 'https://api.openai.com/v1', '/audio/transcriptions');
+        };
+
+        Transcribe._chatEndpoint = function () {
+            return Transcribe._join(State.config.aiBaseUrl || 'https://api.openai.com/v1', '/chat/completions');
+        };
+
+        Transcribe._req = function (opts, cb) {
+            if (typeof GM_xmlhttpRequest !== 'function') { cb(new Error('需要 Tampermonkey 环境')); return; }
+            var url = opts.url;
+            if (!/^https?:\/\//i.test(String(url || ''))) { cb(new Error('接口地址只支持 http/https')); return; }
+            var done = false;
+            var finish = function (err, res) { if (done) return; done = true; cb(err, res); };
+            var req = {
+                method: opts.method || 'POST',
+                url: url,
+                headers: opts.headers || {},
+                data: opts.data,
+                // 注意用 == null 判断：显式传 timeout:0（大文件不设超时）不能被默认值吃掉
+                timeout: opts.timeout == null ? 180000 : opts.timeout,
+                onload: function (res) { finish(null, res); },
+                onerror: function () { finish(new Error('网络请求失败')); },
+                ontimeout: function () { finish(new Error('请求超时（长音频建议调小分片时长）')); }
+            };
+            if (opts.responseType) req.responseType = opts.responseType;
+            if (opts.onprogress) req.onprogress = opts.onprogress;
+            try { GM_xmlhttpRequest(req); } catch (e) { finish(e); }
+        };
+
+        Transcribe._httpHint = function (status, body) {
+            var msg = '';
+            var j = U.safeJson(body, null);
+            if (j && j.error) msg = j.error.message || j.error.code || '';
+            if (status === 401) return '密钥无效或未授权（401）' + (msg ? '：' + msg : '');
+            if (status === 403) return '无权限（403）' + (msg ? '：' + msg : '');
+            if (status === 404) return '接口地址不存在（404）—— 检查 Base URL 是否要带 /v1';
+            if (status === 413) return '文件过大（413）—— 请调小「分片时长」';
+            if (status === 429) return '请求过于频繁 / 额度用尽（429）' + (msg ? '：' + msg : '');
+            if (status >= 500) return '服务端错误（' + status + '）';
+            return 'HTTP ' + status + (msg ? '：' + msg : '');
+        };
+
+        /* ---------------- ASR ---------------- */
+
+        Transcribe.asr = function (blob, cb, onProgress) {
+            var key = String(State.config.asrKey || '').trim();
+            if (!key) { cb(new Error('未填写 ASR 密钥')); return; }
+            var url = Transcribe._asrEndpoint();
+            var fd;
+            try {
+                fd = new FormData();
+                var ext = /wav/.test(blob.type) ? 'wav' : (/ogg/.test(blob.type) ? 'ogg' : (/mp4/.test(blob.type) ? 'm4a' : 'webm'));
+                fd.append('file', blob, 'audio.' + ext);
+                fd.append('model', String(State.config.asrModel || 'whisper-1'));
+                if (State.config.asrLang && State.config.asrLang !== 'auto') fd.append('language', State.config.asrLang);
+                fd.append('response_format', 'json');
+            } catch (e) { cb(new Error('组装请求失败: ' + e.message)); return; }
+            Transcribe._req({
+                url: url,
+                headers: { 'Authorization': 'Bearer ' + key },
+                data: fd,
+                onprogress: onProgress
+            }, function (err, res) {
+                if (err) { cb(err); return; }
+                if (res.status < 200 || res.status >= 300) { cb(new Error(Transcribe._httpHint(res.status, res.responseText))); return; }
+                var data = U.safeJson(res.responseText, null);
+                if (!data) { cb(new Error('ASR 返回非 JSON')); return; }
+                var text = data.text || (data.segments && data.segments.map(function (s) { return s.text; }).join('')) || '';
+                cb(null, String(text).trim());
+            });
+        };
+
+        /* ---------------- 摘要 ---------------- */
+
+        Transcribe.buildPrompt = function (style) {
+            var zh = String(State.config.uiLang || 'zh-CN').indexOf('zh') === 0;
+            var map = zh ? {
+                summary: '你是内容编辑。请阅读下面的音视频文稿，输出一份结构化摘要：\n1) 一句话概括（不超过 40 字）\n2) 核心要点（3-7 条，每条一个短句）\n3) 值得注意的细节或结论\n\n直接输出 Markdown，不要开场白。',
+                points: '你是内容编辑。把下面的文稿整理成「要点清单」：每条以 `-` 开头，一句话，尽量保留数字/名称/结论。只输出清单，不要开场白。',
+                timeline: '你是内容编辑。把下面的文稿整理成**带时间轴的提纲**：每 2-5 分钟一个条目，格式 `- [大致时间] 这一段讲了什么`。只输出提纲，不要开场白。',
+                qa: '你是内容编辑。基于下面的文稿，生成 5-8 个「问题 + 答案」对，问题要覆盖最有信息量的点。用 Markdown 的 `### 问题` / 答案段的形式。'
+            } : {
+                summary: 'You are a content editor. Read the transcript below and produce a structured summary:\n1) One-sentence gist (max 25 words)\n2) Key points (3-7 bullets)\n3) Notable details or conclusions\n\nOutput Markdown only, no preamble.',
+                points: 'You are a content editor. Turn the transcript into a bullet list of key points. Each line starts with "-", one sentence, keep numbers/names/conclusions. Output only the list.',
+                timeline: 'You are a content editor. Turn the transcript into a timed outline: one item every 2-5 minutes, format `- [approx time] what this section covers`. Output only the outline.',
+                qa: 'You are a content editor. Based on the transcript, produce 5-8 question/answer pairs covering the most informative points. Use Markdown `### question` followed by the answer.'
+            };
+            return map[style] || map.summary;
+        };
+
+        // 超长文稿先按段落等分成若干段，逐段摘要再合并 —— 否则会撞上下文上限
+        Transcribe.stripSegment = 12000;
+
+        Transcribe.summarize = function (text, style, cb) {
+            var key = String(State.config.aiKey || '').trim();
+            if (!key) { cb(new Error('未填写 AI 密钥')); return; }
+            var model = String(State.config.aiModel || 'gpt-4o-mini');
+            var url = Transcribe._chatEndpoint();
+            var prompt = Transcribe.buildPrompt(style || State.config.aiPromptStyle || 'summary');
+
+            var parts = [];
+            if (String(text).length > Transcribe.stripSegment) {
+                var chunks = [];
+                var lines = String(text).split('\n');
+                var cur = '';
+                for (var i = 0; i < lines.length; i++) {
+                    if ((cur + lines[i]).length > Transcribe.stripSegment && cur) { chunks.push(cur); cur = ''; }
+                    cur += lines[i] + '\n';
+                }
+                if (cur) chunks.push(cur);
+                parts = chunks.slice(0, 12);
+            } else {
+                parts = [String(text)];
+            }
+
+            var texts = [];
+            var idx = 0;
+            (function step() {
+                if (idx >= parts.length) {
+                    var merged = texts.join('\n\n');
+                    if (parts.length === 1) { cb(null, merged); return; }
+                    // 多段：再让模型合并一次（去掉重复）
+                    Transcribe._chat(url, key, model,
+                        '下面是同一份文稿的分段摘要，请合并成一份不重复的结构化摘要，保持 Markdown。只输出结果。\n\n' + merged,
+                        function (e2, r2) { if (e2) { cb(null, merged); return; } cb(null, r2); });
+                    return;
+                }
+                var seg = parts[idx];
+                var head = parts.length > 1 ? ('（第 ' + (idx + 1) + '/' + parts.length + ' 段）\n') : '';
+                Transcribe._chat(url, key, model, prompt + '\n\n---\n' + head + seg, function (e, r) {
+                    if (e) { cb(e); return; }
+                    texts.push(r);
+                    idx++;
+                    step();
+                });
+            })();
+        };
+
+        Transcribe._chat = function (url, key, model, userText, cb) {
+            var payload = {
+                model: model,
+                messages: [
+                    { role: 'system', content: '你是一个精确、简洁的中文内容编辑。' },
+                    { role: 'user', content: userText }
+                ],
+                temperature: 0.3
+            };
+            Transcribe._req({
+                url: url,
+                headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
+                data: JSON.stringify(payload),
+                timeout: 180000
+            }, function (err, res) {
+                if (err) { cb(err); return; }
+                if (res.status < 200 || res.status >= 300) { cb(new Error(Transcribe._httpHint(res.status, res.responseText))); return; }
+                var data = U.safeJson(res.responseText, null);
+                if (!data || !data.choices || !data.choices.length) { cb(new Error('模型返回格式异常')); return; }
+                var m = data.choices[0].message || {};
+                cb(null, String(m.content || '').trim());
+            });
+        };
+
+        /* ---------------- 本地解码 → 16k 单声道 WAV ---------------- */
+
+        // 整洁-4：原来叫 _writeStr，但实现是逐字符 charCodeAt 写进 Uint8 ——
+        // 只对 ASCII 成立（写 'RIFF' / 'WAVE' / 'fmt ' / 'data' 这些块标识完全够用）。
+        // 改名 _writeAscii，名字与行为对齐，避免以后有人拿它写中文。
+        Transcribe._writeAscii = function (view, off, s) {
+            for (var i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i));
+        };
+
+        Transcribe.encodeWav = function (f32, sampleRate) {
+            var len = f32.length;
+            var buf = new ArrayBuffer(44 + len * 2);
+            var view = new DataView(buf);
+            Transcribe._writeAscii(view, 0, 'RIFF');
+            view.setUint32(4, 36 + len * 2, true);
+            Transcribe._writeAscii(view, 8, 'WAVE');
+            Transcribe._writeAscii(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);          // PCM
+            view.setUint16(22, 1, true);          // 单声道
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            Transcribe._writeAscii(view, 36, 'data');
+            view.setUint32(40, len * 2, true);
+            var off = 44;
+            for (var i = 0; i < len; i++) {
+                var s = f32[i];
+                if (s > 1) s = 1; else if (s < -1) s = -1;
+                view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+                off += 2;
+            }
+            return buf;
+        };
+
+        // 解码 + 降采样成 16kHz 单声道（体积直接砍到 1/6 左右）
+        Transcribe.decodeToMono = function (arrayBuffer, cb) {
+            var AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) { cb(new Error('环境不支持 AudioContext，无法切分音频')); return; }
+            var ctx;
+            try { ctx = new AC(); } catch (e) { cb(new Error('无法创建 AudioContext: ' + e.message)); return; }
+            var done = false;
+            var finish = function (err, r) { if (done) return; done = true; try { ctx.close(); } catch (e2) {} cb(err, r); };
+            var fail = function (e) { finish(new Error('音频解码失败（格式可能不被浏览器支持）: ' + (e && e.message || e))); };
+            try {
+                var p = ctx.decodeAudioData(arrayBuffer, function (buf) {
+                    try {
+                        var secs = buf.duration;
+                        var frames = Math.ceil(secs * Transcribe.TARGET_RATE);
+                        if (!(frames > 0)) { fail('时长无效'); return; }
+                        var OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+                        if (!OAC) { fail('环境不支持 OfflineAudioContext'); return; }
+                        var off = new OAC(1, frames, Transcribe.TARGET_RATE);
+                        var src = off.createBufferSource();
+                        src.buffer = buf;
+                        src.connect(off.destination);
+                        src.start();
+                        off.startRendering().then(function (rendered) {
+                            finish(null, { data: rendered.getChannelData(0), rate: Transcribe.TARGET_RATE, seconds: secs });
+                        }).catch(function (e) { fail(e); });
+                    } catch (e) { fail(e); }
+                }, fail);
+                if (p && p.then) p.catch(fail);
+            } catch (e) { fail(e); }
+        };
+
+        // 切成 ≤ chunkSeconds 的 WAV 片
+        Transcribe.sliceWav = function (pcm, rate, chunkSeconds) {
+            var per = Math.max(30, Number(chunkSeconds) || Transcribe.CHUNK_SECONDS) * rate;
+            var out = [];
+            for (var start = 0; start < pcm.length; start += per) {
+                var end = Math.min(pcm.length, start + per);
+                var sub = pcm.subarray ? pcm.subarray(start, end) : pcm.slice(start, end);
+                var buf = Transcribe.encodeWav(sub, rate);
+                out.push(new Blob([buf], { type: 'audio/wav' }));
+            }
+            return out;
+        };
+
+        /* ---------------- 拉取音频源 ---------------- */
+
+        // 走 _req（出网口只有一个）
+        Transcribe.fetchAudio = function (url, onProgress, cb) {
+            var headers = {};
+            try {
+                var ch = State.config.customHeaders || {};
+                if (ch.Referer) headers['Referer'] = ch.Referer;
+                if (ch.UserAgent) headers['User-Agent'] = ch.UserAgent;
+                if (ch.Cookie) headers['Cookie'] = ch.Cookie;
+            } catch (e) {}
+            var tooBig = false;
+            Transcribe._req({
+                method: 'GET',
+                url: url,
+                headers: headers,
+                responseType: 'blob',
+                timeout: 0,                 // 大音频不设总超时
+                onprogress: function (e) {
+                    if (!onProgress || !e || !e.lengthComputable) return;
+                    if (e.total > Transcribe.MAX_SOURCE) { tooBig = true; return; }
+                    onProgress(e.loaded, e.total);
+                }
+            }, function (err, res) {
+                if (err) { cb(new Error('音频下载失败: ' + err.message)); return; }
+                if (tooBig) { cb(new Error('音频过大（超过 ' + Math.round(Transcribe.MAX_SOURCE / 1048576) + 'MB）')); return; }
+                if (res.status < 200 || res.status >= 300) { cb(new Error('音频下载失败 HTTP ' + res.status)); return; }
+                if (!res.response) { cb(new Error('未取到音频内容')); return; }
+                cb(null, res.response);
+            });
+        };
+
+        /* ---------------- 组合流程 ---------------- */
+
+        // blob + 分片策略 → 全文
+        Transcribe.transcribeBlob = function (blob, onStage, cb) {
+            var maxBytes = (Number(State.config.asrMaxMB) || 24) * 1024 * 1024;
+            if (blob.size <= maxBytes) {
+                onStage && onStage('asr', 1, 1);
+                Transcribe.asr(blob, cb, function (e) {
+                    if (e && e.lengthComputable) onStage && onStage('upload', e.loaded, e.total);
+                });
+                return;
+            }
+            if (blob.size > Transcribe.DECODE_LIMIT) {
+                cb(new Error('音频约 ' + Math.round(blob.size / 1048576) + 'MB，超过本地切片上限（'
+                    + Math.round(Transcribe.DECODE_LIMIT / 1048576) + 'MB）。请把「单次上传上限」调大，或改用外部工具分片。'));
+                return;
+            }
+            onStage && onStage('decode', 0, 1);
+            var rd = new FileReader();
+            rd.onerror = function () { cb(new Error('读取音频内容失败')); };
+            rd.onload = function () {
+                Transcribe.decodeToMono(rd.result, function (err, pcm) {
+                    if (err) { cb(err); return; }
+                    var parts = Transcribe.sliceWav(pcm.data, pcm.rate, State.config.asrChunkSeconds || Transcribe.CHUNK_SECONDS);
+                    if (!parts.length) { cb(new Error('切分后没有可用片段')); return; }
+                    var texts = [];
+                    var i = 0;
+                    (function step() {
+                        if (i >= parts.length) { cb(null, texts.join('\n').trim()); return; }
+                        onStage && onStage('asr', i + 1, parts.length);
+                        Transcribe.asr(parts[i], function (e2, t) {
+                            if (e2) { cb(e2); return; }
+                            if (t) texts.push(t);
+                            i++;
+                            step();
+                        });
+                    })();
+                });
+            };
+            try { rd.readAsArrayBuffer(blob); } catch (e) { cb(new Error('读取失败: ' + e.message)); }
+        };
+
+        Transcribe.run = function (opts, cb) {
+            opts = opts || {};
+            var onStage = opts.onStage || function () {};
+            var url = opts.url;
+            var blob = opts.blob;
+            var doSummary = opts.summarize !== false && Transcribe.summaryReady();
+            var aborted = false;
+            Diag.stats.transcribeCount++;
+
+            var afterText = function (err, text) {
+                if (aborted) return;
+                if (err) { Diag.stats.transcribeFailCount++; cb({ ok: false, reason: err.message }); return; }
+                if (!text) { Diag.stats.transcribeFailCount++; cb({ ok: false, reason: '没有识别到语音内容' }); return; }
+                if (!doSummary) { finish(null, text, ''); return; }
+                onStage('summary', 0, 1);
+                Transcribe.summarize(text, opts.style, function (e2, sum) {
+                    if (aborted) return;
+                    // 摘要失败不算整体失败 —— 文稿本身还是有价值的
+                    finish(null, text, sum || '', e2 ? e2.message : '');
+                });
+            };
+
+            var finish = function (err, text, summary, sumErr) {
+                if (aborted) return;
+                if (err) { Diag.stats.transcribeFailCount++; cb({ ok: false, reason: err.message }); return; }
+                var rec = {
+                    title: opts.title || '', url: url || '', at: U.now(),
+                    text: text, summary: summary || '', reason: sumErr || '',
+                    chars: text.length
+                };
+                Transcribe.pushHistory(rec);
+                cb({ ok: true, result: rec });
+            };
+
+            if (blob) { Transcribe.transcribeBlob(blob, onStage, afterText); return { abort: function () { aborted = true; } }; }
+            if (!url) { cb({ ok: false, reason: '没有音频来源' }); return { abort: function () {} }; }
+            onStage('fetch', 0, 0);
+            Transcribe.fetchAudio(url, function (l, t) { onStage('fetch', l, t); }, function (err, b) {
+                if (aborted) return;
+                if (err) { Diag.stats.transcribeFailCount++; cb({ ok: false, reason: err.message }); return; }
+                Transcribe.transcribeBlob(b, onStage, afterText);
+            });
+            return { abort: function () { aborted = true; } };
+        };
+
+        Transcribe.pushHistory = function (rec) {
+            if (!U.isArr(State.config.transcribeHistory)) State.config.transcribeHistory = [];
+            State.config.transcribeHistory.unshift({
+                title: rec.title, url: rec.url, at: rec.at, chars: rec.chars,
+                text: String(rec.text || '').slice(0, 4000),
+                summary: String(rec.summary || '').slice(0, 4000)
+            });
+            if (State.config.transcribeHistory.length > Transcribe.HISTORY_MAX) {
+                State.config.transcribeHistory.length = Transcribe.HISTORY_MAX;
+            }
+            State.save();
+        };
+
+        Transcribe.clearHistory = function () {
+            State.config.transcribeHistory = [];
+            State.save();
+        };
+
+        Transcribe.toMarkdown = function (rec) {
+            var L = [];
+            L.push('# ' + (rec.title || '转写文稿'));
+            L.push('');
+            L.push('- 来源: ' + (rec.url || '(本地录音)'));
+            L.push('- 时间: ' + new Date(rec.at || U.now()).toLocaleString());
+            L.push('- 字数: ' + (rec.chars || (rec.text || '').length));
+            L.push('');
+            if (rec.summary) { L.push('## AI 摘要'); L.push(''); L.push(rec.summary); L.push(''); }
+            L.push('## 全文');
+            L.push('');
+            L.push(rec.text || '');
+            return L.join('\n');
+        };
+
+        return Transcribe;
+    })();
+
     var UI = (function () {
         'use strict';
     // =========================================================================
@@ -10755,8 +13931,9 @@ VideoResolver.fillFromHtml(result, html);
         var panelShadow = dark
             ? '-12px 0 90px rgba(0,0,0,0.60),-2px 0 26px rgba(0,0,0,0.38)'
             : '-12px 0 90px rgba(0,0,0,0.20),-2px 0 26px rgba(0,0,0,0.10)';
-        var sheen = 'radial-gradient(120% 55% at 12% -10%,' + (dark ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.90)')
-            + ',rgba(255,255,255,0) 60%),linear-gradient(135deg,' + rgba(A, 0.10) + ',' + rgba(A2, 0.06) + ' 48%,' + rgba(R, 0.05) + ')';
+        // P2-13：原来这里有个 sheen 变量，但它的全部用途都被后面的 sheenLive
+        // 覆盖（两处都是给 ::before 的 background-image 赋值，后者在后），
+        // 注释里写的「回退」语义根本不成立 —— 已删除，避免误导后来人。
         var dispersion = 'linear-gradient(115deg,' + (dark ? 'rgba(120,200,255,0.12)' : 'rgba(120,200,255,0.18)')
             + ',rgba(255,255,255,0) 34%,rgba(255,255,255,0) 66%,' + (dark ? 'rgba(255,150,220,0.12)' : 'rgba(255,150,220,0.18)') + ')';
         var sweep = dark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.58)';
@@ -10785,8 +13962,13 @@ VideoResolver.fillFromHtml(result, html);
         css += L + ' ._ms_gl_wrap{position:absolute;inset:0;display:block;'
             + 'transform:translate3d(calc(var(--_ms_px,0) * 9px),calc(var(--_ms_py,0) * 9px),0);}';
         //    不完全正圆（静态不对称圆角）：更像organic的液滴，且不额外触发重绘
-        css += L + ' ._ms_gl{position:absolute;display:block;opacity:.85;will-change:transform;'
+        // P1-6：三个色斑原来永久挂着 will-change:transform —— 等于常驻 3 个合成层，
+        // 面板一开着就一直占着 GPU 内存不释放。will-change 挪到统一的视差容器
+        // ._ms_gl_wrap 上（只有一个），而且只在视差真的在跑时才挂
+        // （JS 切换 _ms_gl_moving 类），停下即释放。
+        css += L + ' ._ms_gl{position:absolute;display:block;opacity:.85;'
             + 'border-radius:48% 52% 45% 55%/52% 45% 55% 48%;transform:translate3d(0,0,0);}';
+        css += L + '._ms_gl_moving ._ms_gl_wrap{will-change:transform;}';
         css += L + ' ._ms_gl_1{width:82%;height:46%;left:-12%;top:-10%;'
             + 'background-image:radial-gradient(closest-side,' + flow[0] + ',' + rgba(A, 0) + ' 72%);'
             + 'animation:_ms_fluid_a 23s cubic-bezier(.37,0,.63,1) infinite;}';
@@ -10820,30 +14002,36 @@ VideoResolver.fillFromHtml(result, html);
 
         // 4) 指向性镜面高光：跟随指针 / 手指位置（CSS 变量由 JS 写入，rAF 合并）
         css += L + ' ._ms_gl_spec{position:absolute;inset:0;z-index:6;'
-            + 'background-image:radial-gradient(38% 32% at var(--_ms_sx,50%) var(--_ms_sy,-10%),rgba(255,255,255,' + specA + '),rgba(255,255,255,0) 70%);'
+            + 'background-image:radial-gradient(38% 32% at calc(var(--_ms_sx,0.5) * 100%) calc(var(--_ms_sy,-0.1) * 100%),rgba(255,255,255,' + specA + '),rgba(255,255,255,0) 70%);'
             + 'opacity:.9;transition:opacity .3s ease;}';
         // 5) 按压波纹：手指按下处漾开的一团光，松手后淡出
         css += L + ' ._ms_gl_ripple{position:absolute;inset:0;z-index:6;'
-            + 'background-image:radial-gradient(34% 30% at var(--_ms_sx,50%) var(--_ms_sy,50%),rgba(255,255,255,' + rippleA + '),rgba(255,255,255,0) 72%);'
+            + 'background-image:radial-gradient(34% 30% at calc(var(--_ms_sx,0.5) * 100%) calc(var(--_ms_sy,0.5) * 100%),rgba(255,255,255,' + rippleA + '),rgba(255,255,255,0) 72%);'
             + 'opacity:0;transition:opacity .38s cubic-bezier(.22,1,.36,1);}';
         // 5b) 湿润反射：与高光反向的第二光斑，像玻璃背面透出来的液体折射
         css += L + ' ._ms_gl_wet{position:absolute;inset:0;z-index:5;opacity:' + (dark ? '.42' : '.55') + ';'
-            + 'background-image:radial-gradient(30% 26% at calc(100% - var(--_ms_sx,50%) * .82) calc(100% - var(--_ms_sy,50%) * .82),'
+            + 'background-image:radial-gradient(30% 26% at calc(100% - var(--_ms_sx,0.5) * 82%) calc(100% - var(--_ms_sy,0.5) * 82%),'
             + 'rgba(255,255,255,' + (dark ? '.14' : '.42') + '),rgba(255,255,255,0) 74%);}';
         css += S + '._ms_pressing ._ms_gl_ripple{opacity:1;transition:opacity .09s ease;}';
         css += S + '._ms_pressing ._ms_gl_1{animation-duration:11s;}';
         css += S + '._ms_pressing ._ms_gl_2{animation-duration:14s;}';
         css += S + '._ms_pressing ._ms_gl_wet{opacity:' + (dark ? '.62' : '.78') + ';transition:opacity .12s ease;}';
 
-        // 6) 玻璃厚度：外缘镜面 + 内侧弯月面（色散微光）
+        // 6) 玻璃厚度：外缘镜面 + 内侧弯月面（色散微光）。
+        //     P2-13：这里原来还带一条 `background-image: sheen, dispersion`，
+        //     但下面 6b 的同选择器 `::before{background-image: sheenLive, dispersion}`
+        //     会把它整条覆盖掉 —— 也就是说 sheen 从来没生效过，
+        //     「解析失败时回退到上面那条静态高光」的注释也不成立
+        //     （同属性同选择器的后声明直接赢，不存在按声明回退这回事）。
+        //     现在把那条永远不生效的 background-image 连同 sheen 变量一起删掉，
+        //     只保留真正生效的 box-shadow（它没有被覆盖）。
         css += S + '::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:' + rOuter
-            + ';background-image:' + sheen + ',' + dispersion + ';background-repeat:no-repeat;'
-            + 'box-shadow:inset 0 0 26px rgba(255,255,255,' + (dark ? 0.08 : 0.30) + '),'
+            + ';box-shadow:inset 0 0 26px rgba(255,255,255,' + (dark ? 0.08 : 0.30) + '),'
             + 'inset 3px 0 14px -8px rgba(120,200,255,' + (dark ? 0.35 : 0.55) + '),'
             + 'inset -3px 0 14px -8px rgba(255,150,220,' + (dark ? 0.35 : 0.55) + ');}';
-        // 6b) 增强版：顶部高光随指针偏移（液体表面被"拉"出反光）。
-        //     单独一条规则，解析失败时自动回退到上面那条静态高光。
-        var sheenLive = 'radial-gradient(120% 55% at calc(6% + var(--_ms_sx,50%) * .30) calc(var(--_ms_sy,-10%) * .14 - 10%),'
+        // 6b) 唯一生效的高光：位置跟随指针（--_ms_sx / --_ms_sy 由层容器写入），
+        //     叠上 dispersion 做玻璃边缘的色散微光。
+        var sheenLive = 'radial-gradient(120% 55% at calc(6% + var(--_ms_sx,0.5) * 30%) calc(var(--_ms_sy,-0.1) * 14% - 10%),'
             + (dark ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.90)')
             + ',rgba(255,255,255,0) 60%),linear-gradient(135deg,' + rgba(A, 0.10) + ',' + rgba(A2, 0.06) + ' 48%,' + rgba(R, 0.05) + ')';
         css += S + '::before{background-image:' + sheenLive + ',' + dispersion + ';}';
@@ -11163,7 +14351,10 @@ VideoResolver.fillFromHtml(result, html);
         // 暗色下强调色略微提亮，避免在深底上「糊」
         var pop = dark ? UI._shade(A, 0.24) : A;
         var pop2 = dark ? UI._shade(A2, 0.20) : A2;
-        var popInk = dark ? '#000000' : '#000000';       // 强调面上一律用黑字（黄/青底上黑字最清楚）
+        // P2-14：原来写成 `dark ? '#000000' : '#000000'` —— 两个分支同值，
+        // 读的人会以为暗底另有取值。直接留一个常量：强调面是黄/青这类高亮色，
+        // 明暗两种主题下都是黑字最清楚。
+        var popInk = '#000000';
         var edge = '3px solid ' + ink;
         var hard = '6px 6px 0 ' + ink;
         var hardSm = '4px 4px 0 ' + ink;
@@ -11584,11 +14775,26 @@ VideoResolver.fillFromHtml(result, html);
         var st = panel.style;
 
         function refreshRect() { try { rect = panel.getBoundingClientRect(); } catch (e) { rect = null; } }
+        // 写入的是**归一化值**（0~1 的无单位数，y 允许为负表示在顶部之上），
+        // 不是 px。内部插值仍用 px 算（跟手位移的量纲），只在写出去时换算，
+        // 这样 CSS 侧的 `calc(var(--_ms_sx) * 100%)` 在任意面板宽度下
+        // 都得到同一个相对位置；写 px 的话宽屏上高光会明显偏左。
         function write() {
-            st.setProperty('--_ms_sx', cx.toFixed(1) + 'px');
-            st.setProperty('--_ms_sy', cy.toFixed(1) + 'px');
+            var rw = (rect && rect.width) || 0;
+            var rh = (rect && rect.height) || 0;
+            st.setProperty('--_ms_sx', (rw ? (cx / rw) : 0.5).toFixed(4));
+            st.setProperty('--_ms_sy', (rh ? (cy / rh) : -0.1).toFixed(4));
             st.setProperty('--_ms_px', cpx.toFixed(3));
             st.setProperty('--_ms_py', cpy.toFixed(3));
+        }
+        // 视差容器是否需要独立合成层：只在动画真的在跑时挂，
+        // 收敛后立刻摘掉（见 P1-6）。
+        var layersEl = null;
+        function setMoving(on) {
+            try {
+                if (!layersEl) layersEl = panel.querySelector('._ms_glass_layers') || panel;
+                if (layersEl && layersEl.classList) layersEl.classList[on ? 'add' : 'remove']('_ms_gl_moving');
+            } catch (e) {}
         }
         function step() {
             var dx = tx - cx, dy = ty - cy;
@@ -11596,6 +14802,7 @@ VideoResolver.fillFromHtml(result, html);
                 cx = tx; cy = ty; cpx = tpx; cpy = tpy;
                 write();
                 raf = 0;                                   // 收敛：停下，不再占用一帧
+                setMoving(false);                          // 同时把合成层还回去
                 return;
             }
             cx += dx * 0.18; cy += dy * 0.18;
@@ -11603,7 +14810,7 @@ VideoResolver.fillFromHtml(result, html);
             write();
             raf = requestAnimationFrame(step);
         }
-        function kick() { if (!raf) raf = requestAnimationFrame(step); }
+        function kick() { if (!raf) { setMoving(true); raf = requestAnimationFrame(step); } }
         function update(x, y) {
             if (!rect || !rect.width || !rect.height) refreshRect();
             if (!rect || !rect.width || !rect.height) return;
@@ -12263,7 +15470,8 @@ VideoResolver.fillFromHtml(result, html);
     UI._tabIconMap = {
         img: MS_CONFIG.ICONS.image, video: MS_CONFIG.ICONS.video, audio: MS_CONFIG.ICONS.audio,
         m3u8: MS_CONFIG.ICONS.stream, translate: MS_CONFIG.ICONS.book, cookie: MS_CONFIG.ICONS.cookie,
-        storage: MS_CONFIG.ICONS.package, settings: MS_CONFIG.ICONS.settings, plugins: MS_CONFIG.ICONS.plug
+        storage: MS_CONFIG.ICONS.package, settings: MS_CONFIG.ICONS.settings, plugins: MS_CONFIG.ICONS.plug,
+        diag: MS_CONFIG.ICONS.wrench
     };
 
     // tab 文案：语言表里 tabImg/tabVideo… 的取值不统一——zh-CN 是纯文字，
@@ -12417,6 +15625,7 @@ VideoResolver.fillFromHtml(result, html);
             { key: 'storage', label: UI._tabLabel('storage') },
             { key: 'plugins', label: UI._tabLabel('plugins') },
             { key: 'settings', label: UI._tabLabel('settings') },
+            { key: 'diag', label: UI._tabLabel('diag') },
         ];
         for (var i = 0; i < tabs.length; i++) {
             (function (t) {
@@ -12593,7 +15802,10 @@ VideoResolver.fillFromHtml(result, html);
                 State.panel.style.transform = UI._panelTf(true);
                 if (!mob) State.panel.style.opacity = '0';   // 移动端只做位移擦入，不淡全屏
                 UI._panelPerf(true);
-                UI._panelGlassFreeze(true);                  // 滑动期间停掉背景模糊（含桌面端）
+                // 桌面入场动画实测约 875ms（错峰结束才收尾），原来默认 holdMs=420
+                // 会让模糊在第 420ms 就回来 —— 正好卡在动画中段，那一帧要重新
+                // 采样整块面板并模糊，直接掉帧。这里改成与 _panelPerf 同一时间窗。
+                UI._panelGlassFreeze(true, UI._panelWindowMs(12) + 80);
                 requestAnimationFrame(function () {
                     if (!State.panelOpen || !State.panel) return;   // 入场途中被关掉就不再播放
                     State.panel.style.transform = UI._panelTf(false);
@@ -12634,7 +15846,10 @@ VideoResolver.fillFromHtml(result, html);
         } catch (e) {}
         UI._staggerCancel();                                  // 入场动画没播完就被关掉时一并收掉
         UI._panelPerf(true);
-        UI._panelGlassFreeze(true);                            // 滑出期间同样停掉背景模糊
+        // 出场用**独立时长**：出场过渡在桌面端只有 .34s，而 _panelWindowMs(12) 是 875ms。
+        // 用户在出场途中再点浮动按钮重开面板时，_ms_sliding 还没被摘掉，
+        // 玻璃效果会被错误地多冻结约 1 秒（表现为「重开的面板是块死板」）。
+        UI._panelGlassFreeze(true, 400);                       // 滑出期间停掉背景模糊（出场动画 < 400ms）
         State.panel.style.transition = UI._panelTransition('out');
         State.panel.style.transform = UI._panelTf(true);
         // 移动端保持不透明滑出：全屏元素淡出同样会「糊」「看不清收起的动作」
@@ -12683,6 +15898,12 @@ VideoResolver.fillFromHtml(result, html);
             { icon: MS_CONFIG.ICONS.folder, label: LANG.t('ctxOpenPanel'), action: function () { UI.openPanel(); } },
             { icon: MS_CONFIG.ICONS.download, label: LANG.t('ctxQuickDownload'), action: function () { UI.quickDownload(); } },
             { icon: MS_CONFIG.ICONS.globe, label: LANG.t('ctxTranslate'), action: function () { UI.openPanel(); UI.switchTab('translate'); } },
+            { icon: MS_CONFIG.ICONS.search, label: LANG.t('grpAudioId'), action: function () { UI.runAudioId(); } },
+            { icon: MS_CONFIG.ICONS.speech, label: LANG.t('transcribeRun'), action: function () {
+                var u = (State.videoLinks && State.videoLinks.length) ? (State.videoLinks[0].url || State.videoLinks[0]) : '';
+                if (!u) { toast(LANG.t('transcribeNoKey'), '#f59e0b'); return; }
+                UI.runTranscribe(typeof u === 'string' ? u : u.url, '');
+            } },
             { icon: MS_CONFIG.ICONS.settings, label: LANG.t('ctxSettings'), action: function () { UI.openPanel(); UI.switchTab('settings'); } },
             { icon: MS_CONFIG.ICONS.cross, label: LANG.t('ctxClose'), action: function () {} }
         ];
@@ -12755,6 +15976,7 @@ VideoResolver.fillFromHtml(result, html);
             else if (tab === 'storage') UI.renderStorage();
             else if (tab === 'plugins') UI.renderPlugins();
             else if (tab === 'settings') UI.renderSettings();
+            else if (tab === 'diag') UI.renderDiag();
         }
 
         var box = document.getElementById('_ms_box');
@@ -12814,12 +16036,16 @@ VideoResolver.fillFromHtml(result, html);
             var closeBtn = document.createElement('button');
             closeBtn.innerHTML = MS_CONFIG.ICONS.cross;
             closeBtn.style.cssText = 'width:32px;height:32px;border:none;border-radius:50%;background:' + c.bg3 + ';color:' + c.txt + ';font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;';
+            var queueTimer = null;
             function closeQueueOverlay() {
-                clearInterval(timer);
+                if (queueTimer) { clearInterval(queueTimer); queueTimer = null; }
                 if (overlay.parentNode) overlay.remove();
                 document.removeEventListener('keydown', escQueue);
             }
-            function escQueue(e) { if (e.key === 'Escape') closeQueueOverlay(); }
+            // P2-12：原来这里还有一份 escHandler（另一套 ESC 监听），
+            // 两条路径各注册各的、各移除各的，很容易漏掉一边导致 ESC 失灵
+            // 或者关窗后监听器残留。统一只留这一套。
+            function escQueue(e) { if (e.key === 'Escape' || e.keyCode === 27) closeQueueOverlay(); }
             closeBtn.addEventListener('click', closeQueueOverlay);
             header.appendChild(title);
             header.appendChild(closeBtn);
@@ -12922,25 +16148,55 @@ VideoResolver.fillFromHtml(result, html);
             }
 
             render();
-            var timer = setInterval(render, 500);
-
-            var escHandler = function (e) {
-                if (e.key === 'Escape') {
-                    clearInterval(timer);
-                    try { overlay.remove(); } catch (err) {}
-                    document.removeEventListener('keydown', escHandler);
-                }
-            };
-            document.addEventListener('keydown', escHandler);
+            // 计时器提到闭包外，好让唯一的那个 closeQueueOverlay 统一清掉。
+            // 原来这里另有一套 escHandler，和 escQueue 重复实现同一件事 ——
+            // 两条路径各注册各的，很容易漏掉一边（ESC 失灵 / 关窗后监听器残留）。
+            queueTimer = setInterval(render, 500);
         } catch (e) {
             LOG.warn('showDownloadQueue error:', e);
         }
     };
 
     // ===== 媒体渲染（使用虚拟列表）=====
+    // 缩略图加载失败的统一兜底（整洁-1）。
+    // 用 error 事件委托（error 不冒泡，所以必须用捕获阶段）+ data-ms-thumb 标记，
+    // 取代原先写在 HTML 属性里的内联 onerror ——
+    // 那样每换一次配色 / 图标都要重写一遍手转义的引号，极易漏改。
+    UI._bindMediaThumbFallback = function (grid) {
+        if (!grid || grid._msThumbFallbackBound) return;
+        grid._msThumbFallbackBound = true;
+        grid.addEventListener('error', function (e) {
+            var img = e.target;
+            if (!img || !img.getAttribute) return;
+            var kind = img.getAttribute('data-ms-thumb');
+            if (!kind) return;
+            var c;
+            try { c = UI.colors(); } catch (e2) { c = null; }
+            var host = img.parentNode;
+            if (!host) return;
+            var d = document.createElement('div');
+            if (kind === 'vlink') {
+                // 与原来的内联 onerror 视觉一致：固定高度 + 胶片图标
+                var h = img.style.height || '100%';
+                d.style.cssText = 'width:100%;height:' + h + ';background:linear-gradient(135deg,#1e293b,#334155)'
+                    + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:' + (U.isMobile() ? '36px' : '24px') + ';';
+                d.innerHTML = MS_CONFIG.ICONS.video;
+            } else {
+                var grad = kind === 'video'
+                    ? 'linear-gradient(135deg,' + MS_CONFIG.COLORS.darkGradientStart + ',' + MS_CONFIG.COLORS.darkGradientEnd + ')'
+                    : MS_CONFIG.COLORS.darkGradientEnd;
+                d.style.cssText = 'width:100%;height:100%;background:' + grad
+                    + ';display:flex;align-items:center;justify-content:center;color:' + MS_CONFIG.COLORS.white + ';';
+                if (kind === 'video') d.innerHTML = MS_CONFIG.ICONS.play;
+            }
+            try { host.replaceChild(d, img); } catch (e3) { try { host.appendChild(d); img.remove(); } catch (e4) {} }
+        }, true);   // 捕获：资源加载错误不冒泡
+    };
+
     // 媒体卡片统一事件委托：原来每张卡片挂 6 个监听器（100 张卡片 = 600+ 监听器），
     // 改为在网格容器上各挂一次，靠 data-url / data-idx 反查目标。
     UI._bindMediaGrid = function (grid, kind, list) {
+        UI._bindMediaThumbFallback(grid);
         function hit(e) {
             var t = e.target && e.target.closest ? e.target.closest('[data-url]') : null;
             return (t && grid.contains(t)) ? t : null;
@@ -13028,6 +16284,8 @@ VideoResolver.fillFromHtml(result, html);
 
     UI.renderMedia = function (kind) {
         if (kind !== 'img' && kind !== 'video' && kind !== 'audio' && kind !== 'm3u8') return;
+        var _diagT0 = U.monoNow();
+        if (typeof Diag !== 'undefined') Diag.stats.renderCount++;   // Diag 模块在后段定义：未加载时静默跳过（模块顺序变化 / 测试沙箱）
         var box = document.getElementById('_ms_box');
         if (!box) return;
         var scrollTop = box.scrollTop;
@@ -13130,6 +16388,7 @@ VideoResolver.fillFromHtml(result, html);
                 '</div>';
             vlinkSection.innerHTML = headerHtml;
             var vlinkGrid = document.createElement('div');
+            UI._bindMediaThumbFallback(vlinkGrid);
             var cardMinWidth = isMobile ? '100%' : 'minmax(160px,1fr)';
             // 性能 7：这两个变量原来叫 gridCols / gridGap，和下面媒体网格的
             // 同名变量（而且是「字符串 vs 数字」两种类型）撞车 —— 全靠 var 提升
@@ -13206,7 +16465,7 @@ VideoResolver.fillFromHtml(result, html);
                     // 浏览器会把块注释起始符当成属性名、N2: 当成另一个属性，挂上一堆垃圾属性，
                     // 注释内容还会泄漏到页面源码里。注释必须留在 JS 层面。
                     // （此处刻意不写出该符号本身，避免下游按文本处理的工具把这一行误判成块注释开端）
-                    vCoverHtml = '<img src="' + SEC.escapeAttr(vItem.cover) + '" loading="lazy" style="width:100%;height:' + coverHeight + ';object-fit:cover;display:block;" onerror="var d=document.createElement(\'div\');d.style.cssText=\'width:100%;height:' + coverHeight + ';background:linear-gradient(135deg,#1e293b,#334155);display:flex;align-items:center;justify-content:center;color:#fff;font-size:' + (isMobile ? '36px' : '24px') + ';\';d.innerHTML=\'<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>\';this.parentNode.replaceChild(d,this);">';
+                    vCoverHtml = '<img src="' + SEC.escapeAttr(vItem.cover) + '" loading="lazy" data-ms-thumb="vlink" style="width:100%;height:' + coverHeight + ';object-fit:cover;display:block;">';
                 } else {
                     var iconSize = isMobile ? '36px' : '24px';
                     vCoverHtml = '<div style="width:100%;height:' + coverHeight + ';background:linear-gradient(135deg,#1e293b,#334155);display:flex;align-items:center;justify-content:center;color:#fff;font-size:' + iconSize + ';"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg></div>';
@@ -13411,6 +16670,8 @@ VideoResolver.fillFromHtml(result, html);
                 }, 150);
             });
         }
+
+        if (typeof Diag !== 'undefined') Diag.stats.renderLastMs = Math.round(U.monoNow() - _diagT0);   // Diag 模块在后段定义：未加载时静默跳过（模块顺序变化 / 测试沙箱）
 
         requestAnimationFrame(function () {
             box.scrollTop = scrollTop;
@@ -13805,9 +17066,24 @@ VideoResolver.fillFromHtml(result, html);
                 v.style.cssText = 'max-width:100%;max-height:65vh;display:block;margin:0 auto;border-radius:8px;background:#000;min-height:180px;';
                 mediaBox.appendChild(v);
 
+                // #1：Hls 是**自由标识符**，全篇从没声明过。UI 模块跑在 'use strict' 下，
+                // 对未声明的标识符赋值会直接抛 ReferenceError ——
+                // 也就是说「页面自己已经加载了 hls.js」这条最省事的分支反而必然报错。
+                // 现在统一走一个局部变量，并且只从 window.Hls 取（不再碰裸标识符）。
+                var HlsLib = null;
+                function pickHls() {
+                    try {
+                        if (typeof window !== 'undefined' && window.Hls && window.Hls.isSupported) { HlsLib = window.Hls; return HlsLib; }
+                    } catch (e0) {}
+                    // 兼容：某些沙箱/打包环境会把 Hls 挂到当前作用域而不是 window
+                    try { if (typeof Hls !== 'undefined' && Hls && Hls.isSupported) { HlsLib = Hls; return HlsLib; } } catch (e1) {}
+                    return null;
+                }
+
                 function initHls() {
-                    if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-                        hlsInstance = new Hls({
+                    var lib = pickHls();
+                    if (lib) {
+                        hlsInstance = new lib({
                             xhrSetup: function(xhr, u) {
                                 xhr.setRequestHeader('Referer', window.location.href);
                                 xhr.setRequestHeader('User-Agent', navigator.userAgent);
@@ -13815,7 +17091,7 @@ VideoResolver.fillFromHtml(result, html);
                         });
                         hlsInstance.loadSource(url);
                         hlsInstance.attachMedia(v);
-                        hlsInstance.on(Hls.Events.ERROR, function(event, data) {
+                        hlsInstance.on(lib.Events.ERROR, function(event, data) {
                             if (data.fatal) {
                                 toast(LANG.t('previewFail') + ': ' + (data.details || 'HLS error'), '#ef4444');
                             }
@@ -13827,13 +17103,9 @@ VideoResolver.fillFromHtml(result, html);
 
                 if (v.canPlayType('application/vnd.apple.mpegurl')) {
                     v.src = url;
-                } else if (typeof Hls !== 'undefined' || (typeof window !== 'undefined' && window.Hls)) {
-                    // typeof Hls 只能探到「当前脚本作用域可见」的 Hls；页面自己在用的
-                    // 那个实例挂在 window.Hls 上，这里一并复用 —— 省一次 CDN 下载，
+                } else if (pickHls()) {
+                    // 页面自己已经在用 hls.js → 直接复用，省一次 CDN 下载，
                     // 也绕开了「站点 CSP 不放行 jsdelivr」的情况。
-                    if (typeof Hls === 'undefined' && typeof window !== 'undefined' && window.Hls) {
-                        Hls = window.Hls;
-                    }
                     initHls();
                 } else {
                     var hlsScript = document.createElement('script');
@@ -13843,6 +17115,7 @@ VideoResolver.fillFromHtml(result, html);
                     // 下面还会优先复用页面自己已经加载的 window.Hls（见 useHls 分支）。
                     hlsScript.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js';
                     hlsScript.async = true;
+                    // onload 时脚本已把 hls.js 挂到 window.Hls，initHls 里 pickHls() 会取到
                     hlsScript.onload = initHls;
                     hlsScript.onerror = function() {
                         mediaBox.innerHTML = '<div style="padding:30px;text-align:center;color:#ef4444;">' + LANG.t('previewFail') + ': hls.js load failed</div>';
@@ -14830,6 +18103,575 @@ VideoResolver.fillFromHtml(result, html);
         } catch (e) { LOG.warn('刷新界面文案失败:', e); }
     };
 
+    // ===== 诊断视图 =====
+    // 把 Diag 模块采集到的东西呈现出来，并提供「一键复制报告」。
+    // 所有数值都来自 O(1) 的计数器，渲染成本与资源数量无关（长列表也不会卡）。
+    UI._diagLogLevel = 0;      // 日志过滤级别（0=全部）
+    UI.renderDiag = function () {
+        var box = document.getElementById('_ms_box');
+        if (!box) return;
+        var c = UI.colors();
+        var wrap = document.createElement('div');
+        wrap.style.cssText = 'padding:12px 14px 24px;font-size:12px;color:' + c.txt + ';';
+
+        function section(title) {
+            var h = document.createElement('div');
+            h.textContent = title;
+            h.style.cssText = 'font-size:13px;font-weight:700;color:' + c.txt + ';margin:16px 0 8px;'
+                + 'padding-bottom:6px;border-bottom:1px solid ' + c.border + ';';
+            wrap.appendChild(h);
+            return h;
+        }
+        function card() {
+            var d = document.createElement('div');
+            d.style.cssText = 'background:' + c.bg2 + ';border:1px solid ' + c.border + ';border-radius:10px;'
+                + 'padding:10px 12px;line-height:1.9;';
+            wrap.appendChild(d);
+            return d;
+        }
+        function row(host, label, val, color) {
+            var r = document.createElement('div');
+            r.style.cssText = 'display:flex;gap:8px;align-items:baseline;';
+            var l = document.createElement('span');
+            l.textContent = label;
+            l.style.cssText = 'flex:0 0 96px;color:' + c.sub + ';';
+            var v = document.createElement('span');
+            v.textContent = String(val);
+            v.style.cssText = 'flex:1;word-break:break-all;font-family:SFMono-Regular,Consolas,monospace;'
+                + (color ? 'color:' + color + ';' : '');
+            r.appendChild(l); r.appendChild(v);
+            host.appendChild(r);
+        }
+        // ---- 标题 + 操作行 ----
+        var titleRow = document.createElement('div');
+        titleRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;';
+        titleRow.innerHTML = '<div style="font-size:14px;font-weight:700;">' + LANG.t('diagTitle') + '</div>';
+        wrap.appendChild(titleRow);
+
+        var desc = document.createElement('div');
+        desc.textContent = LANG.t('diagDesc');
+        desc.style.cssText = 'font-size:11px;color:' + c.sub + ';margin:4px 0 10px;line-height:1.6;';
+        wrap.appendChild(desc);
+
+        var btnRow = document.createElement('div');
+        btnRow.style.cssText = 'display:flex;gap:8px;';
+        wrap.appendChild(btnRow);
+        function mkBtn(label, primary, onClick) {
+            var b = document.createElement('button');
+            b.textContent = label;
+            b.style.cssText = primary
+                ? 'flex:1;min-width:0;padding:9px 10px;border:none;border-radius:9px;background:linear-gradient(135deg,' + c.primary + ',' + c.primary2 + ');color:#fff;font-size:12px;font-weight:700;cursor:pointer;'
+                : 'flex:1;min-width:0;padding:9px 10px;border:1px solid ' + c.border + ';border-radius:9px;background:' + c.bg2 + ';color:' + c.txt + ';font-size:12px;font-weight:600;cursor:pointer;';
+            b.addEventListener('click', onClick);
+            return b;
+        }
+        btnRow.appendChild(mkBtn(LANG.t('diagCopyReport'), true, function () {
+            var text = Diag.report({ logLevel: UI._diagLogLevel });
+            var done = false;
+            try {
+                if (typeof GM_setClipboard === 'function') { GM_setClipboard(text); done = true; }
+            } catch (e0) {}
+            if (!done) {
+                try {
+                    var ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.style.cssText = 'position:fixed;left:-9999px;top:0;';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    done = document.execCommand('copy');
+                    ta.remove();
+                } catch (e1) { done = false; }
+            }
+            // 兜底：无论如何把报告塞进一个可全选的框里，用户能自己复制
+            if (!done) {
+                UI._showDiagText(text);
+                toast(LANG.t('diagCopyFail'), '#f59e0b', 4000);
+            } else {
+                toast(LANG.t('diagCopied'), '#10b981');
+            }
+        }));
+        btnRow.appendChild(mkBtn(LANG.t('diagRefresh'), false, function () { UI.renderDiag(); }));
+        btnRow.appendChild(mkBtn(LANG.t('diagClearLogs'), false, function () {
+            LOG.clearBuffer();
+            UI.renderDiag();
+            toast(LANG.t('diagClearLogs'), '#10b981');
+        }));
+
+        var snap = Diag.snapshot();
+
+        // ---- 环境 ----
+        section(LANG.t('diagEnv'));
+        var envCard = card();
+        var e = snap.env || {};
+        row(envCard, '版本', 'v' + snap.version + ' (构建 ' + snap.scriptVersion + ')');
+        row(envCard, '页面', (e.href || '').slice(0, 120));
+        row(envCard, '视口', e.innerW + ' × ' + e.innerH + ' @' + e.dpr + 'x · ' + (e.isMobile ? '移动端' : '桌面端'));
+        row(envCard, '顶层窗口', e.isTop === null ? '未知（跨域）' : (e.isTop ? '是' : '否（被嵌入 iframe）'));
+        row(envCard, '已运行', Math.round(snap.uptimeMs / 1000) + ' 秒');
+        row(envCard, '界面', (snap.ui.uiStyle || '') + ' · ' + (snap.ui.themeEffective === 'dark' ? '深色' : '浅色') + ' · ' + snap.ui.palette + ' · ' + snap.ui.uiLang);
+        row(envCard, 'UA', (e.ua || '').slice(0, 110));
+
+        // ---- 运行统计 ----
+        section(LANG.t('diagStats'));
+        var statCard = card();
+        var r = snap.resources || {};
+        row(statCard, '资源', '图片 ' + r.images + ' · 视频 ' + r.videos + ' · 音频 ' + r.audios + ' · m3u8 ' + r.m3u8 + ' · 链接 ' + r.videoLinks);
+        var st = snap.stats || {};
+        row(statCard, '扫描', st.fullScanCount + ' 次 · 最近 ' + st.fullScanLastMs + 'ms · 抓到 ' + st.fullScanLastFound + ' 条');
+        row(statCard, '渲染', st.renderCount + ' 次 · 最近 ' + st.renderLastMs + 'ms');
+        row(statCard, '网络入队', (st.netFlushCount || 0) + ' 次');
+        row(statCard, '解析 / 失败', (st.resolveCount || 0) + ' / ' + (st.resolveFailCount || 0));
+        var rt = snap.runtime || {};
+        row(statCard, 'observer', rt.moConnected ? '已挂载（面板开着）' : '未挂载（面板关闭时正常）',
+            rt.moConnected ? '#10b981' : c.sub);
+        row(statCard, '守护轮询', rt.floatGuardRunning ? '运行中' : '未启动');
+        row(statCard, 'm3u8 在跑', rt.m3u8ActiveRuns + ' 个任务 · 在飞请求 ' + rt.m3u8Inflight);
+        row(statCard, '面板', (rt.panelBuilt ? '已构建' : '未构建') + ' · ' + (rt.panelOpen ? '打开中' : '已关闭'));
+        row(statCard, '图标修正 CSS', rt.iconFixCss ? '已注入' : '未注入', rt.iconFixCss ? '#10b981' : '#f59e0b');
+
+        // ---- 缓存 ----
+        section(LANG.t('diagCaches'));
+        var cacheCard = card();
+        (snap.caches || []).forEach(function (cc) {
+            var pct = cc.limit > 0 ? Math.min(100, Math.round(cc.size / cc.limit * 100)) : 0;
+            var line = document.createElement('div');
+            line.style.cssText = 'display:flex;gap:8px;align-items:center;margin:2px 0;';
+            var nm = document.createElement('span');
+            nm.textContent = cc.name;
+            nm.style.cssText = 'flex:0 0 150px;color:' + c.sub + ';font-family:monospace;font-size:11px;overflow:hidden;text-overflow:ellipsis;';
+            var barWrap = document.createElement('div');
+            barWrap.style.cssText = 'flex:1;height:6px;background:' + c.bg3 + ';border-radius:3px;overflow:hidden;';
+            var bar = document.createElement('div');
+            bar.style.cssText = 'height:100%;width:' + pct + '%;background:' + (pct >= 95 ? '#ef4444' : pct >= 75 ? '#f59e0b' : c.primary) + ';';
+            barWrap.appendChild(bar);
+            var num = document.createElement('span');
+            num.textContent = cc.size + ' / ' + cc.limit;
+            num.style.cssText = 'flex:0 0 76px;text-align:right;font-family:monospace;font-size:11px;color:' + c.txt + ';';
+            line.appendChild(nm); line.appendChild(barWrap); line.appendChild(num);
+            cacheCard.appendChild(line);
+        });
+
+        // ---- 耗时打点 ----
+        section(LANG.t('diagPerf'));
+        var perfCard = card();
+        var perf = snap.perf || [];
+        if (perf.length === 0) {
+            row(perfCard, '—', '（暂无打点：面板打开、扫描一次后再看）');
+        } else {
+            row(perfCard, '名称', '次数 · 最近 · 峰值 · 累计', c.sub);
+            perf.slice(0, 14).forEach(function (p) {
+                row(perfCard, p.name, p.count + ' · ' + p.lastMs + 'ms · ' + p.maxMs + 'ms · ' + p.totalMs + 'ms');
+            });
+        }
+
+        // ---- 自检 ----
+        section(LANG.t('diagSelfCheck'));
+        var checkCard = card();
+        var checks = Diag.selfCheck();
+        var failN = 0;
+        checks.forEach(function (it) {
+            if (!it.ok) failN++;
+            var line = document.createElement('div');
+            line.style.cssText = 'display:flex;gap:8px;align-items:baseline;margin:1px 0;';
+            var mark = document.createElement('span');
+            mark.textContent = it.ok ? '✓' : '✗';
+            mark.style.cssText = 'flex:0 0 14px;font-weight:700;color:' + (it.ok ? '#10b981' : '#ef4444') + ';';
+            var nm = document.createElement('span');
+            nm.textContent = it.name;
+            nm.style.cssText = 'flex:0 0 132px;color:' + c.txt + ';';
+            var dt = document.createElement('span');
+            dt.textContent = it.detail || '';
+            dt.style.cssText = 'flex:1;color:' + c.sub + ';font-size:11px;';
+            line.appendChild(mark); line.appendChild(nm); line.appendChild(dt);
+            checkCard.appendChild(line);
+        });
+        if (failN > 0) {
+            var warn = document.createElement('div');
+            warn.textContent = '⚠ 有 ' + failN + ' 项未通过 —— 相关功能会降级，但不是致命错误';
+            warn.style.cssText = 'margin-top:8px;padding-top:8px;border-top:1px dashed ' + c.border + ';color:#f59e0b;font-size:11px;';
+            checkCard.appendChild(warn);
+        }
+
+        // ---- 日志 ----
+        section(LANG.t('diagLogs'));
+        var logBar = document.createElement('div');
+        logBar.style.cssText = 'display:flex;gap:8px;align-items:center;margin-bottom:8px;';
+        var lvLab = document.createElement('span');
+        lvLab.textContent = LANG.t('diagLogLevel');
+        lvLab.style.cssText = 'font-size:11px;color:' + c.sub + ';';
+        var lvSel = document.createElement('select');
+        lvSel.style.cssText = 'flex:1;padding:5px 8px;border:1px solid ' + c.border + ';border-radius:7px;background:' + c.bg+' ;color:' + c.txt + ';font-size:11px;';
+        [['0', LANG.t('diagAllLevels')], ['1', 'INFO'], ['2', 'WARN'], ['3', 'ERROR']].forEach(function (o) {
+            var op = document.createElement('option');
+            op.value = o[0]; op.textContent = o[1];
+            if (Number(o[0]) === UI._diagLogLevel) op.selected = true;
+            lvSel.appendChild(op);
+        });
+        lvSel.addEventListener('change', function () {
+            UI._diagLogLevel = parseInt(lvSel.value, 10) || 0;
+            UI.renderDiag();
+        });
+        logBar.appendChild(lvLab); logBar.appendChild(lvSel);
+        wrap.appendChild(logBar);
+
+        var logs = LOG.dump(UI._diagLogLevel);
+        var logBox = document.createElement('div');
+        logBox.style.cssText = 'background:' + c.bg2 + ';border:1px solid ' + c.border + ';border-radius:10px;'
+            + 'padding:8px 10px;max-height:340px;overflow-y:auto;font-family:SFMono-Regular,Consolas,monospace;font-size:11px;line-height:1.7;';
+        if (logs.length === 0) {
+            logBox.textContent = LANG.t('diagEmptyLogs');
+            logBox.style.color = c.sub;
+        } else {
+            var LVL_COLOR = ['#64748b', c.sub, '#f59e0b', '#ef4444'];
+            logs.forEach(function (g) {
+                var d = new Date(g.t);
+                var lineEl = document.createElement('div');
+                lineEl.style.cssText = 'color:' + (LVL_COLOR[g.lvl] || c.sub) + ';word-break:break-all;';
+                lineEl.textContent = d.toTimeString().slice(0, 8) + '.' + String(d.getMilliseconds()).padStart(3, '0')
+                    + ' [' + LOG.LEVEL_NAMES[g.lvl] + '] ' + g.msg;
+                logBox.appendChild(lineEl);
+            });
+            // 默认滚到底（最新一条）
+            setTimeout(function () { try { logBox.scrollTop = logBox.scrollHeight; } catch (e2) {} }, 0);
+        }
+        wrap.appendChild(logBox);
+
+        box.innerHTML = '';
+        box.appendChild(wrap);
+    };
+
+    // 复制失败时的兜底：把报告放进一个可全选的只读框，用户能自己复制
+    UI._showDiagText = function (text) {
+        try {
+            var c = UI.colors();
+            var ov = document.createElement('div');
+            ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:2147483651;padding:16px;';
+            var m = document.createElement('div');
+            m.style.cssText = 'max-width:min(94vw,640px);width:100%;max-height:84vh;display:flex;flex-direction:column;'
+                + 'background:' + c.bg + ';color:' + c.txt + ';border-radius:14px;padding:14px;box-shadow:0 24px 60px rgba(0,0,0,.5);';
+            m.innerHTML = '<div style="font-size:13px;font-weight:700;margin-bottom:8px;">' + SEC.escapeHtml(LANG.t('diagCopyReport')) + '</div>';
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.readOnly = true;
+            ta.style.cssText = 'flex:1;min-height:320px;width:100%;box-sizing:border-box;background:' + c.bg2 + ';color:' + c.txt
+                + ';border:1px solid ' + c.border + ';border-radius:9px;padding:10px;font-family:monospace;font-size:11px;line-height:1.6;resize:vertical;';
+            m.appendChild(ta);
+            var close = document.createElement('button');
+            close.textContent = '×';
+            close.style.cssText = 'margin-top:10px;padding:9px;border:none;border-radius:9px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:13px;font-weight:600;cursor:pointer;';
+            close.addEventListener('click', function () { try { ov.remove(); } catch (e3) {} });
+            m.appendChild(close);
+            ov.appendChild(m);
+            document.body.appendChild(ov);
+            setTimeout(function () { try { ta.focus(); ta.select(); } catch (e4) {} }, 50);
+        } catch (e) { LOG.warn('诊断报告兜底弹窗失败:', e); }
+    };
+
+    /* =====================================================================
+     * 三大新模块的 UI：结果弹窗 / 听歌识曲 / 转写 / 设置分组
+     * ===================================================================== */
+
+    // 通用结果弹窗：**只用 textContent 填文本**，远端返回的歌词 / 文稿一律不当 HTML
+    // 对话框实例栈：ESC 只关最上面那一个
+    UI._ai3Stack = [];
+    UI._ai3Seq = 0;
+    UI._ai3EscInstalled = false;
+    UI._ensureAi3Esc = function () {
+        if (UI._ai3EscInstalled) return;
+        UI._ai3EscInstalled = true;
+        try {
+            // 5：其它对话框（_ms_vlp_overlay / _ms_queue_overlay）都支持 ESC，
+            // 这里补上，键盘用户不会困惑。挂在捕获阶段，避免被宿主页面抢走。
+            document.addEventListener('keydown', function (e) {
+                if (!e || (e.key !== 'Escape' && e.keyCode !== 27)) return;
+                if (!UI._ai3Stack || !UI._ai3Stack.length) return;
+                e.stopPropagation();
+                var top = UI._ai3Stack[UI._ai3Stack.length - 1];
+                if (top && top.close) top.close();
+            }, true);
+        } catch (e) {}
+    };
+
+    UI._ai3Dialog = function (title, text, actions, onClose) {
+        var c = UI.colors();
+        // 6：不再强制单例。原先新弹窗会把旧的 #_ms_ai3_dlg 直接 remove ——
+        // 用户先识曲再转写，后者会把前者的进度框吃掉，而前者的任务仍在后台跑，
+        // 跑完再弹一个「幽灵结果框」。改成每个实例独立 id + 实例栈。
+        var myId = '_ms_ai3_dlg_' + (++UI._ai3Seq);
+        var overlay = document.createElement('div');
+        overlay.id = myId;
+        overlay.setAttribute('data-ms-ai3', '1');
+        // 层级按「当前打开的弹窗数」算，而不是自增实例号 ——
+        // 用序号的话，累计弹出 647 次之后所有弹窗都会被夹到同一个上限，
+        // 新弹窗不再覆盖旧弹窗（长会话下必现）。按栈长度算则天然只在 0..N 之间。
+        var zIndex = 2147483000 + Math.min(UI._ai3Stack.length, 1000);
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:' + zIndex + ';background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:14px;';
+        var box = document.createElement('div');
+        box.style.cssText = 'width:100%;max-width:580px;max-height:86vh;display:flex;flex-direction:column;background:' + c.bg + ';color:' + c.txt + ';border:1px solid ' + c.border + ';border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.45);font-family:inherit;overflow:hidden;';
+
+        var head = document.createElement('div');
+        head.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid ' + c.border + ';flex-shrink:0;';
+        var titleEl = document.createElement('div');
+        titleEl.style.cssText = 'font-size:15px;font-weight:700;';
+        titleEl.textContent = title;
+        var closeEl = document.createElement('button');
+        closeEl.innerHTML = MS_CONFIG.ICONS.cross;
+        closeEl.style.cssText = 'border:none;background:transparent;color:' + c.sub + ';cursor:pointer;padding:4px;';
+        closeEl.onclick = function () { dismiss(); };
+        head.appendChild(titleEl); head.appendChild(closeEl);
+
+        var body = document.createElement('div');
+        body.style.cssText = 'padding:14px 16px;overflow:auto;flex:1;font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;';
+        body.textContent = text || '';
+
+        box.appendChild(head);
+        box.appendChild(body);
+
+        if (actions && actions.length) {
+            var foot = document.createElement('div');
+            foot.style.cssText = 'display:flex;gap:8px;padding:12px 16px;border-top:1px solid ' + c.border + ';flex-wrap:wrap;flex-shrink:0;';
+            for (var i = 0; i < actions.length; i++) {
+                (function (a) {
+                    var b = document.createElement('button');
+                    b.textContent = a.label;
+                    b.style.cssText = 'flex:1;min-width:110px;padding:10px 12px;border:none;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;'
+                        + (a.kind === 'primary'
+                            ? 'background:linear-gradient(135deg,' + c.primary + ',' + c.primary2 + ');color:#fff;'
+                            : 'background:' + c.bg3 + ';color:' + c.txt + ';');
+                    b.onclick = function () { try { a.fn(overlay); } catch (e) { LOG.warn('[ai3] 动作失败:', e); } };
+                    foot.appendChild(b);
+                })(actions[i]);
+            }
+            box.appendChild(foot);
+        }
+        overlay.appendChild(box);
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) dismiss(); });
+        document.body.appendChild(overlay);
+
+        var dismissed = false;
+        function dismiss() {
+            if (dismissed) return;
+            dismissed = true;
+            var k = UI._ai3Stack.indexOf(handle);
+            if (k >= 0) UI._ai3Stack.splice(k, 1);
+            try { overlay.remove(); } catch (e) {}
+            // 2：必须通知调用方。否则用户点遮罩关窗后底层任务还在跑，
+            // State._ai3Busy 永远复位不了 —— 之后所有识曲 / 转写都被静默拦掉。
+            try { if (onClose) onClose(); } catch (e) { LOG.warn('[ai3] onClose 失败:', e); }
+        }
+
+        var handle = {
+            close: dismiss,
+            body: body,
+            id: myId,
+            say: function (t) {
+                // 13：只在内容真的变了才赋值，并保住滚动位置 ——
+                // 否则长文稿转写时用户往上翻就会被不断拽回底部。
+                if (body.textContent === t) return;
+                var st = body.scrollTop;
+                body.textContent = t;
+                body.scrollTop = st;
+            }
+        };
+        UI._ai3Stack.push(handle);
+        UI._ensureAi3Esc();
+        return handle;
+    };
+
+    UI._ai3Progress = function (title, initial, onClose) {
+        return UI._ai3Dialog(title, initial || '…', [], onClose);
+    };
+
+    /* ---------------- 听歌识曲 ---------------- */
+
+    UI._audioIdConfigured = function () {
+        var p = State.config.audioIdProvider;
+        if (p === 'acrcloud') return !!(State.config.audioIdAcrHost && State.config.audioIdAcrKey && State.config.audioIdAcrSecret);
+        if (p === 'custom') return !!State.config.audioIdCustomUrl;
+        return !!String(State.config.audioIdToken || '').trim();
+    };
+
+    UI.runAudioId = function () {
+        // 10：忙碌提示要区分流程 —— 转写在忙时告诉用户「正在识别…」会让人以为点错了
+        if (State._ai3Busy) { toast(LANG.t('audioIdBusy')); return; }
+        if (!UI._audioIdConfigured()) {
+            toast(LANG.t('audioIdNeedKey'), '#f59e0b');
+            UI.openPanel();
+            UI.switchTab('settings');
+            State.config.settingsExpanded.audioId = true;
+            State.save();
+            setTimeout(function () { try { UI.renderSettings(); } catch (e) {} }, 60);
+            return;
+        }
+        State._ai3Busy = true;
+        var taskHandle = null;
+        var finished = false;
+        // 关窗即中止：否则录音 / 识别还在后台跑，跑完还会冒出一个「幽灵结果框」
+        var dlg = UI._ai3Progress(LANG.t('audioIdRun'), '…', function () {
+            if (finished) return;          // 正常完成路径自己关窗时不要重复处理
+            finished = true;
+            State._ai3Busy = false;
+            UI._ai3Abort = null;
+            if (taskHandle) { try { taskHandle.abort(); } catch (e) {} taskHandle = null; }
+        });
+        taskHandle = AudioID.run({
+            seconds: State.config.audioIdSeconds,
+            source: State.config.audioIdSource,
+            onStage: function (stage, a) {
+                if (finished) return;
+                if (stage === 'capture') dlg.say(LANG.t('audioIdStageCapture', { s: Math.max(0, a) }));
+                else dlg.say(LANG.t('audioIdStageIdentify'));
+            }
+        }, function (res) {
+            if (finished) return;          // 已关窗：丢掉这个迟到的结果
+            finished = true;
+            State._ai3Busy = false;
+            UI._ai3Abort = null;
+            taskHandle = null;
+            dlg.close();                   // onClose 会看到 finished 已置位，不会重复中止
+            if (res.ok) { UI._showAudioIdResult(res.result); return; }
+            var msg = res.reason === 'no-match' ? LANG.t('audioIdNoMatch') : res.reason;
+            UI._ai3Dialog(LANG.t('audioIdResult'), '❌ ' + msg, []);
+        });
+        UI._ai3Abort = function () {
+            if (finished) return;
+            finished = true;
+            State._ai3Busy = false;
+            if (taskHandle) { try { taskHandle.abort(); } catch (e) {} taskHandle = null; }
+            try { dlg.close(); } catch (e) {}
+        };
+    };
+
+    UI._showAudioIdResult = function (r) {
+        var lines = [];
+        lines.push('🎵 ' + (r.title || '?'));
+        if (r.artist) lines.push('👤 ' + r.artist);
+        if (r.album) lines.push('💿 ' + r.album);
+        if (r.releaseDate) lines.push('📅 ' + r.releaseDate);
+        if (r.label) lines.push('🏷 ' + r.label);
+        if (r.lyrics) lines.push('');
+        if (r.lyrics) lines.push(r.lyrics);
+        var text = lines.join('\n');
+
+        var actions = [{
+            label: LANG.t('audioIdCopyInfo'), kind: 'primary',
+            fn: function () { copyText(AudioID.format(r)); toast(LANG.t('audioIdCopiedInfo')); }
+        }];
+        for (var i = 0; i < (r.links || []).length && i < 3; i++) {
+            (function (l) {
+                if (!/^https?:\/\//i.test(l.url)) return;
+                actions.push({ label: l.label, fn: function () { try { window.open(l.url, '_blank', 'noopener'); } catch (e) {} } });
+            })(r.links[i]);
+        }
+        actions.push({
+            label: LANG.t('webdavBackup'),
+            fn: function () {
+                if (!WebDAV.enabled()) { toast(LANG.t('webdavNeedConfig'), '#f59e0b'); return; }
+                WebDAV.backup(function (err, res) {
+                    // 9：原来这里用 audioIdRun（「开始识别」）当失败前缀，
+                    // 弹出来是「开始识别: 网络请求失败」，语义完全错乱
+                    if (err) { toast(LANG.t('webdavBackupFail', { e: err.message }), '#ef4444'); return; }
+                    toast(LANG.t('webdavBackupOk', { kb: Math.round((res && res.bytes || 0) / 1024) }));
+                });
+            }
+        });
+        UI._ai3Dialog(LANG.t('audioIdResult'), text, actions);
+    };
+
+    /* ---------------- 转文字 ---------------- */
+
+    UI.runTranscribe = function (url, title) {
+        // 10：原来用 transcribeStageAsr（「转写中 1/1」）当忙碌提示，语义不对
+        if (State._ai3Busy) { toast(LANG.t('transcribeBusy')); return; }
+        if (!Transcribe.ready()) {
+            toast(LANG.t('transcribeNoKey'), '#f59e0b');
+            UI.openPanel(); UI.switchTab('settings');
+            State.config.settingsExpanded.transcribe = true;
+            State.save();
+            setTimeout(function () { try { UI.renderSettings(); } catch (e) {} }, 60);
+            return;
+        }
+        if (!url) { toast(LANG.t('transcribeNoKey'), '#f59e0b'); return; }
+        State._ai3Busy = true;
+        var taskHandle = null;
+        var finished = false;
+        // 2：转写可能跑十几分钟。原来连 handle 都没保存，用户关窗后
+        // ① _ai3Busy 永远是 true ② 请求继续跑到天荒地老 ③ 最后弹一个幽灵结果框
+        var dlg = UI._ai3Progress(LANG.t('transcribeRun'), '…', function () {
+            if (finished) return;
+            finished = true;
+            State._ai3Busy = false;
+            UI._ai3Abort = null;
+            if (taskHandle) { try { taskHandle.abort(); } catch (e) {} taskHandle = null; }
+        });
+        taskHandle = Transcribe.run({
+            url: url, title: title,
+            summarize: Transcribe.summaryReady(),
+            style: State.config.aiPromptStyle,
+            onStage: function (stage, a, b) {
+                if (finished) return;
+                if (stage === 'fetch') dlg.say(LANG.t('transcribeStageFetch') + (b > 0 ? ' ' + Math.round(a / b * 100) + '%' : ''));
+                else if (stage === 'decode') dlg.say(LANG.t('transcribeStageDecode'));
+                else if (stage === 'asr') dlg.say(LANG.t('transcribeStageAsr', { i: a, n: b }));
+                else if (stage === 'upload') dlg.say(LANG.t('transcribeStageUpload') + (b > 0 ? ' ' + Math.round(a / b * 100) + '%' : ''));
+                else if (stage === 'summary') dlg.say(LANG.t('transcribeStageSummary'));
+            }
+        }, function (res) {
+            if (finished) return;
+            finished = true;
+            State._ai3Busy = false;
+            UI._ai3Abort = null;
+            taskHandle = null;
+            dlg.close();
+            if (!res.ok) { UI._ai3Dialog(LANG.t('transcribeResult'), '❌ ' + res.reason, []); return; }
+            UI._showTranscribeResult(res.result);
+        });
+        UI._ai3Abort = function () {
+            if (finished) return;
+            finished = true;
+            State._ai3Busy = false;
+            if (taskHandle) { try { taskHandle.abort(); } catch (e) {} taskHandle = null; }
+            try { dlg.close(); } catch (e) {}
+        };
+    };
+
+    UI._showTranscribeResult = function (rec) {
+        var parts = [];
+        if (rec.summary) { parts.push('【AI 摘要】\n' + rec.summary); parts.push(''); }
+        if (rec.reason) parts.push(LANG.t('transcribeSummaryFailed', { e: rec.reason }));
+        parts.push('【全文】');
+        parts.push(rec.text || '');
+        var text = parts.join('\n');
+
+        var md = Transcribe.toMarkdown(rec);
+        var baseName = SEC.safeFilename(String(rec.title || 'transcript').slice(0, 60) || 'transcript');
+        var actions = [
+            { label: LANG.t('transcribeCopyText'), kind: 'primary', fn: function () { copyText(text); toast(LANG.t('transcribeCopyText')); } },
+            { label: LANG.t('transcribeCopyMd'), fn: function () { copyText(md); toast(LANG.t('transcribeCopyMd')); } },
+            {
+                label: LANG.t('transcribeSaveMd'), fn: function () {
+                    try {
+                        var blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+                        Dl.fallback(URL.createObjectURL(blob), baseName + '.md', null);
+                    } catch (e) { toast(String(e.message), '#ef4444'); }
+                }
+            },
+            {
+                label: LANG.t('webdavBackup'), fn: function () {
+                    if (!WebDAV.enabled()) { toast(LANG.t('webdavNeedConfig'), '#f59e0b'); return; }
+                    try {
+                        var blob2 = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+                        WebDAV.uploadBlob(blob2, baseName + '.md', function (err) {
+                            if (err) { toast(String(err.message), '#ef4444'); return; }
+                            toast(LANG.t('webdavUploaded', { name: baseName + '.md' }));
+                        });
+                    } catch (e) { toast(String(e.message), '#ef4444'); }
+                }
+            }
+        ];
+        UI._ai3Dialog(LANG.t('transcribeResult'), text, actions);
+    };
+
     UI.renderSettings = function () {
         var box = document.getElementById('_ms_box');
         if (!box) return;
@@ -15422,7 +19264,8 @@ VideoResolver.fillFromHtml(result, html);
                         nameEl.textContent = parser.name || parser.matchPattern;
                         var metaEl = document.createElement('div');
                         metaEl.style.cssText = 'font-size:11px;color:' + c.sub + ';margin-top:2px;word-break:break-all;';
-                        metaEl.textContent = parser.apiUrl || parser.matchPattern;
+                        var stepN = (U.isArr(parser.steps) && parser.steps.length) ? parser.steps.length : 0;
+                        metaEl.textContent = (stepN ? ('[' + stepN + ' 步] ') : '') + (parser.apiUrl || parser.matchPattern);
                         info.appendChild(nameEl); info.appendChild(metaEl);
                         row.appendChild(info);
                         var toggle = UI.createToggle(parser.enabled, function (val) {
@@ -15460,6 +19303,26 @@ VideoResolver.fillFromHtml(result, html);
         parserFormTitle.innerHTML = MS_CONFIG.ICONS.plus + ' ' + LANG.t('addParser');
         parserFormWrap.appendChild(parserFormTitle);
 
+        // 模板下拉：一键填出「两步 B 站」这类完整配置，用户改改就能用在别的站
+        var parserTplRow = document.createElement('div');
+        parserTplRow.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+        var parserTplLab = document.createElement('span');
+        parserTplLab.textContent = LANG.t('parserTemplate');
+        parserTplLab.style.cssText = 'font-size:11px;color:' + c.sub + ';flex-shrink:0;';
+        var parserTplSel = document.createElement('select');
+        parserTplSel.style.cssText = 'flex:1;padding:6px 8px;border:1px solid ' + c.border + ';border-radius:6px;background:' + c.bg + ';color:' + c.txt + ';font-size:12px;';
+        var tplOpt0 = document.createElement('option');
+        tplOpt0.value = ''; tplOpt0.textContent = LANG.t('parserTemplatePick');
+        parserTplSel.appendChild(tplOpt0);
+        var tplList = Plugins.PARSER_TEMPLATES || [];
+        for (var tpi = 0; tpi < tplList.length; tpi++) {
+            var tOpt = document.createElement('option');
+            tOpt.value = tplList[tpi].key; tOpt.textContent = tplList[tpi].label;
+            parserTplSel.appendChild(tOpt);
+        }
+        parserTplRow.appendChild(parserTplLab); parserTplRow.appendChild(parserTplSel);
+        parserFormWrap.appendChild(parserTplRow);
+
         function parserInput(placeholder) {
             var inp = document.createElement('input');
             inp.type = 'text'; inp.placeholder = placeholder;
@@ -15490,6 +19353,19 @@ VideoResolver.fillFromHtml(result, html);
         parserHeadersTa.style.cssText = 'width:100%;min-height:60px;padding:7px 10px;border:1px solid ' + c.border + ';border-radius:6px;background:' + c.bg + ';color:' + c.txt + ';font-size:12px;font-family:monospace;box-sizing:border-box;margin-bottom:8px;resize:vertical;';
         parserFormWrap.appendChild(parserHeadersTa);
 
+        // 多步流水线（可空 —— 留空即单步模式）
+        var parserStepsHintEl = document.createElement('div');
+        parserStepsHintEl.textContent = LANG.t('parserStepsHint');
+        parserStepsHintEl.style.cssText = 'font-size:11px;color:' + c.sub + ';margin-bottom:4px;line-height:1.5;';
+        parserFormWrap.appendChild(parserStepsHintEl);
+        var parserStepsTa = document.createElement('textarea');
+        parserStepsTa.placeholder = LANG.t('parserSteps');
+        parserStepsTa.style.cssText = 'width:100%;min-height:96px;padding:7px 10px;border:1px solid ' + c.border + ';border-radius:6px;background:' + c.bg + ';color:' + c.txt + ';font-size:12px;font-family:monospace;box-sizing:border-box;margin-bottom:8px;resize:vertical;';
+        parserFormWrap.appendChild(parserStepsTa);
+        var parserErrEl = document.createElement('div');
+        parserErrEl.style.cssText = 'display:none;font-size:11px;color:#ef4444;margin-bottom:8px;line-height:1.6;white-space:pre-wrap;';
+        parserFormWrap.appendChild(parserErrEl);
+
         var parserEnabledRow = document.createElement('div');
         parserEnabledRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;';
         var parserEnabledLabel = document.createElement('span');
@@ -15501,6 +19377,11 @@ VideoResolver.fillFromHtml(result, html);
         parserEnabledRow.appendChild(parserEnabledLabel); parserEnabledRow.appendChild(parserEnabledCb);
         parserFormWrap.appendChild(parserEnabledRow);
 
+        function showParserErr(errs) {
+            if (!errs || !errs.length) { parserErrEl.style.display = 'none'; parserErrEl.textContent = ''; return; }
+            parserErrEl.style.display = 'block';
+            parserErrEl.textContent = errs.map(function (e) { return '· ' + e; }).join('\n');
+        }
         function resetParserForm() {
             parserEditingId = null;
             parserFormTitle.innerHTML = MS_CONFIG.ICONS.plus + ' ' + LANG.t('addParser');
@@ -15510,7 +19391,10 @@ VideoResolver.fillFromHtml(result, html);
             parserMethodSel.value = 'GET';
             parserDataPathInp.value = '';
             parserHeadersTa.value = '';
+            parserStepsTa.value = '';
+            parserTplSel.value = '';
             parserEnabledCb.checked = true;
+            showParserErr(null);
         }
         function showParserForm(parser) {
             parserEditingId = parser.id;
@@ -15521,8 +19405,29 @@ VideoResolver.fillFromHtml(result, html);
             parserMethodSel.value = parser.method || 'GET';
             parserDataPathInp.value = parser.dataPath || '';
             parserHeadersTa.value = (parser.headers && Object.keys(parser.headers).length) ? JSON.stringify(parser.headers, null, 2) : '';
+            parserStepsTa.value = (U.isArr(parser.steps) && parser.steps.length) ? JSON.stringify(parser.steps, null, 2) : '';
+            parserTplSel.value = '';
             parserEnabledCb.checked = parser.enabled !== false;
+            showParserErr(null);
         }
+        function applyParserTemplate(key) {
+            var tpl = Plugins.templateParser(key);
+            if (!tpl) return;
+            parserEditingId = null;
+            parserFormTitle.innerHTML = MS_CONFIG.ICONS.plus + ' ' + LANG.t('addParser') + ' · ' + tpl.name;
+            parserNameInp.value = tpl.name || '';
+            parserMatchInp.value = tpl.matchPattern || '';
+            parserApiInp.value = tpl.apiUrl || '';
+            parserMethodSel.value = tpl.method || 'GET';
+            parserDataPathInp.value = tpl.dataPath || '';
+            parserHeadersTa.value = (tpl.headers && Object.keys(tpl.headers).length) ? JSON.stringify(tpl.headers, null, 2) : '';
+            parserStepsTa.value = (U.isArr(tpl.steps) && tpl.steps.length) ? JSON.stringify(tpl.steps, null, 2) : '';
+            parserEnabledCb.checked = false;      // 模板默认不启用，让用户确认后再打开
+            showParserErr(null);
+        }
+        parserTplSel.addEventListener('change', function () {
+            if (parserTplSel.value) applyParserTemplate(parserTplSel.value);
+        });
 
         var parserFormBtns = document.createElement('div');
         parserFormBtns.style.cssText = 'display:flex;gap:8px;';
@@ -15530,10 +19435,10 @@ VideoResolver.fillFromHtml(result, html);
         parserSaveBtn.innerHTML = MS_CONFIG.ICONS.save + ' ' + LANG.t('ok');
         parserSaveBtn.style.cssText = 'flex:1;padding:8px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,' + c.primary + ',' + c.primary2 + ');color:#fff;font-size:12px;font-weight:600;cursor:pointer;';
         parserSaveBtn.onclick = function () {
+            showParserErr(null);
             var name = parserNameInp.value.trim();
             var matchPattern = parserMatchInp.value.trim();
             var apiUrl = parserApiInp.value.trim();
-            if (!matchPattern || !apiUrl) { toast(LANG.t('plsInputText'), '#f59e0b'); return; }
             var headers = {};
             try {
                 if (parserHeadersTa.value.trim()) {
@@ -15541,13 +19446,25 @@ VideoResolver.fillFromHtml(result, html);
                     if (h && typeof h === 'object' && !Array.isArray(h)) headers = h;
                 }
             } catch (e) {
-                toast('Headers JSON ' + LANG.t('fail'), '#ef4444'); return;
+                showParserErr(['请求头 JSON 解析失败: ' + e.message]); return;
+            }
+            var steps = [];
+            if (parserStepsTa.value.trim()) {
+                try {
+                    var s = JSON.parse(parserStepsTa.value.trim());
+                    if (!Array.isArray(s)) { showParserErr(['steps 必须是数组']); return; }
+                    steps = s;
+                } catch (e2) {
+                    showParserErr(['steps JSON 解析失败: ' + e2.message]); return;
+                }
             }
             var obj = {
                 name: name, matchPattern: matchPattern, apiUrl: apiUrl,
                 method: parserMethodSel.value, dataPath: parserDataPathInp.value.trim(),
-                headers: headers, enabled: parserEnabledCb.checked
+                headers: headers, steps: steps, enabled: parserEnabledCb.checked
             };
+            var errs = Plugins.validateParser(obj);
+            if (errs.length) { showParserErr(errs); return; }
             if (parserEditingId) { Plugins.updateParser(parserEditingId, obj); }
             else { Plugins.addParser(obj); }
             resetParserForm(); renderParserList(); toast(LANG.t('pluginSaved'));
@@ -15844,6 +19761,291 @@ VideoResolver.fillFromHtml(result, html);
         dhContent.appendChild(dhClearBtn);
         container.appendChild(makeGroup('downloadHistory', LANG.t('grpDownloadHistory'), dhContent));
 
+        /* ================= 三大新模块设置区 ================= */
+        function _ai3Lab(text) {
+            var el = document.createElement('div');
+            el.textContent = text;
+            el.style.cssText = 'font-size:11px;color:' + c.sub + ';margin:10px 0 4px;';
+            return el;
+        }
+        function _ai3Desc(text) {
+            var el = document.createElement('div');
+            el.textContent = text;
+            el.style.cssText = 'font-size:11px;color:' + c.sub + ';line-height:1.7;margin-bottom:6px;';
+            return el;
+        }
+        function _ai3Inp(ph, val, type, onSave) {
+            var el = document.createElement('input');
+            el.type = type || 'text';
+            el.placeholder = ph || '';
+            el.value = val == null ? '' : String(val);
+            el.style.cssText = 'width:100%;padding:7px 10px;border:1px solid ' + c.border + ';border-radius:6px;background:' + c.bg + ';color:' + c.txt + ';font-size:12px;box-sizing:border-box;';
+            el.addEventListener('change', function () { onSave(el.value); });
+            return el;
+        }
+        function _ai3Sel(opts, cur, onChange) {
+            var el = document.createElement('select');
+            el.style.cssText = 'width:100%;padding:7px 10px;border:1px solid ' + c.border + ';border-radius:6px;background:' + c.bg + ';color:' + c.txt + ';font-size:12px;box-sizing:border-box;';
+            for (var oi = 0; oi < opts.length; oi++) {
+                var o = document.createElement('option');
+                o.value = opts[oi][0];
+                o.textContent = opts[oi][1];
+                el.appendChild(o);
+            }
+            el.value = cur;
+            el.addEventListener('change', function () { onChange(el.value); });
+            return el;
+        }
+        function _ai3ToggleRow(label, init, onChange) {
+            var row = document.createElement('div');
+            row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin:10px 0;';
+            var lb = document.createElement('span');
+            lb.textContent = label;
+            lb.style.cssText = 'font-size:12px;color:' + c.txt + ';flex:1;padding-right:10px;';
+            row.appendChild(lb);
+            row.appendChild(UI.createToggle(init, function (v) { onChange(v); toast(LANG.t('saved')); }));
+            return row;
+        }
+        function _ai3Btns(btns) {
+            var row = document.createElement('div');
+            row.style.cssText = 'display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;';
+            for (var bi = 0; bi < btns.length; bi++) {
+                (function (b) {
+                    var el = document.createElement('button');
+                    el.textContent = b.label;
+                    el.style.cssText = 'flex:1;min-width:104px;padding:9px 12px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;'
+                        + (b.kind === 'primary'
+                            ? 'background:linear-gradient(135deg,' + c.primary + ',' + c.primary2 + ');color:#fff;'
+                            : 'background:' + c.bg3 + ';color:' + c.txt + ';');
+                    el.onclick = function () { try { b.fn(el); } catch (e) { toast(String(e.message), '#ef4444'); } };
+                    row.appendChild(el);
+                })(btns[bi]);
+            }
+            return row;
+        }
+        function _ai3Empty(text) {
+            var el = document.createElement('div');
+            el.textContent = text;
+            el.style.cssText = 'font-size:12px;color:' + c.sub + ';padding:8px 0;';
+            return el;
+        }
+        // 12：历史最多存 30 条，原来只渲染 8 条且没有滚动容器 ——
+        // 剩下 22 条用户根本看不到。改成全部渲染 + 限高滚动。
+        function _ai3HistoryBox(rows) {
+            var wrap = document.createElement('div');
+            wrap.style.cssText = 'max-height:260px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-right:2px;';
+            for (var i = 0; i < rows.length; i++) wrap.appendChild(rows[i]);
+            return wrap;
+        }
+        function _ai3HistoryRow(main, sub) {
+            var row = document.createElement('div');
+            row.style.cssText = 'padding:8px 10px;border-radius:8px;background:' + c.bg + ';border:1px solid ' + c.border + ';margin-bottom:6px;';
+            var m = document.createElement('div');
+            m.textContent = main;
+            m.style.cssText = 'font-size:12px;color:' + c.txt + ';word-break:break-word;';
+            var s = document.createElement('div');
+            s.textContent = sub;
+            s.style.cssText = 'font-size:10px;color:' + c.sub + ';margin-top:2px;';
+            row.appendChild(m); row.appendChild(s);
+            return row;
+        }
+
+        /* -------- ① 音频识别（听歌识曲） -------- */
+        var aidContent = document.createElement('div');
+        (function () {
+            aidContent.appendChild(_ai3Desc(LANG.t('audioIdDesc')));
+            aidContent.appendChild(_ai3Lab(LANG.t('audioIdProvider')));
+            aidContent.appendChild(_ai3Sel([
+                ['audd', LANG.t('audioIdProviderAudD')],
+                ['acrcloud', LANG.t('audioIdProviderAcr')],
+                ['custom', LANG.t('audioIdProviderCustom')]
+            ], State.config.audioIdProvider, function (v) {
+                State.config.audioIdProvider = v; State.save(); UI.renderSettings();
+            }));
+
+            var prov = State.config.audioIdProvider;
+            if (prov === 'acrcloud') {
+                aidContent.appendChild(_ai3Lab(LANG.t('audioIdAcrHost')));
+                aidContent.appendChild(_ai3Inp('identify-us-west-1.acrcloud.com', State.config.audioIdAcrHost, 'text', function (v) { State.config.audioIdAcrHost = v.trim(); State.save(); toast(LANG.t('saved')); }));
+                aidContent.appendChild(_ai3Lab(LANG.t('audioIdAcrKey')));
+                aidContent.appendChild(_ai3Inp('', State.config.audioIdAcrKey, 'password', function (v) { State.config.audioIdAcrKey = v.trim(); State.save(); toast(LANG.t('saved')); }));
+                aidContent.appendChild(_ai3Lab(LANG.t('audioIdAcrSecret')));
+                aidContent.appendChild(_ai3Inp('', State.config.audioIdAcrSecret, 'password', function (v) { State.config.audioIdAcrSecret = v.trim(); State.save(); toast(LANG.t('saved')); }));
+            } else if (prov === 'custom') {
+                aidContent.appendChild(_ai3Lab(LANG.t('audioIdCustomUrl')));
+                aidContent.appendChild(_ai3Inp('https://your-server/identify', State.config.audioIdCustomUrl, 'text', function (v) { State.config.audioIdCustomUrl = v.trim(); State.save(); toast(LANG.t('saved')); }));
+            } else {
+                aidContent.appendChild(_ai3Lab(LANG.t('audioIdToken')));
+                aidContent.appendChild(_ai3Inp('', State.config.audioIdToken, 'password', function (v) { State.config.audioIdToken = v.trim(); State.save(); toast(LANG.t('saved')); }));
+            }
+
+            aidContent.appendChild(_ai3Lab(LANG.t('audioIdSource')));
+            aidContent.appendChild(_ai3Sel([
+                ['page', LANG.t('audioIdSourcePage')],
+                ['mic', LANG.t('audioIdSourceMic')]
+            ], State.config.audioIdSource, function (v) {
+                State.config.audioIdSource = v; State.save(); toast(LANG.t('saved'));
+            }));
+            aidContent.appendChild(_ai3Lab(LANG.t('audioIdSeconds')));
+            aidContent.appendChild(_ai3Inp('8', State.config.audioIdSeconds, 'number', function (v) {
+                var n = parseInt(v, 10);
+                if (!(n >= 3 && n <= 20)) { toast('3-20', '#f59e0b'); UI.renderSettings(); return; }
+                State.config.audioIdSeconds = n; State.save(); toast(LANG.t('saved'));
+            }));
+
+            aidContent.appendChild(_ai3Btns([
+                { label: LANG.t('audioIdRun'), kind: 'primary', fn: function () { UI.runAudioId(); } }
+            ]));
+
+            aidContent.appendChild(_ai3Lab(LANG.t('audioIdHistory')));
+            var h = U.isArr(State.config.audioIdHistory) ? State.config.audioIdHistory : [];
+            if (!h.length) aidContent.appendChild(_ai3Empty(LANG.t('audioIdNoHistory')));
+            else {
+                var aidRows = [];
+                for (var hi = 0; hi < h.length; hi++) {
+                    aidRows.push(_ai3HistoryRow(
+                        AudioID.format(h[hi]),
+                        new Date(h[hi].at || 0).toLocaleString() + ' · ' + (h[hi].provider || '')
+                    ));
+                }
+                aidContent.appendChild(_ai3HistoryBox(aidRows));
+            }
+            if (h.length) {
+                aidContent.appendChild(_ai3Btns([
+                    { label: LANG.t('audioIdClearHistory'), fn: function () { AudioID.clearHistory(); UI.renderSettings(); toast(LANG.t('saved')); } }
+                ]));
+            }
+        })();
+        container.appendChild(makeGroup('audioId', LANG.t('grpAudioId'), aidContent));
+
+        /* -------- ② 转文字 + AI 摘要 -------- */
+        var trContent = document.createElement('div');
+        (function () {
+            trContent.appendChild(_ai3Desc(LANG.t('transcribeDesc')));
+            trContent.appendChild(_ai3Lab(LANG.t('asrBaseUrl')));
+            trContent.appendChild(_ai3Inp('https://api.openai.com/v1', State.config.asrBaseUrl, 'text', function (v) { State.config.asrBaseUrl = v.trim(); State.save(); toast(LANG.t('saved')); }));
+            trContent.appendChild(_ai3Lab(LANG.t('asrKey')));
+            trContent.appendChild(_ai3Inp('sk-…', State.config.asrKey, 'password', function (v) { State.config.asrKey = v.trim(); State.save(); toast(LANG.t('saved')); }));
+            trContent.appendChild(_ai3Lab(LANG.t('asrModel')));
+            trContent.appendChild(_ai3Inp('whisper-1', State.config.asrModel, 'text', function (v) { State.config.asrModel = v.trim(); State.save(); toast(LANG.t('saved')); }));
+            trContent.appendChild(_ai3Lab(LANG.t('asrLang')));
+            trContent.appendChild(_ai3Inp('auto', State.config.asrLang, 'text', function (v) { State.config.asrLang = v.trim(); State.save(); toast(LANG.t('saved')); }));
+            trContent.appendChild(_ai3Lab(LANG.t('asrMaxMB')));
+            trContent.appendChild(_ai3Inp('24', State.config.asrMaxMB, 'number', function (v) {
+                var n = parseInt(v, 10);
+                if (!(n >= 1 && n <= 100)) { toast('1-100', '#f59e0b'); UI.renderSettings(); return; }
+                State.config.asrMaxMB = n; State.save(); toast(LANG.t('saved'));
+            }));
+            trContent.appendChild(_ai3Lab(LANG.t('asrChunkSeconds')));
+            trContent.appendChild(_ai3Inp('600', State.config.asrChunkSeconds, 'number', function (v) {
+                var n = parseInt(v, 10);
+                if (!(n >= 30 && n <= 1800)) { toast('30-1800', '#f59e0b'); UI.renderSettings(); return; }
+                State.config.asrChunkSeconds = n; State.save(); toast(LANG.t('saved'));
+            }));
+
+            trContent.appendChild(_ai3Lab(LANG.t('aiBaseUrl')));
+            trContent.appendChild(_ai3Inp('https://api.openai.com/v1', State.config.aiBaseUrl, 'text', function (v) { State.config.aiBaseUrl = v.trim(); State.save(); toast(LANG.t('saved')); }));
+            trContent.appendChild(_ai3Lab(LANG.t('aiKey')));
+            trContent.appendChild(_ai3Inp('sk-…', State.config.aiKey, 'password', function (v) { State.config.aiKey = v.trim(); State.save(); toast(LANG.t('saved')); }));
+            trContent.appendChild(_ai3Lab(LANG.t('aiModel')));
+            trContent.appendChild(_ai3Inp('gpt-4o-mini', State.config.aiModel, 'text', function (v) { State.config.aiModel = v.trim(); State.save(); toast(LANG.t('saved')); }));
+            trContent.appendChild(_ai3Lab(LANG.t('aiPromptStyle')));
+            trContent.appendChild(_ai3Sel([
+                ['summary', LANG.t('styleSummary')],
+                ['points', LANG.t('stylePoints')],
+                ['timeline', LANG.t('styleTimeline')],
+                ['qa', LANG.t('styleQa')]
+            ], State.config.aiPromptStyle, function (v) {
+                State.config.aiPromptStyle = v; State.save(); toast(LANG.t('saved'));
+            }));
+
+            trContent.appendChild(_ai3Lab(LANG.t('transcribeHistory')));
+            var th = U.isArr(State.config.transcribeHistory) ? State.config.transcribeHistory : [];
+            if (!th.length) trContent.appendChild(_ai3Empty(LANG.t('transcribeNoHistory')));
+            else {
+                var trRows = [];
+                for (var ti = 0; ti < th.length; ti++) {
+                    (function (rec) {
+                        var row = _ai3HistoryRow(rec.title || rec.url || '(no title)', new Date(rec.at || 0).toLocaleString() + ' · ' + (rec.chars || 0) + ' 字');
+                        row.style.cursor = 'pointer';
+                        row.onclick = function () { UI._showTranscribeResult({ title: rec.title, url: rec.url, at: rec.at, text: rec.text, summary: rec.summary, chars: rec.chars }); };
+                        trRows.push(row);
+                    })(th[ti]);
+                }
+                trContent.appendChild(_ai3HistoryBox(trRows));
+            }
+            if (th.length) {
+                trContent.appendChild(_ai3Btns([
+                    { label: LANG.t('transcribeClearHistory'), fn: function () { Transcribe.clearHistory(); UI.renderSettings(); toast(LANG.t('saved')); } }
+                ]));
+            }
+        })();
+        container.appendChild(makeGroup('transcribe', LANG.t('grpTranscribe'), trContent));
+
+        /* -------- ③ WebDAV 后端 -------- */
+        var wdContent = document.createElement('div');
+        (function () {
+            wdContent.appendChild(_ai3Desc(LANG.t('webdavDesc')));
+            wdContent.appendChild(_ai3ToggleRow(LANG.t('webdavEnabled'), !!State.config.webdavEnabled, function (v) {
+                State.config.webdavEnabled = v; State.save(); UI.renderSettings();
+            }));
+            wdContent.appendChild(_ai3Lab(LANG.t('webdavUrl')));
+            wdContent.appendChild(_ai3Inp('https://nas.example.com/dav/', State.config.webdavUrl, 'text', function (v) { State.config.webdavUrl = v.trim(); State.save(); toast(LANG.t('saved')); }));
+            wdContent.appendChild(_ai3Lab(LANG.t('webdavDir')));
+            wdContent.appendChild(_ai3Inp('media-sniffer/', State.config.webdavDir, 'text', function (v) { State.config.webdavDir = v.trim(); State.save(); toast(LANG.t('saved')); }));
+            wdContent.appendChild(_ai3Lab(LANG.t('webdavUser')));
+            wdContent.appendChild(_ai3Inp('', State.config.webdavUser, 'text', function (v) { State.config.webdavUser = v.trim(); State.save(); toast(LANG.t('saved')); }));
+            wdContent.appendChild(_ai3Lab(LANG.t('webdavPass')));
+            wdContent.appendChild(_ai3Inp('', State.config.webdavPass, 'password', function (v) { State.config.webdavPass = v; State.save(); toast(LANG.t('saved')); }));
+            wdContent.appendChild(_ai3ToggleRow(LANG.t('webdavUploadDownloads'), !!State.config.webdavUploadDownloads, function (v) {
+                State.config.webdavUploadDownloads = v; State.save();
+            }));
+
+            var last = State.config.webdavLastSyncAt;
+            var lastEl = document.createElement('div');
+            lastEl.textContent = LANG.t('webdavLastSync', { t: last ? new Date(last).toLocaleString() : LANG.t('webdavNever') });
+            lastEl.style.cssText = 'font-size:11px;color:' + c.sub + ';margin:8px 0 2px;';
+            wdContent.appendChild(lastEl);
+
+            wdContent.appendChild(_ai3Btns([
+                {
+                    label: LANG.t('webdavTest'), fn: function (btn) {
+                        if (!State.config.webdavUrl) { toast(LANG.t('webdavNeedConfig'), '#f59e0b'); return; }
+                        btn.textContent = LANG.t('webdavTesting');
+                        WebDAV.test(function (err, r) {
+                            if (err) { toast(err.message, '#ef4444'); UI.renderSettings(); return; }
+                            toast(LANG.t('webdavTestOk', { n: r.count }));
+                            UI.renderSettings();
+                        });
+                    }
+                },
+                {
+                    label: LANG.t('webdavBackup'), kind: 'primary', fn: function (btn) {
+                        if (!State.config.webdavUrl) { toast(LANG.t('webdavNeedConfig'), '#f59e0b'); return; }
+                        btn.textContent = LANG.t('webdavTesting');
+                        WebDAV.backup(function (err, r) {
+                            if (err) { toast(err.message, '#ef4444'); UI.renderSettings(); return; }
+                            toast(LANG.t('webdavBackupOk', { kb: Math.round((r.bytes || 0) / 1024) }));
+                            UI.renderSettings();
+                        });
+                    }
+                },
+                {
+                    label: LANG.t('webdavRestore'), fn: function (btn) {
+                        if (!State.config.webdavUrl) { toast(LANG.t('webdavNeedConfig'), '#f59e0b'); return; }
+                        btn.textContent = LANG.t('webdavTesting');
+                        WebDAV.restore(function (err, r) {
+                            if (err) { toast(err.message, '#ef4444'); UI.renderSettings(); return; }
+                            toast(LANG.t('webdavRestoreOk', { n: r.applied }));
+                            try { applyPanelThemeNow(); } catch (e) {}
+                            UI.renderSettings();
+                        });
+                    }
+                }
+            ]));
+        })();
+        container.appendChild(makeGroup('webdav', LANG.t('grpWebdav'), wdContent));
+
         var info = document.createElement('div');
         info.style.cssText = 'padding:12px;border-radius:10px;background:' + c.bg2 + ';font-size:11px;color:' + c.sub + ';line-height:1.8;text-align:center;';
         info.innerHTML = LANG.t('infoLine1') + '<br/>' + LANG.t('infoLine2');
@@ -16056,6 +20258,10 @@ VideoResolver.fillFromHtml(result, html);
     // 一次性工作（读配置 / 起扫描器 / 装 hook / 查更新）只做第一次，重复调用只补建 UI。
     State._booted = false;
     State.init = function () {
+        if (typeof Diag !== 'undefined') Diag.mark('init');   // Diag 未加载时静默跳过（模块加载顺序变化 / 测试沙箱）
+        // 整洁-2：开发期检查一次「LANG 只存纯文本」这条约定有没有被违反
+        // （只记一条 warn，失败也不影响启动）
+        try { if (LANG.assertPlainText) LANG.assertPlainText(); } catch (eLang) {}
         if (window.top !== window.self) return false;
 
         var host = document.body || document.documentElement;
@@ -16167,16 +20373,20 @@ VideoResolver.fillFromHtml(result, html);
         // 而 subtree:true 挂在 documentElement 上，页面任何一处 DOM 变更都会进队列
         // （SPA 里几乎每帧都有），长会话下是最高的一项固定开销。
         // 面板打开/关闭由 UI._moConnect / UI._moDisconnect 控制（见 openPanel / closePanel）。
+        // 诊断面板要能读到「现在到底挂着没有」，这里把内部标志同步暴露出去
+        UI._moConnectedFlag = false;
         UI._moConnect = function () {
             if (!_mo || _moConnected) return;
             try {
                 _mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
                 _moConnected = true;
+                UI._moConnectedFlag = true;
             } catch (e) { LOG.warn('MutationObserver 挂载失败:', e); }
         };
         UI._moDisconnect = function () {
             if (!_mo || !_moConnected) return;
             _moConnected = false;
+            UI._moConnectedFlag = false;
             try { _mo.disconnect(); } catch (e) {}
             if (_moResumeTimer) { clearTimeout(_moResumeTimer); _moResumeTimer = null; }
             _moPaused = false;
