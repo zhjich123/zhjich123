@@ -2,7 +2,7 @@
 
 一个功能强大的 Tampermonkey / ScriptCat 油猴脚本，用于抓取网页中的图片、视频、音频、m3u8 流媒体资源，支持批量下载、AES-128 解密、翻译、Cookie/Storage 管理等功能。
 
-> **当前版本：v1.16** · [下载最新版](https://github.com/zhjich123/zhjich123/releases/latest)
+> **当前版本：v1.17** · [下载最新版](https://github.com/zhjich123/zhjich123/releases/latest)
 
 ## 功能特性
 
@@ -39,6 +39,55 @@
 邮箱：zhengjingchen123456@outlook.com
 
 ## 更新日志
+
+### v1.17
+**修复「图标被当成文字显示」+ 8 项体验 / 性能问题**
+
+#### 🔴 修复：部分按钮上直接显示 SVG 源码
+
+有用户反馈某些按钮上出现了一长串 `<svg style="display:block…" …><path d="M11 4H4a2 2 0 0 0-2 2v14…`。
+
+**两层根因**：① **语言表里内嵌了图标** —— `LANG.strings` 有 **81 处** 把 SVG 拼进文案值；
+② **渲染出口用了 `textContent`** —— 选区工具栏 `btn()`、Cookie/Storage `mkBtn()`、
+翻译页 `makeBtn()`、其他操作 `mkOBtn()` 都把语言值当 HTML/文本直接赋给元素。
+
+**修法**（按「语言表只存纯文本」的约定彻底收口）：
+
+- 语言表 **81 处图标前缀全部剥掉**，现在自检 `内嵌 ICONS: 0 | 字面 <svg: 0`
+- 新增 **`UI.iconTextEl(icon, text)`**：图标走 `innerHTML`（内置常量）、
+  **文案走 `textContent`**，用 DOM 拼而不是字符串拼接
+- 5 个按钮工厂全部改用它，彻底不再 `innerHTML = label`
+- **19 处调用点把图标补回原位**（视觉不退化）：`genScript` / `dlMerge`(×2) /
+  `genScriptBtn`(×2) / `m3u8Title` / `m3u8Detail` / `encrypted` / `advFilterTitle` /
+  `speakBtn` / `importConfig` / `copyResult` / `copyCookieStr` / `addCookie` / `clearSite` /
+  `addItem` / `clearAll` / `lsTitle` / `lsCount`
+- Storage tab 的统计行与两个分区标题原来走 `textContent` 直赋，改成 `iconTextEl` 组合
+- 顺手把设置页最后那行「语言值进 innerHTML」拆成两个 `textContent` 的 div
+
+**守卫加了一档**：`LANG.assertPlainText()` 原来只查 `<svg`，现在查**任何标记**；
+翻译页介绍文案里内嵌的 `<br/>` 改成 `\n` 分段 + 渲染处按行生成 div。
+
+#### 🟠 8 项体验 / 性能修复
+
+| 问题 | 影响 | 修法 |
+|---|---|---|
+| 长按卡片后若**没有** click（用户直接抬手），标记残留在元素上 | **下一次点这张卡会被误跳过** | 加 800ms 兜底定时器强制清掉 |
+| 大区间 Shift 选择对**每张**卡调 `_updateCardMark`（内部还有 `querySelector`） | 一屏几百张时是**主线程峰值** | 区间 > 50 改走**一次** `_updateAllCards`，合并到一帧；小集合仍逐个走 |
+| 底部工具栏用「有没有逗号」猜是不是双色串 | 带逗号的复杂值会被**错误地包成渐变** | 抽 `asBackground()`：**逐段校验颜色字面量**，否则直通 |
+| 转写历史只存前 4000 字但无提示 | 用户以为**转写本身出了问题** | 提成常量 + 记 `truncated`；历史行加小字，**回放时顶部再给一条 ⚠ 提示** |
+| 缩略图失败兜底里每张都调 `U.isMobile()` | 批量失败时重复几十次 | 绑定时缓存 —— 30 张失败从 30 次降到 **1 次** |
+| 诊断报告弹窗硬编码 z-index，不在实例栈里 | 盖住结果弹窗，ESC 关错对象 | 走**同一公式** + 进实例栈 + 统一幂等 `dismiss()` |
+| 抖音 `RENDER_DATA` 解码的空 catch | 站点改版时**排障看不出哪一步断的** | 补三条 `LOG.debug`（解码失败 / 非合法 JSON / 字段不存在） |
+| `assertPlainText` 被 retry 链反复触发 | 同一违规键每次启动都 warn 一遍 | 加一次性标记 + 结果缓存 |
+
+#### ✅ 验证
+
+新增 `t-lang` **96 项** · `t-storage` **55 项**（把 `renderStorage` 真跑起来，
+遍历 DOM 确认「文字形态的 SVG」为 **0** 处）· `t-fix8` **79 项**（长按兜底真跑、
+300 张大区间确认逐卡更新 **0** 次、`asBackground` 喂 9 种输入、两弹窗层级递增）；
+反向验证 `_rev-lang` **21/21** · `_rev-storage` **11/11** · `_rev-fix8` **19/19**；
+全量回归 **27 项全绿**。
+
 
 ### v1.16
 **三大能力（DASH 音视频合流 / 内置诊断面板 / 解析器插件化）+ 三个新功能（听歌识曲 / 转文字 + AI 摘要 / WebDAV 后端）+ 50 项缺陷修复**
