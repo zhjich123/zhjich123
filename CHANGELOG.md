@@ -1,5 +1,93 @@
 # 更新日志
 
+## v1.17
+
+**修复「图标被当成文字显示」+ 8 项体验/性能问题**
+
+---
+
+### 一、🔴 修复：部分按钮上直接显示 SVG 源码
+
+有用户截图反馈：某些位置的按钮上出现了一长串 `<svg style="display:block…" width="16" …><path d="M11 4H4a2 2 0 0 0-2 2v14…`。
+
+**两层根因**：
+
+1. **语言表里内嵌了图标**：`LANG.strings` 有 **81 处** 把 SVG 拼进文案值里
+   （例如 `'genScript': MS_CONFIG.ICONS.edit + '生成下载脚本'`）
+2. **渲染出口用了 `textContent`**：选区工具栏的 `btn()`、Cookie/Storage 的 `mkBtn()`、
+   翻译页的 `makeBtn()`、其他操作的 `mkOBtn()` 都是 `b.innerHTML = label` 或
+   `b.textContent = label` —— 于是 SVG 源码被当成**纯文本**渲染出来
+
+**修法**（按「语言表只存纯文本」的约定彻底收口）：
+
+- 语言表 **81 处图标前缀全部剥掉**，现在自检结果是 `内嵌 ICONS: 0 | 字面 <svg: 0`
+- 新增 **`UI.iconTextEl(icon, text)`**：图标走 `innerHTML`（内置常量），
+  **文案走 `textContent`**，用 DOM 拼而不是字符串拼接 —— 任何位置都不会再因为
+  把语言值丢进 HTML 而把标记显示出来
+- 上面 5 个按钮工厂全部改用它，彻底不再 `innerHTML = label`
+- **19 处调用点把图标补回原位**（视觉不退化）：
+  `genScript` / `dlMerge`(×2) / `genScriptBtn`(×2) / `m3u8Title` / `m3u8Detail` /
+  `encrypted` / `advFilterTitle` / `speakBtn` / `importConfig` / `copyResult` /
+  `copyCookieStr` / `addCookie` / `clearSite` / `addItem` / `clearAll` / `lsTitle` / `lsCount`
+- Storage tab 的「localStorage N 条 · sessionStorage M 条」统计行与两个分区标题
+  原来走 `textContent` 直赋，改成 `iconTextEl` 组合
+- 顺手把设置页最后那行「语言值进 innerHTML」（`infoLine1<br/>infoLine2`）
+  拆成两个 `textContent` 的 div，视觉完全一致
+
+**守卫加了一档**：`LANG.assertPlainText()` 原来只查 `<svg`，现在查**任何标记**
+（`/<[a-zA-Z\/!]/`）—— 否则下次混进 `<br>` 这类又不会被发现。
+另外把「翻译页介绍文案」里内嵌的 `<br/>` 改成 `\n` 分段 + 渲染处按行生成 div
+（它虽然走 `innerHTML` 看不出问题，但同样违反了约定）。
+
+> 这类问题最坑的地方在于：**它只在特定语言/特定位置才露出来**，
+> 而且「代码看起来没问题」。所以这次补的不只是修法，还有一条会在启动时
+> 主动扫描全部语言表的守卫。
+
+### 二、8 项体验 / 性能修复
+
+| 严重度 | 问题 | 影响 | 修法 |
+|---|---|---|---|
+| 🟠 | 长按卡片后若**没有**触发 click（用户直接抬手），`_msLongPressTriggered` 标记残留在元素上 | **下一次点这张卡片会被误跳过**（看着像「点不动」） | 加 800ms 兜底定时器强制清掉；连按时 `clearTimeout` 保证不误清 |
+| 🟠 | 大区间 Shift 选择对**每一张**卡调 `_updateCardMark`，而它内部要跑 `querySelector('[data-url=…]')` | 一屏几百张时是**主线程峰值**（Shift 选 500 张 = 500 次属性选择器查询） | 区间 > 50 时改走**一次** `_updateAllCards`（只查一次列表），并合并到一帧（连点 Shift 只跑最后一次）；小集合仍逐个走，避免全刷抖动 |
+| 🟠 | 底部工具栏用「有没有逗号」猜是不是双色串：`color.indexOf(',') > -1 && color.indexOf('gradient') === -1` | 传 `'rgba(0,0,0,.2),transparent'` 这类带逗号的复杂值会被**错误地包成渐变**（当前调用点都安全，但太脆弱） | 抽 `asBackground()`：带 `(`/`gradient` 直通；逗号分隔时**逐段校验是不是颜色字面量**；否则原样直通 |
+| 🟡 | 转写历史每条只存前 4000 字，但 UI 上**没有任何提示** | 用户点开历史看到被截断的文稿，会以为**转写本身出了问题** | 提成常量 `HISTORY_TEXT_MAX`（存与提示共用）+ 记录 `truncated` 标记；历史行加「· 历史仅保留前 N 字」小字，**从历史回放时顶部再给一条 ⚠ 提示** |
+| 🟡 | 缩略图加载失败的兜底里每张都调 `U.isMobile()`（内部跑 UA 正则 + 读 `innerWidth`） | 批量失败时（一个网格几十张一起 404）重复几十次，纯属浪费 | 绑定时算一次缓存 —— 实测 30 张同时失败从 30 次降到 **1 次** |
+| 🟡 | 诊断报告兜底弹窗硬编码 `z-index:2147483651`，比结果弹窗高**且不在实例栈里** | 两者同时打开时会盖住结果弹窗，ESC 还会关错对象 | 走与结果弹窗**同一公式**（push 前按栈长算）+ 把自己推进实例栈 + 统一 `dismiss()`（幂等）+ 挂 ESC + 点遮罩可关 |
+| 🟡 | 抖音解析里 `RENDER_DATA` 解码的 `catch(e){}` 是空的 | 站点改版时只报一句「解析抖音视频信息失败」，**排障完全看不出哪一步断的** | 补三条 `LOG.debug`：解码失败 / 不是合法 JSON / 页面里根本没有该字段（用 debug 级，默认 INFO 下不刷屏） |
+| 🟢 | `LANG.assertPlainText` 在 `State.init` 里调用，而 init 会被 retry 链触发多次 | 同一个违规键每次启动都 warn 一遍 —— 纯日志噪音 | 加一次性标记 + 结果缓存 |
+
+### 三、验证
+
+- **新增测试**：
+  - `t-lang` **96 项** —— 语言表四语言零内嵌 + 23 个键仍在 + `iconTextEl` 真跑
+    （含危险输入 / null / 0 容错）+ 19 处图标补回 + 反回归扫描
+  - `t-storage` **55 项** —— 把 `renderStorage` **真跑起来**，遍历产出的 DOM 树
+    统计「文字形态的 SVG」必须为 **0 处**
+  - `t-fix8` **79 项** —— 行为验证占多数：长按兜底真跑（含「不模拟 click」的关键场景）、
+    300 张大区间确认 `_updateCardMark` 被调 **0** 次而 `_updateAllCards` 1 次、
+    `asBackground` 抽出来喂 9 种输入、30 张失败图确认 `isMobile` 只调 1 次、
+    两个弹窗连开确认层级递增且 ESC 只关最上面那个
+- **反向验证**（把每处修复逐条还原成缺陷写法，确认测试会失败）：
+  `_rev-lang` **21/21** · `_rev-storage` **11/11** · `_rev-fix8` **19/19**
+- **全量回归 27 项全绿**：`t-vgrid` / `t-p0c` / `t-p0b` / `t-p0` / `t-panel` / `t-ios27` /
+  `t-version` / `t-identity` / `t-perf2` / `t-style3` / `t-hostcss` / `t-fix34` / `t-fix15` /
+  `t-fix7` / `t-fix4b` / `t-fix8` / `t-clean24` / `t-lang` / `t-storage` / `t-diag` / `t-mux` /
+  `t-parserdsl` / `t-webdav` / `t-audioid` / `t-transcribe` / `t-refs`
+- 既有反向验证同样全通过：`_rev` 34/34 · `_rev-fix34` 48/48 · `_rev-big3` 39/39 ·
+  `_rev-ai3` 38/38 · `_rev-clean24` 34/34 · `_rev-fix7` 16/16 · `_rev-fix4b` 10/10 ·
+  `_rev-fix15` 26/26 · `_rev-style3` 49/49 · `_rev-perf2` 28/28 · `_rev-p0d` 25/25 ·
+  `_rev-identity` 20/20 · `_rev-vgrid` 12/12 · `_rev-hostcss` 14/14
+
+### 四、升级说明
+
+Tampermonkey 会通过 `@updateURL` 原地覆盖，点一下「更新」即可
+（脚本内的「一键更新」也指向同一个固定文件名地址，不会再装成一个新脚本）。
+
+如果之前装过多份旧版，建议先在管理面板里删掉多余的，只保留这一份。
+
+> 版本号从 1.16 升到 1.17（`@version` / `MS_CONFIG.VERSION` / `U.VERSION` 三处统一），
+> 这样更新检查能正确识别出新版本。
+
 ## v1.16
 
 **三大能力（DASH 音视频合流 / 内置诊断面板 / 解析器插件化）+ 三个新功能（听歌识曲 / 转文字+AI摘要 / WebDAV 后端）+ 50 项缺陷修复**
