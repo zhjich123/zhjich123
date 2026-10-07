@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         媒体嗅探器 Media Sniffer Pro
 // @namespace    http://tampermonkey.net/
-// @version      1.16
+// @version      1.17
 // @description  图片/视频/音频/m3u8 抓取 · AES-128解密 · 分片合并 · 虚拟列表 · 进度可视化 · 跨域兜底 · Cookie/Storage · 翻译 · 元信息 · 高级筛选 · iOS 27 液态玻璃界面
 // @license      GPL-3.0-or-later
 // @downloadURL  https://raw.githubusercontent.com/zhjich123/zhjich123/main/media-sniffer.user.js
@@ -43,7 +43,7 @@
     }
 
     try {
-    console.info('[MS] 脚本开始加载，版本:', '1.16');
+    console.info('[MS] 脚本开始加载，版本:', '1.17');
 
 
 
@@ -51,7 +51,7 @@
     // <svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;"><svg   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.045a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.01 17.461 2 12 2z"></path></svg></svg> 全局配置（图标 / 颜色 / 尺寸 / 配色板）
     // =========================================================================
     var MS_CONFIG = {
-        VERSION: '1.16',
+        VERSION: '1.17',
         // 界面风格白名单（唯一真源）。必须放在 MS_CONFIG 里 —— 它在最外层作用域，
         // State IIFE 与 UI IIFE 是**并列**的两个 IIFE，写在其中一个里面另一个取不到。
         // （v1.15 首版曾把它放在 State IIFE 内，导致 UI.applyUiStyle 抛 ReferenceError
@@ -372,7 +372,7 @@
     //  模块 1：核心工具 (Utils) + 日志系统
     // =========================================================================
     var U = {};
-    U.VERSION = '1.16';
+    U.VERSION = '1.17';
 
     // 7：String.prototype.padStart / padEnd 是 ES2017。老 WebView / 老 Safari
     // 里它们不存在，会直接在生成诊断报告（p.name.padEnd(22)）、
@@ -988,7 +988,7 @@
             'tabSettings': '设置',
             'btnSelAll': '全选', 'btnSelNone': '取消全选',
             'extractCover': '提取封面', 'filterPanel': '筛选设置',
-            'advFilterTitle': MS_CONFIG.ICONS.wrench + '高级筛选设置',
+            'advFilterTitle': '高级筛选设置',
             'advFilterDesc': '设置阈值后，点击"应用筛选"重新过滤资源列表',
             'minImageSize': '最小图片大小（字节）',
             'minImageWidth': '最小图片宽度（px）',
@@ -1003,10 +1003,10 @@
             'searchPlaceholder': '搜索...',
             'advFilter': '高级筛选',
             'noCookie': '暂无 Cookie',
-            'copyCookieStr': MS_CONFIG.ICONS.copy + '复制 Cookie 字符串',
+            'copyCookieStr': '复制 Cookie 字符串',
             'copyJson': '复制 JSON',
-            'addCookie': MS_CONFIG.ICONS.plus + '新增 Cookie',
-            'clearSite': MS_CONFIG.ICONS.trash + '清空本站',
+            'addCookie': '新增 Cookie',
+            'clearSite': '清空本站',
             'delete': '删除',
             'cookieName': 'Cookie 名称',
             'cookieValue': '请输入 Cookie 值：',
@@ -1019,25 +1019,25 @@
             'readCookieFail': '读取 Cookie 失败',
             'exportLs': '导出 localStorage',
             'exportSs': '导出 sessionStorage',
-            'addItem': MS_CONFIG.ICONS.plus + '新增项',
-            'clearAll': MS_CONFIG.ICONS.trash + '清空全部',
+            'addItem': '新增项',
+            'clearAll': '清空全部',
             'keyName': '键名',
             'keyValue': '键值',
             'confirmClearStorage': '确认清空存储？',
             'cleared': '已清空',
             'addToLs': '添加到 localStorage',
-            'lsTitle': MS_CONFIG.ICONS.package + 'localStorage',
+            'lsTitle': 'localStorage',
             'ssTitle': 'sessionStorage',
-            'lsCount': MS_CONFIG.ICONS.package + 'localStorage {n} 条 · sessionStorage {m} 条',
+            'lsCount': 'localStorage {n} 条 · sessionStorage {m} 条',
             'transTitle': '翻译工具',
-            'transIntro': '· 使用 MyMemory 免费 API（国内可用）· 一次最多 500 字符<br/>· 快捷键 Alt+T 翻译当前页选中文字',
+            'transIntro': '· 使用 MyMemory 免费 API（国内可用）· 一次最多 500 字符\n· 快捷键 Alt+T 翻译当前页选中文字',
             'transInputPh': '请输入要翻译的文本...',
             'transResultPh': '翻译结果将显示在这里',
             'transBtn': '翻译',
             'zhToEn': '中→英',
             'enToZh': '英→中',
             'clearBtn': '清空',
-            'copyResult': MS_CONFIG.ICONS.copy + '复制结果',
+            'copyResult': '复制结果',
             'resultAsInput': '结果当输入',
             'plsInputText': '请输入文本',
             'translating': '正在翻译（{from} → {to}）…',
@@ -1052,7 +1052,7 @@
             'transTimeout': '请求超时',
             'transAllFail': '所有翻译引擎均失败',
             'transPartialFail': '部分分段翻译失败',
-            'speakBtn': MS_CONFIG.ICONS.volume + '发音',
+            'speakBtn': '发音',
             'transHistory': '翻译历史',
             'transNoHistory': '暂无翻译历史',
             'transClearHistory': '清空历史',
@@ -1113,33 +1113,33 @@
             'confirmDlAll': '开始下载 {n} 个文件？',
             'confirmReset': '确认重置所有配置？',
             'pasteJson': '粘贴 JSON 配置',
-            'm3u8Title': MS_CONFIG.ICONS.stream + '流媒体：{n} 个 m3u8',
+            'm3u8Title': '流媒体：{n} 个 m3u8',
             'noM3u8': '暂无 m3u8 资源',
             'dlMerge': '下载并合并',
             'genScriptBtn': '生成脚本',
             'detailBtn': '详情',
-            'm3u8Detail': MS_CONFIG.ICONS.stream + 'm3u8 流媒体详情',
+            'm3u8Detail': 'm3u8 流媒体详情',
             'parsing': '解析中...',
             'parseResult': '解析结果：{n} 个分片',
             'masterStreams': '多码率流，共 {n} 个子流：',
             'segmentsInfo': '分片列表，共 {n} 个分片，总时长 {t}',
-            'encrypted': MS_CONFIG.ICONS.lock + 'AES 加密',
+            'encrypted': 'AES 加密',
             'notEncrypted': '未加密',
             'yes': '是',
             'no': '否',
             'parseFailNet': '网络请求失败',
             'parseFailTimeout': '请求超时',
             'm3u8PreviewHint': 'm3u8 不可直接预览，请下载',
-            'logLevelTitle': MS_CONFIG.ICONS.chart + '日志级别（调试用）',
+            'logLevelTitle': '日志级别（调试用）',
             'logDebug': '调试',
             'logInfo': '信息',
             'logWarn': '警告',
             'logError': '错误',
-            'otherOps': MS_CONFIG.ICONS.palette + '其他操作',
+            'otherOps': '其他操作',
             'exportAllConfig': '导出全部配置',
-            'importConfig': MS_CONFIG.ICONS.download + '导入配置',
+            'importConfig': '导入配置',
             'resetAll': '↻ 重置全部设置',
-            'batchTitle': MS_CONFIG.ICONS.package + '批量下载设置',
+            'batchTitle': '批量下载设置',
             'concurrency': '并发数：',
             'intervalMs': '间隔(ms)：',
             'retries': '重试次数：',
@@ -1150,16 +1150,16 @@
             'qualityHigh': '最高清晰度',
             'qualityMedium': '中等清晰度',
             'qualityLow': '最低清晰度',
-            'requestHeaders': MS_CONFIG.ICONS.wrench + '请求头设置',
+            'requestHeaders': '请求头设置',
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': '媒体嗅探器 Pro v1.16 · SelectionManager · 拖拽排序 · 收藏夹 · 智能去重 · 分组 · 批量操作注册 · 插件系统',
+            'infoLine1': '媒体嗅探器 Pro v1.17 · SelectionManager · 拖拽排序 · 收藏夹 · 智能去重 · 分组 · 批量操作注册 · 插件系统',
             'infoLine2': '快捷键：Alt+T 翻译选中 · Alt+B 开关面板 · Esc 关闭',
             'clickTabScan': '点击标签扫描',
             'dlProgress': '下载进度',
             'dlProgressText': '{done} / {total}（失败 {fail}）· {speed} · 预计剩余 {eta}',
-            'shortcutTitle': MS_CONFIG.ICONS.keyboard + '快捷键设置',
+            'shortcutTitle': '快捷键设置',
             'shortcutToggle': '开关面板',
             'shortcutTranslate': '翻译选中',
             'shortcutClose': '关闭面板',
@@ -1267,6 +1267,7 @@
             'transcribeHistory': '转写历史',
             'transcribeClearHistory': '清空转写历史',
             'transcribeNoHistory': '还没有转写记录',
+            'transcribeHistoryTruncated': '历史仅保留前 {n} 字',
             'grpWebdav': 'WebDAV 后端（NAS）',
             'webdavDesc': '把配置与历史同步到 WebDAV，并可把下载文件直接存进 NAS。密码仅保存在本地，不会写入备份文件。',
             'webdavEnabled': '启用 WebDAV',
@@ -1481,7 +1482,7 @@
             'btnSelNone': 'Deselect All',
             'extractCover': 'Extract Cover',
             'filterPanel': 'Filter Settings',
-            'advFilterTitle': MS_CONFIG.ICONS.wrench + 'Advanced Filter Settings',
+            'advFilterTitle': 'Advanced Filter Settings',
             'advFilterDesc': 'Set thresholds, then click "Apply" to re-filter the resource list',
             'minImageSize': 'Min Image Size (bytes)',
             'minImageWidth': 'Min Image Width (px)',
@@ -1496,10 +1497,10 @@
             'searchPlaceholder': 'Search URL or filename…',
             'advFilter': 'Advanced Filter',
             'noCookie': 'No cookies on this page',
-            'copyCookieStr': MS_CONFIG.ICONS.copy + 'Copy Cookie String',
+            'copyCookieStr': 'Copy Cookie String',
             'copyJson': 'Copy JSON',
-            'addCookie': MS_CONFIG.ICONS.plus + 'Add Cookie',
-            'clearSite': MS_CONFIG.ICONS.trash + 'Clear Site',
+            'addCookie': 'Add Cookie',
+            'clearSite': 'Clear Site',
             'delete': 'Delete',
             'cookieName': 'Enter cookie name:',
             'cookieValue': 'Enter cookie value:',
@@ -1512,25 +1513,25 @@
             'readCookieFail': 'Cannot read cookies',
             'exportLs': 'Export localStorage',
             'exportSs': 'Export sessionStorage',
-            'addItem': MS_CONFIG.ICONS.plus + 'Add Item',
-            'clearAll': MS_CONFIG.ICONS.trash + 'Clear All',
+            'addItem': 'Add Item',
+            'clearAll': 'Clear All',
             'keyName': 'Key:',
             'keyValue': 'Value:',
             'confirmClearStorage': 'Clear localStorage and sessionStorage?',
             'cleared': 'Cleared',
             'addToLs': '✓ Added to localStorage',
-            'lsTitle': MS_CONFIG.ICONS.package + 'localStorage',
+            'lsTitle': 'localStorage',
             'ssTitle': 'sessionStorage',
-            'lsCount': MS_CONFIG.ICONS.package + 'localStorage {n} · sessionStorage {m}',
+            'lsCount': 'localStorage {n} · sessionStorage {m}',
             'transTitle': 'Text Translation',
-            'transIntro': '· MyMemory free API · Max 500 chars<br/>· Shortcut: Alt+T to translate selected text',
+            'transIntro': '· MyMemory free API · Max 500 chars\n· Shortcut: Alt+T to translate selected text',
             'transInputPh': 'Enter or paste text to translate…',
             'transResultPh': 'Translation result appears here…',
             'transBtn': 'Translate',
             'zhToEn': 'ZH→EN',
             'enToZh': 'EN→ZH',
             'clearBtn': 'Clear',
-            'copyResult': MS_CONFIG.ICONS.copy + 'Copy Result',
+            'copyResult': 'Copy Result',
             'resultAsInput': 'Use as Input',
             'plsInputText': 'Please enter text to translate',
             'translating': '⌛ Translating ({from} → {to})…',
@@ -1545,7 +1546,7 @@
             'transTimeout': 'Request timeout',
             'transAllFail': 'All translation engines failed',
             'transPartialFail': 'Some segments failed',
-            'speakBtn': MS_CONFIG.ICONS.volume + 'Speak',
+            'speakBtn': 'Speak',
             'transHistory': 'History',
             'transNoHistory': 'No translation history',
             'transClearHistory': 'Clear History',
@@ -1569,10 +1570,10 @@
             'invertSel': 'Invert',
             'clearSel': 'Clear',
             'copySelBtn': 'Copy',
-            'downloadSelBtn': MS_CONFIG.ICONS.arrowDown + 'Download',
+            'downloadSelBtn': 'Download',
             'copyN': 'Copy ({n})',
             'downloadN': 'Download ({n})',
-            'genScript': MS_CONFIG.ICONS.edit + 'Generate Script',
+            'genScript': 'Generate Script',
             'rescan': 'Rescan',
             'plsCheck': 'Please select resources first',
             'scriptCopied': 'aria2 script generated and copied',
@@ -1607,12 +1608,12 @@
             'confirmDlAll': 'Download all {n} files?',
             'confirmReset': 'Reset all settings?',
             'pasteJson': 'Paste config JSON:',
-            'm3u8Title': MS_CONFIG.ICONS.stream + 'Streams: {n} m3u8',
+            'm3u8Title': 'Streams: {n} m3u8',
             'noM3u8': 'No m3u8 streams found',
-            'dlMerge': MS_CONFIG.ICONS.arrowDown + 'Download & Merge',
-            'genScriptBtn': MS_CONFIG.ICONS.edit + 'Generate Script',
+            'dlMerge': 'Download & Merge',
+            'genScriptBtn': 'Generate Script',
             'detailBtn': 'Details',
-            'm3u8Detail': MS_CONFIG.ICONS.stream + 'm3u8 Stream Details',
+            'm3u8Detail': 'm3u8 Stream Details',
             'parsing': 'Parsing...',
             'parseResult': 'Parse result:',
             'masterStreams': 'Master playlist, {n} variants:',
@@ -1624,16 +1625,16 @@
             'parseFailNet': 'Parse failed: network error',
             'parseFailTimeout': 'Parse failed: timeout',
             'm3u8PreviewHint': 'Stream (m3u8): use download function',
-            'logLevelTitle': MS_CONFIG.ICONS.chart + 'Log Level (debug)',
+            'logLevelTitle': 'Log Level (debug)',
             'logDebug': 'DEBUG (verbose)',
             'logInfo': 'INFO (default)',
             'logWarn': 'WARN',
             'logError': 'ERROR (errors only)',
-            'otherOps': MS_CONFIG.ICONS.palette + 'Other Actions',
+            'otherOps': 'Other Actions',
             'exportAllConfig': 'Export All Config',
-            'importConfig': MS_CONFIG.ICONS.download + 'Import Config',
+            'importConfig': 'Import Config',
             'resetAll': '↻ Reset All Settings',
-            'batchTitle': MS_CONFIG.ICONS.package + 'Batch Download Settings',
+            'batchTitle': 'Batch Download Settings',
             'concurrency': 'Concurrency:',
             'intervalMs': 'Interval (ms):',
             'retries': 'Retries:',
@@ -1644,16 +1645,16 @@
             'qualityHigh': 'Best Quality',
             'qualityMedium': 'Medium',
             'qualityLow': 'Low',
-            'requestHeaders': MS_CONFIG.ICONS.wrench + 'Request Headers',
+            'requestHeaders': 'Request Headers',
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': 'Media Sniffer Pro v1.16 · SelectionManager · Drag Sort · Favorites · Smart Dedup · Groups · Batch Actions · Plugin System',
+            'infoLine1': 'Media Sniffer Pro v1.17 · SelectionManager · Drag Sort · Favorites · Smart Dedup · Groups · Batch Actions · Plugin System',
             'infoLine2': 'Shortcuts: Alt+T Translate · Alt+B Toggle · Esc Close',
             'clickTabScan': 'Click a tab above to start scanning',
             'dlProgress': 'Download Progress',
             'dlProgressText': '{done} / {total} ({fail} failed) · {speed} · ETA {eta}',
-            'shortcutTitle': MS_CONFIG.ICONS.keyboard + 'Shortcuts',
+            'shortcutTitle': 'Shortcuts',
             'shortcutToggle': 'Toggle Panel',
             'shortcutTranslate': 'Translate Selection',
             'shortcutClose': 'Close Panel',
@@ -1761,6 +1762,7 @@
             'transcribeHistory': 'Transcript history',
             'transcribeClearHistory': 'Clear history',
             'transcribeNoHistory': 'No records yet',
+            'transcribeHistoryTruncated': 'History keeps only the first {n} characters',
             'grpWebdav': 'WebDAV Backend (NAS)',
             'webdavDesc': 'Sync settings and history to WebDAV, and optionally store downloads straight on your NAS. Passwords stay local and are never written into backups.',
             'webdavEnabled': 'Enable WebDAV',
@@ -1954,7 +1956,7 @@
             'btnSelNone': '選択解除',
             'extractCover': 'カバー抽出',
             'filterPanel': 'フィルター設定',
-            'advFilterTitle': MS_CONFIG.ICONS.wrench + '詳細フィルター設定',
+            'advFilterTitle': '詳細フィルター設定',
             'advFilterDesc': 'しきい値を設定し、「適用」をクリックしてリストを再フィルター',
             'minImageSize': '最小画像サイズ（バイト）',
             'minImageWidth': '最小画像幅（px）',
@@ -1969,10 +1971,10 @@
             'searchPlaceholder': 'URLまたはファイル名を検索…',
             'advFilter': '詳細フィルター',
             'noCookie': 'このページにCookieはありません',
-            'copyCookieStr': MS_CONFIG.ICONS.copy + 'Cookie文字列コピー',
+            'copyCookieStr': 'Cookie文字列コピー',
             'copyJson': 'JSONコピー',
-            'addCookie': MS_CONFIG.ICONS.plus + 'Cookie追加',
-            'clearSite': MS_CONFIG.ICONS.trash + 'サイトをクリア',
+            'addCookie': 'Cookie追加',
+            'clearSite': 'サイトをクリア',
             'delete': '削除',
             'cookieName': 'Cookie名を入力：',
             'cookieValue': 'Cookie値を入力：',
@@ -1985,25 +1987,25 @@
             'readCookieFail': 'Cookieを読み込めません',
             'exportLs': 'localStorageをエクスポート',
             'exportSs': 'sessionStorageをエクスポート',
-            'addItem': MS_CONFIG.ICONS.plus + '項目を追加',
-            'clearAll': MS_CONFIG.ICONS.trash + 'すべてクリア',
+            'addItem': '項目を追加',
+            'clearAll': 'すべてクリア',
             'keyName': 'キー：',
             'keyValue': '値：',
             'confirmClearStorage': 'localStorageとsessionStorageをクリアしますか？',
             'cleared': 'クリアしました',
             'addToLs': '✓ localStorageに追加しました',
-            'lsTitle': MS_CONFIG.ICONS.package + 'localStorage',
+            'lsTitle': 'localStorage',
             'ssTitle': 'sessionStorage',
-            'lsCount': MS_CONFIG.ICONS.package + 'localStorage {n}件 ·  sessionStorage {m}件',
+            'lsCount': 'localStorage {n}件 ·  sessionStorage {m}件',
             'transTitle': 'テキスト翻訳',
-            'transIntro': '・MyMemory無料API ・最大500文字<br/>・ショートカット: Alt+Tで選択テキスト翻訳',
+            'transIntro': '・MyMemory無料API ・最大500文字\n・ショートカット: Alt+Tで選択テキスト翻訳',
             'transInputPh': '翻訳するテキストを入力または貼り付け…',
             'transResultPh': '翻訳結果がここに表示されます…',
             'transBtn': '翻訳',
             'zhToEn': '中→英',
             'enToZh': '英→中',
             'clearBtn': 'クリア',
-            'copyResult': MS_CONFIG.ICONS.copy + '結果をコピー',
+            'copyResult': '結果をコピー',
             'resultAsInput': '結果を入力に',
             'plsInputText': '翻訳するテキストを入力してください',
             'translating': '⌛ 翻訳中（{from} → {to}）…',
@@ -2025,10 +2027,10 @@
             'invertSel': '反転',
             'clearSel': 'クリア',
             'copySelBtn': 'コピー',
-            'downloadSelBtn': MS_CONFIG.ICONS.arrowDown + 'ダウンロード',
+            'downloadSelBtn': 'ダウンロード',
             'copyN': 'コピー({n})',
             'downloadN': 'ダウンロード({n})',
-            'genScript': MS_CONFIG.ICONS.edit + 'スクリプト生成',
+            'genScript': 'スクリプト生成',
             'rescan': '再スキャン',
             'plsCheck': 'リソースを選択してください',
             'scriptCopied': 'aria2スクリプト生成・コピー完了',
@@ -2063,12 +2065,12 @@
             'confirmDlAll': '全{n}ファイルをDLしますか？',
             'confirmReset': 'すべての設定をリセットしますか？',
             'pasteJson': '設定JSONを貼り付け：',
-            'm3u8Title': MS_CONFIG.ICONS.stream + 'ストリーム：{n} m3u8',
+            'm3u8Title': 'ストリーム：{n} m3u8',
             'noM3u8': 'm3u8ストリームはありません',
-            'dlMerge': MS_CONFIG.ICONS.arrowDown + 'DLして結合',
-            'genScriptBtn': MS_CONFIG.ICONS.edit + 'スクリプト生成',
+            'dlMerge': 'DLして結合',
+            'genScriptBtn': 'スクリプト生成',
             'detailBtn': '詳細',
-            'm3u8Detail': MS_CONFIG.ICONS.stream + 'm3u8ストリーム詳細',
+            'm3u8Detail': 'm3u8ストリーム詳細',
             'parsing': '解析中...',
             'parseResult': '解析結果：',
             'masterStreams': 'マスタープレイリスト、{n}ストリーム：',
@@ -2080,16 +2082,16 @@
             'parseFailNet': '解析失敗：ネットワークエラー',
             'parseFailTimeout': '解析失敗：タイムアウト',
             'm3u8PreviewHint': 'ストリーム (m3u8)：ダウンロード機能を使ってください',
-            'logLevelTitle': MS_CONFIG.ICONS.chart + 'ログレベル（デバッグ用）',
+            'logLevelTitle': 'ログレベル（デバッグ用）',
             'logDebug': 'DEBUG（詳細）',
             'logInfo': 'INFO（デフォルト）',
             'logWarn': 'WARN（警告）',
             'logError': 'ERROR（エラーのみ）',
-            'otherOps': MS_CONFIG.ICONS.palette + 'その他の操作',
+            'otherOps': 'その他の操作',
             'exportAllConfig': '全設定エクスポート',
-            'importConfig': MS_CONFIG.ICONS.download + '設定インポート',
+            'importConfig': '設定インポート',
             'resetAll': '↻ 全設定リセット',
-            'batchTitle': MS_CONFIG.ICONS.package + '一括DL設定',
+            'batchTitle': '一括DL設定',
             'concurrency': '同時実行数:',
             'intervalMs': '間隔(ms):',
             'retries': 'リトライ:',
@@ -2100,11 +2102,11 @@
             'qualityHigh': '最高',
             'qualityMedium': '中',
             'qualityLow': '低',
-            'requestHeaders': MS_CONFIG.ICONS.wrench + 'リクエストヘッダー',
+            'requestHeaders': 'リクエストヘッダー',
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': 'メディアスニッファー Pro v1.16 · モジュール設計 · AES-128復号 · 仮想リスト · 進捗可視化 · プラグインシステム',
+            'infoLine1': 'メディアスニッファー Pro v1.17 · モジュール設計 · AES-128復号 · 仮想リスト · 進捗可視化 · プラグインシステム',
             'infoLine2': 'ショートカット: Alt+T 翻訳 · Alt+B パネル切替 · Esc 閉じる',
             'clickTabScan': '上のタブをクリックしてスキャン開始',
             'dlProgress': 'ダウンロード進捗',
@@ -2215,6 +2217,7 @@
             'transcribeHistory': '文字起こし履歴',
             'transcribeClearHistory': '履歴を消去',
             'transcribeNoHistory': '記録はまだありません',
+            'transcribeHistoryTruncated': '履歴は先頭 {n} 文字のみ保存',
             'grpWebdav': 'WebDAVバックエンド（NAS）',
             'webdavDesc': '設定と履歴をWebDAVに同期し、ダウンロードをNASへ直接保存できます。パスワードは端末内のみでバックアップに含めません。',
             'webdavEnabled': 'WebDAVを有効化',
@@ -2408,7 +2411,7 @@
             'btnSelNone': '선택 해제',
             'extractCover': '썸네일 추출',
             'filterPanel': '필터 설정',
-            'advFilterTitle': MS_CONFIG.ICONS.wrench + '고급 필터 설정',
+            'advFilterTitle': '고급 필터 설정',
             'advFilterDesc': '임계값을 설정한 후 "적용"을 클릭하여 리스트를 다시 필터링',
             'minImageSize': '최소 이미지 크기（바이트）',
             'minImageWidth': '최소 이미지 너비（px）',
@@ -2423,10 +2426,10 @@
             'searchPlaceholder': 'URL 또는 파일명 검색…',
             'advFilter': '고급 필터',
             'noCookie': '이 페이지에 쿠키가 없습니다',
-            'copyCookieStr': MS_CONFIG.ICONS.copy + '쿠키 문자열 복사',
+            'copyCookieStr': '쿠키 문자열 복사',
             'copyJson': 'JSON 복사',
-            'addCookie': MS_CONFIG.ICONS.plus + '쿠키 추가',
-            'clearSite': MS_CONFIG.ICONS.trash + '사이트 비우기',
+            'addCookie': '쿠키 추가',
+            'clearSite': '사이트 비우기',
             'delete': '삭제',
             'cookieName': '쿠키 이름을 입력하세요:',
             'cookieValue': '쿠키 값을 입력하세요:',
@@ -2439,25 +2442,25 @@
             'readCookieFail': '쿠키를 읽을 수 없습니다',
             'exportLs': 'localStorage 내보내기',
             'exportSs': 'sessionStorage 내보내기',
-            'addItem': MS_CONFIG.ICONS.plus + '항목 추가',
-            'clearAll': MS_CONFIG.ICONS.trash + '모두 비우기',
+            'addItem': '항목 추가',
+            'clearAll': '모두 비우기',
             'keyName': '키:',
             'keyValue': '값:',
             'confirmClearStorage': 'localStorage와 sessionStorage를 비우시겠습니까?',
             'cleared': '비워졌습니다',
             'addToLs': '✓ localStorage에 추가됨',
-            'lsTitle': MS_CONFIG.ICONS.package + 'localStorage',
+            'lsTitle': 'localStorage',
             'ssTitle': 'sessionStorage',
-            'lsCount': MS_CONFIG.ICONS.package + 'localStorage {n}개 ·  sessionStorage {m}개',
+            'lsCount': 'localStorage {n}개 ·  sessionStorage {m}개',
             'transTitle': '텍스트 번역',
-            'transIntro': '· MyMemory 무료 API · 최대 500자<br/>· 단축키: Alt+T로 선택 텍스트 번역',
+            'transIntro': '· MyMemory 무료 API · 최대 500자\n· 단축키: Alt+T로 선택 텍스트 번역',
             'transInputPh': '번역할 텍스트를 입력하거나 붙여넣으세요…',
             'transResultPh': '번역 결과가 여기에 표시됩니다…',
             'transBtn': '번역',
             'zhToEn': '중→영',
             'enToZh': '영→중',
             'clearBtn': '비우기',
-            'copyResult': MS_CONFIG.ICONS.copy + '결과 복사',
+            'copyResult': '결과 복사',
             'resultAsInput': '결과를 입력으로',
             'plsInputText': '번역할 텍스트를 입력하세요',
             'translating': '⌛ 번역 중（{from} → {to}）…',
@@ -2479,10 +2482,10 @@
             'invertSel': '반전',
             'clearSel': '비우기',
             'copySelBtn': '복사',
-            'downloadSelBtn': MS_CONFIG.ICONS.arrowDown + '다운로드',
+            'downloadSelBtn': '다운로드',
             'copyN': '복사({n})',
             'downloadN': '다운로드({n})',
-            'genScript': MS_CONFIG.ICONS.edit + '스크립트 생성',
+            'genScript': '스크립트 생성',
             'rescan': '재스캔',
             'plsCheck': '리소스를 선택하세요',
             'scriptCopied': 'aria2 스크립트 생성 및 복사됨',
@@ -2517,12 +2520,12 @@
             'confirmDlAll': '총 {n}개 파일을 다운로드하시겠습니까?',
             'confirmReset': '모든 설정을 재설정하시겠습니까?',
             'pasteJson': '설정 JSON 붙여넣기:',
-            'm3u8Title': MS_CONFIG.ICONS.stream + '스트림: {n} m3u8',
+            'm3u8Title': '스트림: {n} m3u8',
             'noM3u8': 'm3u8 스트림이 없습니다',
-            'dlMerge': MS_CONFIG.ICONS.arrowDown + '다운로드 및 병합',
-            'genScriptBtn': MS_CONFIG.ICONS.edit + '스크립트 생성',
+            'dlMerge': '다운로드 및 병합',
+            'genScriptBtn': '스크립트 생성',
             'detailBtn': '세부정보',
-            'm3u8Detail': MS_CONFIG.ICONS.stream + 'm3u8 스트림 세부정보',
+            'm3u8Detail': 'm3u8 스트림 세부정보',
             'parsing': '분석 중...',
             'parseResult': '분석 결과:',
             'masterStreams': '마스터 플레이리스트, {n}개 스트림:',
@@ -2534,16 +2537,16 @@
             'parseFailNet': '분석 실패: 네트워크 오류',
             'parseFailTimeout': '분석 실패: 시간 초과',
             'm3u8PreviewHint': '스트림 (m3u8): 다운로드 기능을 사용하세요',
-            'logLevelTitle': MS_CONFIG.ICONS.chart + '로그 레벨（디버그용）',
+            'logLevelTitle': '로그 레벨（디버그용）',
             'logDebug': 'DEBUG（상세）',
             'logInfo': 'INFO（기본）',
             'logWarn': 'WARN（경고）',
             'logError': 'ERROR（오류만）',
-            'otherOps': MS_CONFIG.ICONS.palette + '기타 작업',
+            'otherOps': '기타 작업',
             'exportAllConfig': '전체 설정 내보내기',
-            'importConfig': MS_CONFIG.ICONS.download + '설정 가져오기',
+            'importConfig': '설정 가져오기',
             'resetAll': '↻ 모든 설정 재설정',
-            'batchTitle': MS_CONFIG.ICONS.package + '일괄 다운로드 설정',
+            'batchTitle': '일괄 다운로드 설정',
             'concurrency': '동시 실행:',
             'intervalMs': '간격(ms):',
             'retries': '재시도:',
@@ -2554,11 +2557,11 @@
             'qualityHigh': '최고 화질',
             'qualityMedium': '중간 화질',
             'qualityLow': '최저 화질',
-            'requestHeaders': MS_CONFIG.ICONS.wrench + '요청 헤더',
+            'requestHeaders': '요청 헤더',
             'referer': 'Referer:',
             'userAgent': 'User-Agent:',
             'cookie': 'Cookie:',
-            'infoLine1': '미디어 스니퍼 Pro v1.16 · 모듈 구조 · AES-128 복호화 · 가상 리스트 · 진행률 · 플러그인 시스템',
+            'infoLine1': '미디어 스니퍼 Pro v1.17 · 모듈 구조 · AES-128 복호화 · 가상 리스트 · 진행률 · 플러그인 시스템',
             'infoLine2': '단축키: Alt+T 번역 · Alt+B 패널 토글 · Esc 닫기',
             'clickTabScan': '위 탭을 클릭하여 스캔 시작',
             'dlProgress': '다운로드 진행률',
@@ -2669,6 +2672,7 @@
             'transcribeHistory': '받아쓰기 기록',
             'transcribeClearHistory': '기록 지우기',
             'transcribeNoHistory': '기록이 없습니다',
+            'transcribeHistoryTruncated': '기록은 앞 {n}자만 보관됩니다',
             'grpWebdav': 'WebDAV 백엔드(NAS)',
             'webdavDesc': '설정과 기록을 WebDAV에 동기화하고 다운로드를 NAS에 바로 저장할 수 있습니다. 비밀번호는 기기에만 있고 백업에 포함되지 않습니다.',
             'webdavEnabled': 'WebDAV 사용',
@@ -2793,6 +2797,11 @@
     // 只在 DEBUG 级别下跑、只报一次，成本可忽略；作用是让违反上面那条约定的人
     // 一眼看到，而不是等切语言时发现图标没了再回头查。
     LANG.assertPlainText = function () {
+        // #8：这个函数在 State.init 里调用，而 init 会被 retry 链触发多次 ——
+        // 同一个违规键每次启动都会 warn 一遍，纯属日志噪音。
+        // 加一次性标记：第一次跑完之后直接返回上次结果。
+        if (LANG._asserted) return LANG._assertedResult || [];
+        LANG._asserted = true;
         var bad = [];
         try {
             for (var lang in LANG.strings) {
@@ -2801,13 +2810,16 @@
                 for (var k in table) {
                     if (!Object.prototype.hasOwnProperty.call(table, k)) continue;
                     var v = table[k];
-                    if (typeof v === 'string' && v.indexOf('<svg') >= 0) bad.push(lang + '.' + k);
+                    // 从「只查 <svg」扩到「任何标签」—— 约定是「只存纯文本」，
+                    // 混进 <br/> 这类换行标记一样是违规（而且哪天被 textContent 用就露出来）。
+                    if (typeof v === 'string' && /<[a-zA-Z\/!]/.test(v)) bad.push(lang + '.' + k);
                 }
             }
         } catch (e) { return []; }
         if (bad.length) {
-            try { LOG.warn('[LANG] 以下文案里内嵌了 SVG，违反「LANG 只存纯文本」约定（图标请走 UI._tabIconMap）:', bad.join(', ')); } catch (e2) {}
+            try { LOG.warn('[LANG] 以下文案里含标记，违反「LANG 只存纯文本」约定（图标请走 UI.iconTextEl / _tabIconMap）:', bad.join(', ')); } catch (e2) {}
         }
+        LANG._assertedResult = bad;
         return bad;
     };
 
@@ -4823,7 +4835,16 @@
                                     try {
                                         var decoded = decodeURIComponent(renderMatch2[1]);
                                         renderData = U.safeJson(decoded, null);
-                                    } catch(e) {}
+                                        // 解码成功但 JSON 不合法也要留一句
+                                        if (!renderData) LOG.debug('[抖音] RENDER_DATA 不是合法 JSON（前 80 字）:', String(decoded).slice(0, 80));
+                                    } catch (e) {
+                                        // #15：原来这里空 catch —— 页面换成不含该字段的版本时，
+                                        // renderData 一直是 null，最后只报一句「解析抖音视频信息失败」，
+                                        // 排障时完全看不出是哪一步断的。
+                                        LOG.debug('[抖音] RENDER_DATA 解码失败:', e && e.message);
+                                    }
+                                } else {
+                                    LOG.debug('[抖音] 页面里没有 RENDER_DATA / __INIT_PROPS__（站点可能改版了）');
                                 }
                             }
                             var result = {
@@ -12558,6 +12579,10 @@ VideoResolver.fillFromHtml(result, html);
         Transcribe.CHUNK_SECONDS = 600;              // 每片 10 分钟（16kHz 单声道 ≈ 19MB）
         Transcribe.TARGET_RATE = 16000;
         Transcribe.HISTORY_MAX = 30;
+        // #12：历史里每条只存前 N 个字符（配置体积会爆）。这个上限必须
+        // 让 UI 知道 —— 否则用户点开历史看到被截断的文稿，却没有任何提示，
+        // 会以为转写本身出了问题。
+        Transcribe.HISTORY_TEXT_MAX = 4000;
 
         // 14：原来这里有个 Transcribe.styles 常量数组，全篇没有任何引用 —— 已删除。
         // （风格白名单的唯一真源是 validateConfig 里的校验，UI 的下拉选项也直接列在那里。）
@@ -12944,8 +12969,9 @@ VideoResolver.fillFromHtml(result, html);
             if (!U.isArr(State.config.transcribeHistory)) State.config.transcribeHistory = [];
             State.config.transcribeHistory.unshift({
                 title: rec.title, url: rec.url, at: rec.at, chars: rec.chars,
-                text: String(rec.text || '').slice(0, 4000),
-                summary: String(rec.summary || '').slice(0, 4000)
+                text: String(rec.text || '').slice(0, Transcribe.HISTORY_TEXT_MAX),
+                summary: String(rec.summary || '').slice(0, Transcribe.HISTORY_TEXT_MAX),
+                truncated: String(rec.text || '').length > Transcribe.HISTORY_TEXT_MAX
             });
             if (State.config.transcribeHistory.length > Transcribe.HISTORY_MAX) {
                 State.config.transcribeHistory.length = Transcribe.HISTORY_MAX;
@@ -14931,7 +14957,16 @@ VideoResolver.fillFromHtml(result, html);
                     State._lastSelState = true;
                 }
                 if (longPressEl) {
-                    longPressEl._msLongPressTriggered = true;
+                    var marked = longPressEl;
+                    marked._msLongPressTriggered = true;
+                    // #9：正常流程下紧随其后的 click 会把这个标记清掉。
+                    // 但用户可能长按后直接抬手（没触发 click），或期间 DOM 变了 ——
+                    // 标记就会残留在元素上，导致**下一次**点击这张卡片被误跳过。
+                    // 加个兜底：无论如何 800ms 后强制清掉。
+                    clearTimeout(marked._msLpTm);
+                    marked._msLpTm = setTimeout(function () {
+                        try { marked._msLongPressTriggered = false; } catch (e) {}
+                    }, 800);
                 }
             }, 400);
         }
@@ -15486,6 +15521,25 @@ VideoResolver.fillFromHtml(result, html);
             .replace(/<svg[\s\S]*?<\/svg>/gi, '')
             .replace(/<svg[^>]*\/>/gi, '')
             .trim();
+    };
+
+    // 「图标 + 文案」的统一构造器。
+    // LANG 只存纯文本（见上面的约定），图标由调用方从 ICONS 传入。
+    // 用 DOM 拼而不是字符串拼接：文案走 textContent，任何位置都不会因为
+    // 把语言值直接丢进 innerHTML 而把 <svg> 当文本显示出来。
+    UI.iconTextEl = function (icon, text) {
+        var wrap = document.createElement('span');
+        wrap.style.cssText = 'display:inline-flex;align-items:center;gap:6px;';
+        if (icon) {
+            var ic = document.createElement('span');
+            ic.style.cssText = 'display:inline-flex;align-items:center;';
+            ic.innerHTML = icon;              // ICONS 是脚本内置常量，不含外部数据
+            wrap.appendChild(ic);
+        }
+        var tx = document.createElement('span');
+        tx.textContent = text == null ? '' : String(text);
+        wrap.appendChild(tx);
+        return wrap;
     };
 
     // tab 内部结构（图标 + 文字）统一由这里生成，避免创建与刷新两条路径各拼一套
@@ -16165,6 +16219,10 @@ VideoResolver.fillFromHtml(result, html);
     UI._bindMediaThumbFallback = function (grid) {
         if (!grid || grid._msThumbFallbackBound) return;
         grid._msThumbFallbackBound = true;
+        // #13：U.isMobile() 内部要跑 UA 正则 + 读 window.innerWidth。
+        // 缩略图**批量**加载失败时（一个网格里几十张一起 404）会重复调它几十次，
+        // 纯属浪费。绑定时就固定下来 —— 面板生命周期内窗口宽度也不会变到「切换设备」。
+        var isMob = U.isMobile();
         grid.addEventListener('error', function (e) {
             var img = e.target;
             if (!img || !img.getAttribute) return;
@@ -16179,7 +16237,7 @@ VideoResolver.fillFromHtml(result, html);
                 // 与原来的内联 onerror 视觉一致：固定高度 + 胶片图标
                 var h = img.style.height || '100%';
                 d.style.cssText = 'width:100%;height:' + h + ';background:linear-gradient(135deg,#1e293b,#334155)'
-                    + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:' + (U.isMobile() ? '36px' : '24px') + ';';
+                    + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:' + (isMob ? '36px' : '24px') + ';';
                 d.innerHTML = MS_CONFIG.ICONS.video;
             } else {
                 var grad = kind === 'video'
@@ -16211,7 +16269,25 @@ VideoResolver.fillFromHtml(result, html);
                 if (list[i] === undefined) continue;
                 if (state) State.selected.add(list[i]);
                 else State.selected.delete(list[i]);
-                Selection._updateCardMark(list[i]);
+            }
+            // #10：原来在循环里对**每一张**都调 _updateCardMark，
+            // 而它内部要跑 querySelector('[data-url="…"]') —— 一屏几百张时
+            // 这一段是主线程峰值（Shift 选 500 张 = 500 次属性选择器查询）。
+            //
+            // 选中集合已经在上面改完了，视觉上「全刷一遍」比「逐个刷」更快也更一致
+            // （_updateAllCards 只查一次 [data-url] 列表，然后顺序遍历）。
+            // 区间很大时更不能逐个查 —— 小集合仍走逐个路径，避免全刷带来的抖动。
+            if (end - start + 1 > 50) {
+                // 大区间：合并到一帧里全刷（连点 Shift 时只跑最后一次）
+                clearTimeout(grid._msRangeTm);
+                grid._msRangeTm = setTimeout(function () {
+                    try { Selection._updateAllCards(); } catch (e) {}
+                }, 0);
+            } else {
+                for (i = start; i <= end; i++) {
+                    if (list[i] === undefined) continue;
+                    Selection._updateCardMark(list[i]);
+                }
             }
         }
         grid.addEventListener('click', function (e) {
@@ -16798,7 +16874,7 @@ VideoResolver.fillFromHtml(result, html);
         var kw = State.searchKeyword;
         if (kw) list = list.filter(function (u) { return u.toLowerCase().indexOf(kw) !== -1; });
 
-        box.innerHTML = '<div style="padding:10px 14px;font-size:13px;color:' + c.sub + ';border-bottom:1px solid ' + c.border + ';background:' + c.bg2 + ';">' + LANG.t('m3u8Title', {n: list.length}) + '</div>';
+        box.innerHTML = '<div style="padding:10px 14px;font-size:13px;color:' + c.sub + ';border-bottom:1px solid ' + c.border + ';background:' + c.bg2 + ';">' + MS_CONFIG.ICONS.stream + ' ' + LANG.t('m3u8Title', {n: list.length}) + '</div>';
 
         if (list.length === 0) {
             box.innerHTML += '<div style="padding:60px 20px;text-align:center;color:' + c.sub + ';font-size:14px;">' + LANG.t('noM3u8') + '</div>';
@@ -16817,9 +16893,9 @@ VideoResolver.fillFromHtml(result, html);
             item.innerHTML = '<div style="font-size:13px;font-weight:600;color:' + c.txt + ';margin-bottom:6px;word-break:break-all;">' + SEC.escapeHtml(U.trunc(url, 60)) + '</div>' +
                 '<div style="font-size:11px;color:' + c.sub + ';margin-bottom:8px;">' + SEC.escapeHtml(SEC.nameFromUrl(url)) + '</div>' +
                 '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-                '<button data-op="download" data-url="' + SEC.escapeAttr(url) + '" style="padding:8px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:12px;font-weight:600;cursor:pointer;flex:1;">' + LANG.t('dlMerge') + '</button>' +
+                '<button data-op="download" data-url="' + SEC.escapeAttr(url) + '" style="padding:8px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:12px;font-weight:600;cursor:pointer;flex:1;">' + MS_CONFIG.ICONS.arrowDown + ' ' + LANG.t('dlMerge') + '</button>' +
                 '<button data-op="preview" data-url="' + SEC.escapeAttr(url) + '" style="padding:8px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff;font-size:12px;font-weight:600;cursor:pointer;flex:1;">' + LANG.t('preview') + '</button>' +
-                '<button data-op="script" data-url="' + SEC.escapeAttr(url) + '" style="padding:8px 12px;border:none;border-radius:8px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:12px;font-weight:600;cursor:pointer;flex:1;">' + LANG.t('genScriptBtn') + '</button>' +
+                '<button data-op="script" data-url="' + SEC.escapeAttr(url) + '" style="padding:8px 12px;border:none;border-radius:8px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:12px;font-weight:600;cursor:pointer;flex:1;">' + MS_CONFIG.ICONS.edit + ' ' + LANG.t('genScriptBtn') + '</button>' +
                 '<button data-op="detail" data-url="' + SEC.escapeAttr(url) + '" style="padding:8px 12px;border:none;border-radius:8px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:12px;font-weight:600;cursor:pointer;">' + LANG.t('detailBtn') + '</button>' +
                 '</div>';
             // 绑定按钮事件
@@ -16892,12 +16968,12 @@ VideoResolver.fillFromHtml(result, html);
             var modal = document.createElement('div');
             modal.style.cssText = 'max-width:600px;width:100%;background:' + c.bg + ';color:' + c.txt + ';border-radius:16px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.5);';
 
-            modal.innerHTML = '<div style="font-size:16px;font-weight:700;margin-bottom:12px;">' + LANG.t('m3u8Detail') + '</div>' +
+            modal.innerHTML = '<div style="font-size:16px;font-weight:700;margin-bottom:12px;">' + MS_CONFIG.ICONS.stream + ' ' + LANG.t('m3u8Detail') + '</div>' +
                 '<div style="background:' + c.bg2 + ';padding:12px;border-radius:10px;font-size:12px;color:' + c.sub + ';word-break:break-all;margin-bottom:16px;font-family:monospace;">' + SEC.escapeHtml(url) + '</div>' +   // N1: URL 含 < 时会被当成标签开头，破坏整个弹窗结构
                 '<div id="_ms_m3u8_info" style="padding:16px;background:' + c.bg2 + ';border-radius:10px;margin-bottom:16px;">' + LANG.t('parsing') + '</div>' +
                 '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-                '<button id="_ms_m3u8_dl" style="flex:1;min-width:120px;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:14px;font-weight:600;cursor:pointer;">' + LANG.t('dlMerge') + '</button>' +
-                '<button id="_ms_m3u8_script" style="flex:1;min-width:120px;padding:12px;border:none;border-radius:10px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:14px;font-weight:600;cursor:pointer;">' + LANG.t('genScriptBtn') + '</button>' +
+                '<button id="_ms_m3u8_dl" style="flex:1;min-width:120px;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:14px;font-weight:600;cursor:pointer;">' + MS_CONFIG.ICONS.arrowDown + ' ' + LANG.t('dlMerge') + '</button>' +
+                '<button id="_ms_m3u8_script" style="flex:1;min-width:120px;padding:12px;border:none;border-radius:10px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:14px;font-weight:600;cursor:pointer;">' + MS_CONFIG.ICONS.edit + ' ' + LANG.t('genScriptBtn') + '</button>' +
                 '<button id="_ms_m3u8_close" style="padding:12px 20px;border:none;border-radius:10px;background:#475569;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">' + LANG.t('close') + '</button>' +
                 '</div>';
 
@@ -16932,7 +17008,7 @@ VideoResolver.fillFromHtml(result, html);
                             }
                         } else {
                             html += '<div style="font-size:12px;color:' + c.sub + ';">' + LANG.t('segmentsInfo', {n: parsed.segments.length, t: U.formatTime(parsed.duration)}) + '</div>';
-                            html += '<div style="font-size:12px;color:' + (parsed.encrypted ? '#ef4444' : '#10b981') + ';margin-top:6px;">' + (parsed.encrypted ? LANG.t('encrypted') : LANG.t('notEncrypted')) + (parsed.encrypted ? ' (' + SEC.escapeHtml(parsed.keyMethod) + ')' : '') + '</div>';
+                            html += '<div style="font-size:12px;color:' + (parsed.encrypted ? '#ef4444' : '#10b981') + ';margin-top:6px;">' + (parsed.encrypted ? (MS_CONFIG.ICONS.lock + ' ' + LANG.t('encrypted')) : LANG.t('notEncrypted')) + (parsed.encrypted ? ' (' + SEC.escapeHtml(parsed.keyMethod) + ')' : '') + '</div>';
                         }
                         info.innerHTML = html;
                     }
@@ -17256,7 +17332,7 @@ VideoResolver.fillFromHtml(result, html);
             var modal = document.createElement('div');
             modal.style.cssText = 'max-width:400px;width:100%;background:' + c.bg + ';color:' + c.txt + ';border-radius:16px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.5);';
 
-            modal.innerHTML = '<div style="font-size:16px;font-weight:700;margin-bottom:16px;">' + LANG.t('advFilterTitle') + '</div>' +
+            modal.innerHTML = '<div style="font-size:16px;font-weight:700;margin-bottom:16px;">' + MS_CONFIG.ICONS.wrench + ' ' + LANG.t('advFilterTitle') + '</div>' +
                 '<div style="font-size:13px;color:' + c.sub + ';margin-bottom:12px;">' + LANG.t('advFilterDesc') + '</div>' +
                 '<div style="margin-bottom:12px;"><label style="font-size:12px;color:' + c.txt + ';display:block;margin-bottom:4px;">' + LANG.t('minImageSize') + '</label><input type="number" id="_ms_filter_img_size" value="' + State.config.minImageSize + '" style="width:100%;padding:8px;border:1px solid ' + c.border + ';border-radius:8px;background:' + c.bg + ';color:' + c.txt + ';font-size:13px;box-sizing:border-box;"></div>' +
                 '<div style="margin-bottom:12px;"><label style="font-size:12px;color:' + c.txt + ';display:block;margin-bottom:4px;">' + LANG.t('minImageWidth') + '</label><input type="number" id="_ms_filter_img_w" value="' + State.config.minImageWidth + '" style="width:100%;padding:8px;border:1px solid ' + c.border + ';border-radius:8px;background:' + c.bg + ';color:' + c.txt + ';font-size:13px;box-sizing:border-box;"></div>' +
@@ -17299,10 +17375,35 @@ VideoResolver.fillFromHtml(result, html);
         ft.innerHTML = '';
         var wrap = document.createElement('div');
         wrap.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;';
-        function btn(label, color, handler, flex, textColor) {
+        // #11：原来用 `color.indexOf(',') > -1 && color.indexOf('gradient') === -1`
+        // 来判断「这是不是 a,b 双色串」—— 靠「有没有逗号」猜语义。
+        // 调用方一旦传 'rgba(0,0,0,.2),transparent' 这种带逗号的复杂值，
+        // 就会被错误地包成 linear-gradient(135deg,rgba(0,0,0,.2),transparent)
+        // （本意可能是两个色标之外的写法）。当前调用点都安全，但这个判断太脆弱。
+        //
+        // 现在改成显式规则：
+        //   · 已带 '(' 或 'gradient' → 原样直通（调用方自己写好了完整值）
+        //   · 逗号分隔且**每段都是颜色字面量**（#hex / rgb / hsl / transparent / 命名色）→ 包成渐变
+        //   · 其余情况原样直通
+        var COLOR_ONLY = /^(#[0-9a-fA-F]{3,8}|rgba?\([^)]*\)|hsla?\([^)]*\)|transparent|currentColor|[a-zA-Z]+)$/;
+        function asBackground(color) {
+            var v = String(color == null ? '' : color).trim();
+            if (!v) return '';
+            if (v.indexOf('(') >= 0 || v.indexOf('gradient') >= 0) return v;   // 直通
+            if (v.indexOf(',') < 0) return v;                                  // 单色
+            var parts = v.split(',');
+            for (var i = 0; i < parts.length; i++) {
+                if (!COLOR_ONLY.test(parts[i].trim())) return v;                // 有非颜色段 → 直通
+            }
+            return 'linear-gradient(135deg,' + v + ')';
+        }
+        function btn(label, color, handler, flex, textColor, icon) {
             var b = document.createElement('button');
-            b.textContent = label;
-            var bg = color.indexOf(',') > -1 && color.indexOf('gradient') === -1 ? 'linear-gradient(135deg,' + color + ')' : color;
+            // 原来是 b.textContent = label，而 label 曾等于 LANG.t('genScript') ——
+            // 那个键的值里内嵌了 <svg>（语言表的历史包袱），于是图标源码被原样
+            // 当文字显示在按钮上。现在语言表只存纯文本，图标走参数 + DOM 拼接。
+            b.appendChild(UI.iconTextEl(icon || '', label));
+            var bg = asBackground(color);
             b.style.cssText = (flex ? 'flex:' + flex + ';' : 'flex:1;') + 'min-width:60px;padding:8px 10px;border:none;border-radius:8px;background:' + bg + ';color:' + (textColor || '#fff') + ';font-size:12px;font-weight:600;cursor:pointer;';
             b.addEventListener('click', handler);
             wrap.appendChild(b);
@@ -17355,7 +17456,7 @@ VideoResolver.fillFromHtml(result, html);
                 var script = Dl.generateScript(picked, 'aria2');
                 copyText(script);
                 toast(LANG.t('scriptCopied'));
-            });
+            }, null, null, MS_CONFIG.ICONS.edit);
             btn(LANG.t('sendAria2'), '#06b6d4,#22d3ee', function () {
                 var picked = selList.length > 0 ? selList : fullList;
                 if (!picked || picked.length === 0) { toast(LANG.t('plsCheck'), '#f59e0b'); return; }
@@ -17502,8 +17603,19 @@ VideoResolver.fillFromHtml(result, html);
 
         var intro = document.createElement('div');
         intro.style.cssText = 'padding:14px 16px;border-radius:14px;background:' + c.bg2 + ';border:1px solid ' + c.border + ';margin-bottom:14px;font-size:12px;color:' + c.sub + ';line-height:1.8;';
-        intro.innerHTML = '<div style="font-size:14px;font-weight:600;color:' + c.txt + ';margin-bottom:6px;">' + LANG.t('transTitle') + '</div>' +
-            LANG.t('transIntro');
+        // 原来这里写成 innerHTML = '<div …>' + LANG.t('transTitle') + '</div>' + LANG.t('transIntro')。
+        // 后果是语言表里被迫内嵌 <br/>（违反「只存纯文本」约定），
+        // 而且一旦有人把它当纯文本用就会显示成字面 "<br/>"。
+        // 现在语言值用 \n 分段，这里按行生成 div —— 视觉一致，标记归零。
+        var introTitle = document.createElement('div');
+        introTitle.style.cssText = 'font-size:14px;font-weight:600;color:' + c.txt + ';margin-bottom:6px;';
+        introTitle.textContent = LANG.t('transTitle');
+        intro.appendChild(introTitle);
+        String(LANG.t('transIntro')).split('\n').forEach(function (line) {
+            var lineEl = document.createElement('div');
+            lineEl.textContent = line;
+            intro.appendChild(lineEl);
+        });
         container.appendChild(intro);
 
         // ===== 引擎选择 =====
@@ -17599,9 +17711,10 @@ VideoResolver.fillFromHtml(result, html);
         // ===== 操作按钮 =====
         var btnRow = document.createElement('div');
         btnRow.style.cssText = 'display:flex;gap:8px;margin-top:10px;margin-bottom:14px;flex-wrap:wrap;';
-        function makeBtn(label, bg, handler, parent) {
+        function makeBtn(label, bg, handler, parent, icon) {
             var b = document.createElement('button');
-            b.innerHTML = label; b.style.cssText = 'flex:1;min-width:110px;padding:10px 12px;border:none;border-radius:10px;background:' + bg + ';color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;';
+            b.appendChild(UI.iconTextEl(icon || '', label));
+            b.style.cssText = 'flex:1;min-width:110px;padding:10px 12px;border:none;border-radius:10px;background:' + bg + ';color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;';
             b.addEventListener('click', handler);
             (parent || btnRow).appendChild(b);
         }
@@ -17625,14 +17738,14 @@ VideoResolver.fillFromHtml(result, html);
         // ===== 结果操作按钮 =====
         var btnRow2 = document.createElement('div');
         btnRow2.style.cssText = 'display:flex;gap:8px;margin-top:10px;margin-bottom:18px;';
-        makeBtn(LANG.t('copyResult'), '#6366f1', function () { copyText(output.textContent || ''); }, btnRow2);
+        makeBtn(LANG.t('copyResult'), '#6366f1', function () { copyText(output.textContent || ''); }, btnRow2, MS_CONFIG.ICONS.copy);
         makeBtn(LANG.t('resultAsInput'), '#10b981', function () { if (output.textContent && output.textContent !== LANG.t('transResultPh')) input.value = output.textContent; }, btnRow2);
         makeBtn(LANG.t('speakBtn'), '#f59e0b', function () {
             if (output.textContent && output.textContent !== LANG.t('transResultPh')) {
                 TranslateEngine.speak(output.textContent, toSel.value);
                 toast(LANG.t('saved'));
             }
-        }, btnRow2);
+        }, btnRow2, MS_CONFIG.ICONS.volume);
         container.appendChild(btnRow2);
 
         box.appendChild(container);
@@ -17665,13 +17778,14 @@ VideoResolver.fillFromHtml(result, html);
 
         var btnRow = document.createElement('div');
         btnRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;';
-        function mkBtn(label, color, handler, flex) {
+        function mkBtn(label, color, handler, flex, icon) {
             var b = document.createElement('button');
-            b.innerHTML = label;
+            // 文案走 textContent（见 UI.iconTextEl），不再把语言值当 HTML 塞进去
+            b.appendChild(UI.iconTextEl(icon || '', label));
             b.style.cssText = (flex ? 'flex:' + flex + ';' : 'flex:1;') + 'min-width:110px;padding:10px 12px;border:none;border-radius:10px;background:linear-gradient(135deg,' + color + ');color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;';
             b.addEventListener('click', handler); btnRow.appendChild(b);
         }
-        mkBtn(LANG.t('copyCookieStr'), '#6366f1,#8b5cf6', function () { try { copyText(document.cookie || '（空）'); } catch (e) { toast(LANG.t('readCookieFail'), '#ef4444'); } });
+        mkBtn(LANG.t('copyCookieStr'), '#6366f1,#8b5cf6', function () { try { copyText(document.cookie || '（空）'); } catch (e) { toast(LANG.t('readCookieFail'), '#ef4444'); } }, null, MS_CONFIG.ICONS.copy);
         mkBtn(LANG.t('copyJson'), '#10b981,#34d399', function () { var pairs = parseCookies(); copyText(JSON.stringify(pairs, null, 2)); });
         mkBtn(LANG.t('addCookie'), '#f59e0b,#fbbf24', function () {
             var name = prompt(LANG.t('cookieName'));
@@ -17679,7 +17793,7 @@ VideoResolver.fillFromHtml(result, html);
             var val = prompt(LANG.t('cookieValue'));
             if (val == null) return;
             try { document.cookie = name + '=' + val + ';path=/;domain=' + location.hostname; toast(LANG.t('added')); UI.renderCookie(); } catch (e) { toast(LANG.t('addFail') + ': ' + e.message, '#ef4444'); }
-        });
+        }, null, MS_CONFIG.ICONS.plus);
         mkBtn(LANG.t('clearSite'), '#ef4444,#f87171', function () {
             if (!confirm(LANG.t('confirmClearCookie'))) return;
             try {
@@ -17696,7 +17810,7 @@ VideoResolver.fillFromHtml(result, html);
                 }
                 toast(LANG.t('clearedRefresh')); UI.renderCookie();
             } catch (e) { toast(LANG.t('clearFail') + ': ' + e.message, '#ef4444'); }
-        });
+        }, null, MS_CONFIG.ICONS.trash);
         container.appendChild(btnRow);
 
         var pairs = parseCookies();
@@ -17761,9 +17875,9 @@ VideoResolver.fillFromHtml(result, html);
 
         var btnRow = document.createElement('div');
         btnRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;';
-        function mkBtn(label, color, handler) {
+        function mkBtn(label, color, handler, icon) {
             var b = document.createElement('button');
-            b.innerHTML = label;
+            b.appendChild(UI.iconTextEl(icon || '', label));
             b.style.cssText = 'flex:1;min-width:110px;padding:10px 12px;border:none;border-radius:10px;background:linear-gradient(135deg,' + color + ');color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;';
             b.addEventListener('click', handler); btnRow.appendChild(b);
         }
@@ -17773,13 +17887,12 @@ VideoResolver.fillFromHtml(result, html);
             var k = prompt(LANG.t('keyName')); if (!k) return;
             var v = prompt(LANG.t('keyValue')); if (v == null) return;
             try { localStorage.setItem(k, v); toast(LANG.t('addToLs')); UI.renderStorage(); }
-            catch (e) { toast(LANG.t('addFail') + ': ' + e.message, '#ef4444'); }
-        });
+            catch (e) { toast(LANG.t('addFail') + ': ' + e.message, '#ef4444'); }}, MS_CONFIG.ICONS.plus);
         mkBtn(LANG.t('clearAll'), '#ef4444,#f87171', function () {
             if (!confirm(LANG.t('confirmClearStorage'))) return;
             try { localStorage.clear(); sessionStorage.clear(); toast(LANG.t('cleared')); UI.renderStorage(); }
             catch (e) { toast(LANG.t('clearFail') + ': ' + e.message, '#ef4444'); }
-        });
+        }, MS_CONFIG.ICONS.trash);
         container.appendChild(btnRow);
 
         function readStorage(scope) {
@@ -17797,14 +17910,14 @@ VideoResolver.fillFromHtml(result, html);
         var ls = readStorage('ls'), ss = readStorage('ss');
         var info = document.createElement('div');
         info.style.cssText = 'padding:12px;border-radius:10px;background:' + c.bg2 + ';font-size:12px;color:' + c.sub + ';margin-bottom:12px;';
-        info.textContent = LANG.t('lsCount', {n: ls.length, m: ss.length});
+        info.appendChild(UI.iconTextEl(MS_CONFIG.ICONS.package, LANG.t('lsCount', {n: ls.length, m: ss.length})));
         container.appendChild(info);
 
-        function renderSection(title, items, scope) {
+        function renderSection(title, items, scope, icon) {
             if (items.length === 0) return;
             var h = document.createElement('div');
             h.style.cssText = 'font-weight:700;color:' + c.txt + ';margin:14px 0 6px;font-size:13px;';
-            h.textContent = title + '（' + items.length + '）';
+            h.appendChild(UI.iconTextEl(icon || '', title + '（' + items.length + '）'));
             container.appendChild(h);
             for (var i = 0; i < items.length; i++) {
                 (function (it) {
@@ -17834,8 +17947,8 @@ VideoResolver.fillFromHtml(result, html);
                 })(items[i]);
             }
         }
-        renderSection(LANG.t('lsTitle'), ls, 'ls');
-        renderSection(LANG.t('ssTitle'), ss, 'ss');
+        renderSection(LANG.t('lsTitle'), ls, 'ls', MS_CONFIG.ICONS.package);
+        renderSection(LANG.t('ssTitle'), ss, 'ss', MS_CONFIG.ICONS.package);
 
         box.appendChild(container);
     };
@@ -18341,11 +18454,18 @@ VideoResolver.fillFromHtml(result, html);
     };
 
     // 复制失败时的兜底：把报告放进一个可全选的只读框，用户能自己复制
+    // #14：原来这里硬编码 z-index:2147483651，比 _ai3Dialog 的层级高 ——
+    // 两者同时打开时，后开的会被压在下面，而且 _ai3Stack 完全感知不到这个弹窗
+    // （ESC 关错对象 / 层级算错）。
+    // 现在让它走与 _ai3Dialog 同一套层级：按栈深度算，并把自己也推进栈里。
     UI._showDiagText = function (text) {
         try {
             var c = UI.colors();
             var ov = document.createElement('div');
-            ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:2147483651;padding:16px;';
+            // 与 _ai3Dialog 完全同一公式：**push 之前**按当前栈长算层级。
+            // 两边都是「先算层级、再入栈」，所以先开的那个层级一定更低。
+            var zIndex = 2147483000 + Math.min(UI._ai3Stack ? UI._ai3Stack.length : 0, 1000);
+            ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:' + zIndex + ';padding:16px;';
             var m = document.createElement('div');
             m.style.cssText = 'max-width:min(94vw,640px);width:100%;max-height:84vh;display:flex;flex-direction:column;'
                 + 'background:' + c.bg + ';color:' + c.txt + ';border-radius:14px;padding:14px;box-shadow:0 24px 60px rgba(0,0,0,.5);';
@@ -18359,10 +18479,31 @@ VideoResolver.fillFromHtml(result, html);
             var close = document.createElement('button');
             close.textContent = '×';
             close.style.cssText = 'margin-top:10px;padding:9px;border:none;border-radius:9px;background:' + c.bg3 + ';color:' + c.txt + ';font-size:13px;font-weight:600;cursor:pointer;';
-            close.addEventListener('click', function () { try { ov.remove(); } catch (e3) {} });
+            // 关窗要同时：移除 DOM + 从栈里出栈 + 复位计数
+            var settled = false;
+            function dismiss() {
+                if (settled) return;
+                settled = true;
+                if (handle && UI._ai3Stack) {
+                    var k = UI._ai3Stack.indexOf(handle);
+                    if (k >= 0) UI._ai3Stack.splice(k, 1);
+                }
+                try { ov.remove(); } catch (e3) {}
+            }
+            close.addEventListener('click', function () { dismiss(); });
+            // 点遮罩也关（与 _ai3Dialog 行为一致）
+            ov.addEventListener('click', function (e) { if (e.target === ov) dismiss(); });
             m.appendChild(close);
             ov.appendChild(m);
             document.body.appendChild(ov);
+
+            // 把自己也登记进实例栈 —— 这样 ESC 会先关最上面那个，
+            // 而且后续弹窗的层级计算能正确排在它之上
+            var handle = { close: dismiss };
+            if (!UI._ai3Stack) UI._ai3Stack = [];
+            UI._ai3Stack.push(handle);
+            if (typeof UI._ensureAi3Esc === 'function') UI._ensureAi3Esc();
+
             setTimeout(function () { try { ta.focus(); ta.select(); } catch (e4) {} }, 50);
         } catch (e) { LOG.warn('诊断报告兜底弹窗失败:', e); }
     };
@@ -18637,6 +18778,12 @@ VideoResolver.fillFromHtml(result, html);
 
     UI._showTranscribeResult = function (rec) {
         var parts = [];
+        // #12：从历史回放的文稿是被截断保存的 —— 必须在最上面说清楚，
+        // 否则用户以为转写只出了这么点内容。
+        if (rec && rec.truncated) {
+            parts.push('⚠ ' + LANG.t('transcribeHistoryTruncated', { n: Transcribe.HISTORY_TEXT_MAX }));
+            parts.push('');
+        }
         if (rec.summary) { parts.push('【AI 摘要】\n' + rec.summary); parts.push(''); }
         if (rec.reason) parts.push(LANG.t('transcribeSummaryFailed', { e: rec.reason }));
         parts.push('【全文】');
@@ -18671,6 +18818,71 @@ VideoResolver.fillFromHtml(result, html);
         ];
         UI._ai3Dialog(LANG.t('transcribeResult'), text, actions);
     };
+
+
+    // =========================================================================
+    //  设置页底部的品牌图
+    //
+    //  · 内嵌为 data URI —— 脚本跑在**任意宿主页面**上，引用不到本地文件，
+    //    也不能指望某个图床一直可用。
+    //  · 原图 1536x565，压到 920x338 / JPEG q86（28KB，base64 后 38KB，PSNR 45dB）。
+    //    面板内容区最宽约 430px，920px 相当于 2.1x，retina 下依然锐利。
+    //  · 分块拼接而不是一整行：脚本里最长行一直是 ~968 字符，
+    //    塞一行 38KB 的字符串会让 diff / 编辑器都很难受。
+    // =========================================================================
+    UI._BRAND_IMG = 'data:image/jpeg;base64,'
+        + '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'
+        + 'AAGAAAEgAAAAAAAAEgEgAAACAAAAAAAAAEwgUAAAEgkAAAAgAAEAgAkgAEEgQAAAkAAgAAAAAAEkEAAAEQAECQAEAAggAAkAAAEAAAEEAkEEkAgAgAAgkigEAAAEgAkAEAAEEAgkkAkAAEAEkAAGkgAAAAAAggEkggEAgEgEgkEQkAEkgAAAEAEgEEgAAkkkkkgA0kAkSEkEEAkkkAEAEAAAAEAAgEAAAgAmkggAAEggAAAAkEkEAAAAgAAAggAAAgAEAEMEEgAkEAkAAAgAAEEAAEAkAikAEAgAAAAgEgEkgAAAAEgAgggEggAAAkEEEAgAAAAAAAAACAgAAAAgEAAkAAAEkAAAEEEAkkAAAAAEEAEggAkEAAgkkAAEggggAAAAEkwAAAAAACAAAAAAAkAAEgAAEgkAAAAAEgAEAEkggAAEEAAAAAEAAAEAAAAkAAggAEEgAAAEAAgAAgAgAEkEkAAAAAkkgkAEAEAAAAkAgAAAAgEAkAEAEgAAAgAgkAEgkAgEgAEEgAEkkEgAAAEkgEkAAEgkgggEAAkgggAkAAAEAggAEgAAEAgEgAAAA0AAgkAEEgkkEAAEAgEkAAkkkkgAAAAEAEEgEAgkAEAkAAAEAgwkAEAEAkEAAAEgAEgEgEgAAAAAgkAkggAggAAAAAAAAEggEggAgQAEggAEEAAAAAEkAAAgAAAEkAAAgAAAkkkgkAEgkAFAAAAAgGkAEkAgAECgAAEgAkEAAEkAAiAAAEEikEkg'
+        + 'kgAAEkkAEkAAgggAAgAEgAgAAAEgAQEAgAAAkEAgEAggEAAgAEgggkEEkgEAAEkggAEkAAEAAAAAAAggAAgAAAEgACgAgEgoAgEAAJAAEAAEAggEkEgAkAAkEkAgkEgAkggggEUUEgIEACEFgAggEAEkgkAEgkgAAmAAAkEpAkkgkgAAAgkkEkAkgAAEAAEAkEEgEEkEgkkkgAgAAgAkAAkAAkkAAAAkEAgkkkggAAEkgkEgkkkAAAAAAAAEAAAgkAAkAAgAAAAAAAAAAEEgAAAAAAAAEAEkkAAAkgkkgkAkAEkAggkgAkkEAkAAAAAkAAEAAAAEgAAAAgAAAAkEkkkEAgAAAkEEEkkkkAEAkEAEEEkkEkEgAAAACAAAAAAgAAAAAgAAAAAAAEAkgkgAgAAgEgAEEkgEAkkgkgkggEEggEgAEAAEEgAAGgAAAEkQAAkkAAAAAggEEEAAkgkEEEEkEgEAkEEAgEEkkggEAAA0AmE0wEkEAmGAiWghgmAAkAAgAAAAAAgEkEkAEkEEkkggkAkAkkkAgQgAEAAggAkA6A26cHmmCGEiCiUgAgAAgAAgkgkkAEgEkgggAkAEEAEkAAAgAAAAAiioiGgiQzAEnkEwE0ggEEkAAAAAAEgEkggkAggkAgkgAkkEgEkEEEhgAAkEEgkEAkAgEAgAgkEggAAkEAAAAAAgEAEEAAEEkkkgAgEgkgEkgAAgAEggAAAAEAAEAAAAAAAEAAAgEkkkEAAAgAkkAggE'
+        + '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'
+        ;
 
     UI.renderSettings = function () {
         var box = document.getElementById('_ms_box');
@@ -18972,9 +19184,9 @@ VideoResolver.fillFromHtml(result, html);
         // 其他操作
         var ob = document.createElement('div');
         ob.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;';
-        function mkOBtn(label, color, handler, flex) {
+        function mkOBtn(label, color, handler, flex, icon) {
             var b = document.createElement('button');
-            b.innerHTML = label;
+            b.appendChild(UI.iconTextEl(icon || '', label));
             b.style.cssText = (flex ? 'flex:' + flex + ';' : 'flex:1;') + 'min-width:100px;padding:10px 12px;border:none;border-radius:10px;background:' + color + ';color:#fff;font-size:13px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px;';
             b.addEventListener('click', handler); ob.appendChild(b);
         }
@@ -18986,7 +19198,7 @@ VideoResolver.fillFromHtml(result, html);
             var res = State.importConfig(t);
             if (res.ok) { toast(res.msg); applyPanelThemeNow(); UI.renderSettings(); }
             else toast(res.msg, '#ef4444');
-        }, 1.3);
+        }, 1.3, MS_CONFIG.ICONS.download);
         mkOBtn(LANG.t('resetAll'), '#ef4444', function () {
             if (!confirm(LANG.t('confirmReset'))) return;
             State.resetConfig(); applyPanelThemeNow(); toast(LANG.t('resetDone')); UI.renderSettings();
@@ -19966,9 +20178,13 @@ VideoResolver.fillFromHtml(result, html);
                 var trRows = [];
                 for (var ti = 0; ti < th.length; ti++) {
                     (function (rec) {
-                        var row = _ai3HistoryRow(rec.title || rec.url || '(no title)', new Date(rec.at || 0).toLocaleString() + ' · ' + (rec.chars || 0) + ' 字');
+                        var isTrunc = !!rec.truncated
+                            || String(rec.text || '').length >= Transcribe.HISTORY_TEXT_MAX;
+                        var meta = new Date(rec.at || 0).toLocaleString() + ' · ' + (rec.chars || 0) + ' 字'
+                            + (isTrunc ? ' · ' + LANG.t('transcribeHistoryTruncated', { n: Transcribe.HISTORY_TEXT_MAX }) : '');
+                        var row = _ai3HistoryRow(rec.title || rec.url || '(no title)', meta);
                         row.style.cursor = 'pointer';
-                        row.onclick = function () { UI._showTranscribeResult({ title: rec.title, url: rec.url, at: rec.at, text: rec.text, summary: rec.summary, chars: rec.chars }); };
+                        row.onclick = function () { UI._showTranscribeResult({ title: rec.title, url: rec.url, at: rec.at, text: rec.text, summary: rec.summary, chars: rec.chars, truncated: isTrunc }); };
                         trRows.push(row);
                     })(th[ti]);
                 }
@@ -20048,8 +20264,33 @@ VideoResolver.fillFromHtml(result, html);
 
         var info = document.createElement('div');
         info.style.cssText = 'padding:12px;border-radius:10px;background:' + c.bg2 + ';font-size:11px;color:' + c.sub + ';line-height:1.8;text-align:center;';
-        info.innerHTML = LANG.t('infoLine1') + '<br/>' + LANG.t('infoLine2');
+        // 原来写成 info.innerHTML = LANG.t('infoLine1') + '<br/>' + LANG.t('infoLine2')。
+        // 值本身是纯文本，但把语言值拼进 HTML 是个坏习惯（哪天文案里出现 < 就出事），
+        // 拆成两行 div + textContent，视觉完全一致。
+        var infoL1 = document.createElement('div');
+        infoL1.textContent = LANG.t('infoLine1');
+        var infoL2 = document.createElement('div');
+        infoL2.textContent = LANG.t('infoLine2');
+        info.appendChild(infoL1);
+        info.appendChild(infoL2);
         container.appendChild(info);
+
+        // 品牌图：设置页最底部。
+        // 外面套一层白色圆角容器 —— 图片本身是白底，暗色主题下直接贴上去会像一块补丁。
+        // 有些站点的 CSP 会拦 data: 图片，加载失败就把整块收起来，不留一个空白框。
+        var brandWrap = document.createElement('div');
+        brandWrap.style.cssText = 'margin-top:14px;border-radius:12px;overflow:hidden;'
+            + 'border:1px solid ' + c.border + ';background:#ffffff;';
+        var brandImg = document.createElement('img');
+        brandImg.alt = 'UserScript Developer';
+        brandImg.loading = 'lazy';
+        brandImg.decoding = 'async';
+        brandImg.style.cssText = 'width:100%;height:auto;display:block;';
+        // onerror 必须先挂上再赋 src，否则同步失败来不及接
+        brandImg.onerror = function () { try { brandWrap.remove(); } catch (e) {} };
+        brandImg.src = UI._BRAND_IMG;
+        brandWrap.appendChild(brandImg);
+        container.appendChild(brandWrap);
 
         box.appendChild(container);
     };
