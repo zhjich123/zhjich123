@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         媒体嗅探器 Media Sniffer Pro
 // @namespace    http://tampermonkey.net/
-// @version      1.18
+// @version      1.19
 // @description  图片/视频/音频/m3u8 抓取 · AES-128解密 · 分片合并 · 虚拟列表 · 进度可视化 · 跨域兜底 · Cookie/Storage · 翻译 · 元信息 · 高级筛选 · iOS 27 液态玻璃界面
 // @license      GPL-3.0-or-later
 // @downloadURL  https://raw.githubusercontent.com/zhjich123/zhjich123/main/media-sniffer.user.js
@@ -43,10 +43,10 @@
 	}
 
 	try {
-	console.info('[MS] 脚本开始加载，版本:', '1.18');
+	console.info('[MS] 脚本开始加载，版本:', '1.19');
 		var MS_CONFIG = {
-		VERSION: '1.18',
-										UI_STYLE_IDS: ['normal', 'material', 'ios27', 'neumorph', 'brutal', 'terminal'],
+		VERSION: '1.19',
+										UI_STYLE_IDS: ['normal', 'miui', 'ios27', 'neumorph', 'brutal', 'terminal'],
 										UPDATE_URL: 'https://raw.githubusercontent.com/zhjich123/zhjich123/main/media-sniffer.user.js',
 		ICONS: {
 			chevronLeft: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 1px 2px rgba(0,0,0,.2));"><polyline points="15 18 9 12 15 6"></polyline></svg>',
@@ -313,7 +313,7 @@
 	var U = (function () {
 		'use strict';
 		var U = {};
-	U.VERSION = '1.18';
+	U.VERSION = '1.19';
 
 					(function () {
 		try {
@@ -653,12 +653,18 @@
 		try { return (location.hostname || '').replace(/\./g, '-') || 'site'; } catch (e) { return 'site'; }
 	};
 	U.isMobile = function () {
+		// 性能：UA 在会话中不变，只解析一次；窗口宽度变化时重新判定窄屏分支
 		try {
+			if (U._isMobGave !== undefined && U._isMobW === window.innerWidth) return U._isMobGave;
 			var ua = navigator.userAgent;
-			if (/Mobi|Android|iPhone|HarmonyOS/i.test(ua)) return true;
-			if (/iPad/i.test(ua)) return true;
-			if (/Mac OS X/i.test(ua) && navigator.maxTouchPoints > 0) return true;
-			return window.innerWidth < 700;
+			var r;
+			if (/Mobi|Android|iPhone|HarmonyOS/i.test(ua)) r = true;
+			else if (/iPad/i.test(ua)) r = true;
+			else if (/Mac OS X/i.test(ua) && navigator.maxTouchPoints > 0) r = true;
+			else r = window.innerWidth < 700;
+			U._isMobGave = r;
+			U._isMobW = window.innerWidth;
+			return r;
 		} catch (e) { return false; }
 	};
 		U.deepClone = function (obj) {
@@ -742,15 +748,18 @@
 			'themeAuto': '跟随系统', 'themeLight': '亮色',
 			'themeDark': '暗色',
 			'uiStyleSelect': '界面风格',
-			'uiStyleDesc': '切换面板整体视觉风格（iOS 27 液态玻璃 / 新拟物 / 粗野主义 / 终端复古）',
 			'uiStyleNormal': '普通',
-			'uiStyleMaterial': 'Material', 'uiStyleIos27': 'iOS 27',
+			'uiStyleMiui': 'MIUI', 'uiStyleIos27': 'iOS 27',
 			'updateManualHint': '已打开脚本地址：若浏览器显示的是源码，请全选复制后在脚本管理器里新建脚本粘贴',
 			'updateOpenHint': '已打开更新页面，请在脚本管理器里确认「更新」',
 			'updateOpenFail': '无法自动打开更新页，地址已复制，请粘贴到浏览器地址栏',
 			'updateDownloadScript': '或：下载脚本文件（.user.js）',
 			'updateDownloading': '已开始下载脚本文件，请手动安装',
 			'uiStyleNeumorph': '新拟物', 'uiStyleBrutal': '粗野主义', 'uiStyleTerminal': '终端',
+			'devMode': '开发者模式', 'grpDevMode': '开发者',
+			'secAppearance': '外观与显示', 'secDownload': '下载与保存', 'secCapture': '抓取与筛选',
+			'secExtend': '扩展功能', 'secSystem': '系统与高级',
+			'devModeDesc': '开启后显示「诊断」标签页，用于排查问题',
 			'paletteSelect': '配色方案',
 			'paletteIndigo': '靛蓝',
 			'palettePurple': '紫色', 'paletteBlue': '海蓝',
@@ -992,7 +1001,7 @@
 			'referer': 'Referer:',
 			'userAgent': 'User-Agent:',
 			'cookie': 'Cookie:',
-			'infoLine1': '媒体嗅探器 Pro v1.18 · SelectionManager · 拖拽排序 · 收藏夹 · 智能去重 · 分组 · 批量操作注册 · 插件系统',
+			'infoLine1': '媒体嗅探器 Pro v1.19',
 			'infoLine2': '快捷键：Alt+T 翻译选中 · Alt+B 开关面板 · Esc 关闭',
 			'clickTabScan': '点击标签扫描',
 			'dlProgress': '下载进度',
@@ -1237,15 +1246,18 @@
 			'themeAuto': 'System', 'themeLight': 'Light',
 			'themeDark': 'Dark',
 			'uiStyleSelect': 'UI Style',
-			'uiStyleDesc': 'Switch the panel visual style (Liquid Glass / Neumorphism / Neo-Brutalism / Terminal)',
 			'uiStyleNormal': 'Normal',
-			'uiStyleMaterial': 'Material', 'uiStyleIos27': 'iOS 27',
+			'uiStyleMiui': 'MIUI', 'uiStyleIos27': 'iOS 27',
 			'updateManualHint': 'Script URL opened: if the browser shows source code, copy it all and paste into a new userscript',
 			'updateOpenHint': 'Update page opened — confirm “Update” in your userscript manager',
 			'updateOpenFail': 'Could not open the update page; the URL is copied — paste it into the address bar',
 			'updateDownloadScript': 'Or: download the script file (.user.js)',
 			'updateDownloading': 'Download started — install it manually',
 			'uiStyleNeumorph': 'Neumorphism', 'uiStyleBrutal': 'Neo-Brutalism', 'uiStyleTerminal': 'Terminal',
+			'devMode': 'Developer Mode', 'grpDevMode': 'Developer',
+			'secAppearance': 'Appearance', 'secDownload': 'Downloads', 'secCapture': 'Capture',
+			'secExtend': 'Extensions', 'secSystem': 'System',
+			'devModeDesc': 'Show the Diagnostics tab for troubleshooting',
 			'paletteSelect': 'Color Scheme',
 			'paletteIndigo': 'Indigo',
 			'palettePurple': 'Purple', 'paletteBlue': 'Blue',
@@ -1491,7 +1503,7 @@
 			'referer': 'Referer:',
 			'userAgent': 'User-Agent:',
 			'cookie': 'Cookie:',
-			'infoLine1': 'Media Sniffer Pro v1.18 · SelectionManager · Drag Sort · Favorites · Smart Dedup · Groups · Batch Actions · Plugin System',
+			'infoLine1': 'Media Sniffer Pro v1.19',
 			'infoLine2': 'Shortcuts: Alt+T Translate · Alt+B Toggle · Esc Close',
 			'clickTabScan': 'Click a tab above to start scanning',
 			'dlProgress': 'Download Progress',
@@ -1737,15 +1749,18 @@
 			'themeAuto': 'システム', 'themeLight': 'ライト',
 			'themeDark': 'ダーク',
 			'uiStyleSelect': 'UIスタイル',
-			'uiStyleDesc': 'パネルの外観スタイルを切り替え（Liquid Glass / ニューモーフィズム / ネオブルータリズム / ターミナル）',
 			'uiStyleNormal': '通常',
-			'uiStyleMaterial': 'Material', 'uiStyleIos27': 'iOS 27',
+			'uiStyleMiui': 'MIUI', 'uiStyleIos27': 'iOS 27',
 			'updateManualHint': 'スクリプトURLを開きました：ソースが表示された場合は全選択コピーして新規スクリプトに貼り付けてください',
 			'updateOpenHint': '更新ページを開きました。スクリプトマネージャーで「更新」を確認してください',
 			'updateOpenFail': '更新ページを開けませんでした。URLをコピーしたのでアドレスバーに貼り付けてください',
 			'updateDownloadScript': 'または：スクリプトファイルをダウンロード（.user.js）',
 			'updateDownloading': 'ダウンロードを開始しました。手動でインストールしてください',
 			'uiStyleNeumorph': 'ニューモーフィズム', 'uiStyleBrutal': 'ネオブルータリズム', 'uiStyleTerminal': 'ターミナル',
+			'devMode': '開発者モード', 'grpDevMode': '開発者',
+			'secAppearance': '外観', 'secDownload': 'ダウンロード', 'secCapture': '取り込み',
+			'secExtend': '拡張機能', 'secSystem': 'システム',
+			'devModeDesc': '有効にすると「診断」タブが表示されます',
 			'paletteSelect': '配色スキーム',
 			'paletteIndigo': 'インディゴ',
 			'palettePurple': 'パープル', 'paletteBlue': 'ブルー',
@@ -1952,7 +1967,7 @@
 			'referer': 'Referer:',
 			'userAgent': 'User-Agent:',
 			'cookie': 'Cookie:',
-			'infoLine1': 'メディアスニッファー Pro v1.18 · モジュール設計 · AES-128復号 · 仮想リスト · 進捗可視化 · プラグインシステム',
+			'infoLine1': 'メディアスニッファー Pro v1.19',
 			'infoLine2': 'ショートカット: Alt+T 翻訳 · Alt+B パネル切替 · Esc 閉じる',
 			'clickTabScan': '上のタブをクリックしてスキャン開始',
 			'dlProgress': 'ダウンロード進捗',
@@ -2196,15 +2211,18 @@
 			'themeAuto': '시스템', 'themeLight': '라이트',
 			'themeDark': '다크',
 			'uiStyleSelect': 'UI 스타일',
-			'uiStyleDesc': '패널 시각 스타일 전환(Liquid Glass / 뉴모피즘 / 네오 브루탈리즘 / 터미널)',
 			'uiStyleNormal': '일반',
-			'uiStyleMaterial': 'Material', 'uiStyleIos27': 'iOS 27',
+			'uiStyleMiui': 'MIUI', 'uiStyleIos27': 'iOS 27',
 			'updateManualHint': '스크립트 주소를 열었습니다. 소스가 보이면 전체 복사 후 새 스크립트에 붙여넣으세요',
 			'updateOpenHint': '업데이트 페이지를 열었습니다. 스크립트 관리자에서 “업데이트”를 확인하세요',
 			'updateOpenFail': '업데이트 페이지를 열 수 없습니다. 주소를 복사했으니 브라우저 주소창에 붙여넣으세요',
 			'updateDownloadScript': '또는: 스크립트 파일 다운로드 (.user.js)',
 			'updateDownloading': '다운로드를 시작했습니다. 수동으로 설치하세요',
 			'uiStyleNeumorph': '뉴모피즘', 'uiStyleBrutal': '네오 브루탈리즘', 'uiStyleTerminal': '터미널',
+			'devMode': '개발자 모드', 'grpDevMode': '개발자',
+			'secAppearance': '모양', 'secDownload': '다운로드', 'secCapture': '수집',
+			'secExtend': '확장 기능', 'secSystem': '시스템',
+			'devModeDesc': '활성화하면 「진단」 탭이 표시됩니다',
 			'paletteSelect': '컬러 스킴',
 			'paletteIndigo': '인디고',
 			'palettePurple': '퍼플', 'paletteBlue': '블루',
@@ -2411,7 +2429,7 @@
 			'referer': 'Referer:',
 			'userAgent': 'User-Agent:',
 			'cookie': 'Cookie:',
-			'infoLine1': '미디어 스니퍼 Pro v1.18 · 모듈 구조 · AES-128 복호화 · 가상 리스트 · 진행률 · 플러그인 시스템',
+			'infoLine1': '미디어 스니퍼 Pro v1.19',
 			'infoLine2': '단축키: Alt+T 번역 · Alt+B 패널 토글 · Esc 닫기',
 			'clickTabScan': '위 탭을 클릭하여 스캔 시작',
 			'dlProgress': '다운로드 진행률',
@@ -3540,6 +3558,7 @@
 		batchDelay: 400,
 		askBeforeDownload: true, 
 		showStatusBar: true,
+		devMode: false,          // 开发者模式：开启后才显示「诊断」标签页
 		logLevel: 1, 
 				minImageSize: 1024,
 		minImageWidth: 50,
@@ -3698,6 +3717,7 @@
 				}
 				if (raw && typeof raw === 'object') {
 										if (raw.uiStyle === 'apple') raw.uiStyle = 'ios27';
+										if (raw.uiStyle === 'material') raw.uiStyle = 'miui';   // v1.18：Material 主题已被 MIUI 主题取代
 					var errors = State.validateConfig(raw);
 					if (errors.length > 0) {
 						LOG.warn('配置校验失败:', errors);
@@ -3805,8 +3825,14 @@
 		} catch (e) {}
 	};
 
+	State._themeInputSeen = undefined;
 	State._computeTheme = function () {
 		var theme = State.config.theme;
+		// 性能：getTheme() 被 colors() → isEffectivelyDark() 高频调用。
+		// config.theme 没变时直接复用上次结果 —— auto 模式下 _computedTheme 由
+		// matchMedia 监听器持续维护，无需每次同步查询系统主题。
+		if (theme === State._themeInputSeen) return;
+		State._themeInputSeen = theme;
 		if (theme === 'auto') {
 						try {
 				if (typeof matchMedia === 'function') {
@@ -4107,6 +4133,23 @@
 			try { reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e1) {}
 			var HIDDEN = 'translateX(-50%) translateY(calc(-100% - 72px))'; 
 			var SHOWN = 'translateX(-50%) translateY(0)';
+
+			// 底部倒计时线：直观看到还剩多久消失
+			try {
+				var _cdDur = dur || TOAST_DUR;
+				var _cd = document.createElement('span');
+				_cd.setAttribute('aria-hidden', 'true');
+				_cd.style.cssText = 'position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:0 0 12px 12px;'
+					+ 'background:currentColor;opacity:.4;transform-origin:left center;pointer-events:none;';
+				t.style.overflow = 'hidden';
+				t.appendChild(_cd);
+				if (!reduce) {
+					try {
+						_cd.animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }],
+							{ duration: _cdDur, easing: 'linear', fill: 'forwards' });
+					} catch (eCd) {}
+				}
+			} catch (eCd0) {}
 
 			t.style.willChange = 'transform,opacity';
 			t.style.transition = 'none';
@@ -6010,7 +6053,11 @@ VideoResolver.fillFromHtml(result, html);
 
 								'<div id="_ms_vlp_player" style="background:#000;border-radius:12px;overflow:hidden;margin-bottom:12px;position:relative;touch-action:manipulation;">' +
 					(cover ? '<img id="_ms_vlp_cover" src="' + SEC.escapeAttr(cover) + '" style="width:100%;display:block;max-height:360px;object-fit:contain;">' : '') +
-					'<div id="_ms_vlp_loading" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:14px;">加载中...</div>' +
+					// 待播放遮罩：未播放时显示「点击播放」，而不是一直挂着一个「加载中」
+					'<div id="_ms_vlp_idle" style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.46));">' +
+						'<span style="width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.45);color:#1a1a1c;font-size:0;">' + MS_CONFIG.ICONS.playSmall + '</span>' +
+					'</div>' +
+					'<div id="_ms_vlp_loading" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:14px;">加载中...</div>' +
 					'<div id="_ms_vlp_video_error" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);flex-direction:column;align-items:center;justify-content:center;color:#fff;padding:20px;text-align:center;">' +
 						'<div style="font-size:32px;margin-bottom:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>' +
 						'<div id="_ms_vlp_error_msg" style="font-size:13px;margin-bottom:12px;">视频加载失败</div>' +
@@ -6073,12 +6120,18 @@ VideoResolver.fillFromHtml(result, html);
 
 		var playerDiv = document.getElementById('_ms_vlp_player');
 		var loadingDiv = document.getElementById('_ms_vlp_loading');
+		var idleDiv = document.getElementById('_ms_vlp_idle');
 		var coverImg = document.getElementById('_ms_vlp_cover');
 		var videoErrorDiv = document.getElementById('_ms_vlp_video_error');
 		var videoErrorMsg = document.getElementById('_ms_vlp_error_msg');
 		var videoUrlText = document.getElementById('_ms_vlp_video_url_text');
 
+		// 加载提示只在真正建好播放器、开始拉流时出现
+		function showLoading() { if (loadingDiv) loadingDiv.style.display = 'block'; }
+		function hideLoading() { if (loadingDiv) loadingDiv.style.display = 'none'; }
+
 		if (State.config.autoPlayPreview && currentVideoUrl) {
+			if (idleDiv) idleDiv.style.display = 'none';
 			setTimeout(function() {
 				var vid = createPlayer();
 				if (vid) {
@@ -6098,6 +6151,7 @@ VideoResolver.fillFromHtml(result, html);
 			abortedFlag = true; 
 			if (muxHandle) { try { muxHandle.abort(); } catch (e) {} muxHandle = null; }
 			UI._vlpAbortMux = null;
+			detachDashAudio();          // DASH 独立音轨：关窗时一并停掉
 			if (isMobile) {
 				modal.style.transform = 'translateY(100%)';
 				overlay.style.background = 'rgba(0,0,0,0)';
@@ -6123,13 +6177,72 @@ VideoResolver.fillFromHtml(result, html);
 			if (videoErrorDiv) videoErrorDiv.style.display = 'none';
 		}
 
+				// ===== DASH 独立音轨 =====
+		// B 站等站点返回的 DASH 流：视频轨与音频轨是两条独立的流，
+		// 只播 videoUrl 会「有画面没声音」。这里用隐藏的 <audio> 同步播放音频轨。
+		var dashAudio = null;
+		function detachDashAudio() {
+			if (!dashAudio) return;
+			try { dashAudio.pause(); } catch (e) {}
+			try { dashAudio.removeAttribute('src'); dashAudio.load(); } catch (e) {}
+			try { dashAudio.remove(); } catch (e) {}
+			dashAudio = null;
+		}
+		function attachDashAudio(vid) {
+			if (!vid || !isDash || !audioUrl) return;
+			if (vid._msDashBound) {
+				// 同一 video 元素（换清晰度 / 换分P）：只换音轨地址并重新对齐
+				if (dashAudio) {
+					try { dashAudio.src = audioUrl; dashAudio.load(); } catch (e) {}
+					try { dashAudio.currentTime = vid.currentTime || 0; } catch (e) {}
+				}
+				return;
+			}
+			vid._msDashBound = true;
+
+			dashAudio = document.createElement('audio');
+			dashAudio.preload = 'auto';
+			dashAudio.src = audioUrl;
+			dashAudio.style.display = 'none';
+			try { dashAudio.volume = vid.volume; dashAudio.muted = vid.muted; } catch (e) {}
+			(document.body || document.documentElement).appendChild(dashAudio);
+
+			function syncSeek() {
+				try { if (isFinite(vid.currentTime)) dashAudio.currentTime = vid.currentTime; } catch (e) {}
+			}
+			function playAudio() { try { var pr = dashAudio.play(); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {} }
+
+			vid.addEventListener('play', function () {
+				if (Math.abs((dashAudio.currentTime || 0) - vid.currentTime) > 0.25) syncSeek();
+				playAudio();
+			});
+			vid.addEventListener('playing', playAudio);
+			vid.addEventListener('pause', function () { try { dashAudio.pause(); } catch (e) {} });
+			vid.addEventListener('waiting', function () { try { dashAudio.pause(); } catch (e) {} });
+			vid.addEventListener('seeking', syncSeek);
+			vid.addEventListener('seeked', syncSeek);
+			vid.addEventListener('ended', function () { try { dashAudio.pause(); } catch (e) {} });
+			vid.addEventListener('ratechange', function () { try { dashAudio.playbackRate = vid.playbackRate; } catch (e) {} });
+			vid.addEventListener('volumechange', function () {
+				try { dashAudio.volume = vid.volume; dashAudio.muted = vid.muted; } catch (e) {}
+			});
+			vid.addEventListener('timeupdate', function () {
+				if (vid.paused) return;
+				if (dashAudio.paused) playAudio();                        // 音轨掉了就补上
+				else if (Math.abs(dashAudio.currentTime - vid.currentTime) > 0.4) syncSeek();   // 漂移超 0.4s 重新对齐
+			});
+		}
+
 				var createPlayer = function(autoPlay) {
-			if (loadingDiv) loadingDiv.remove();
-			if (coverImg) coverImg.remove();
+			// 隐藏「待播放」遮罩（点一下就能播），封面交给 video 接管
+			if (idleDiv) idleDiv.style.display = 'none';
+			if (coverImg) { try { coverImg.remove(); } catch (eCI) {} coverImg = null; }
 			hideVideoError();
+			showLoading();
 
 			var oldVid = playerDiv.querySelector('video');
 			if (oldVid) oldVid.remove();
+			detachDashAudio();
 
 			var vid = document.createElement('video');
 			vid.controls = true;
@@ -6137,6 +6250,10 @@ VideoResolver.fillFromHtml(result, html);
 			vid.style.cssText = 'width:100%;display:block;max-height:400px;';
 			vid.setAttribute('playsinline', '');
 			vid.setAttribute('webkit-playsinline', '');
+
+			// 首个可播放帧到达就收起加载提示（此前只有点播放才会消失）
+			vid.addEventListener('loadeddata', hideLoading);
+			vid.addEventListener('canplay', hideLoading);
 
 			if (currentVideoUrl) {
 				vid.src = currentVideoUrl;
@@ -6151,6 +6268,7 @@ VideoResolver.fillFromHtml(result, html);
 			}
 
 			playerDiv.appendChild(vid);
+			attachDashAudio(vid);
 			return vid;
 		};
 
@@ -6182,6 +6300,7 @@ VideoResolver.fillFromHtml(result, html);
 				};
 				vid.addEventListener('loadedmetadata', onMeta);
 				vid.load();
+				attachDashAudio(vid);
 												setTimeout(function () {
 					try { vid.removeEventListener('loadedmetadata', onMeta); } catch (eR) {}
 					try {
@@ -6230,13 +6349,18 @@ VideoResolver.fillFromHtml(result, html);
 			});
 		}
 
-				document.getElementById('_ms_vlp_play').onclick = function() {
+				function playVideo() {
 			var vid = createPlayer();
 			if (vid) {
-				vid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-				setTimeout(function() { vid.play().catch(function(){}); }, 100);
+				try { vid.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (eSV) {}
+				setTimeout(function() { try { vid.play().catch(function(){}); } catch (e) {} }, 100);
 			}
-		};
+			return vid;
+		}
+		var playBtnEl = document.getElementById('_ms_vlp_play');
+		if (playBtnEl) playBtnEl.onclick = function() { playVideo(); };
+		// 点封面中央的播放圆钮 = 点「播放」
+		if (idleDiv) idleDiv.addEventListener('click', function() { playVideo(); });
 
 												var abortedFlag = false;
 		var muxStatusEl = null;
@@ -6516,6 +6640,9 @@ VideoResolver.fillFromHtml(result, html);
 								qualityList = data.qualityList || [];
 				videoQualities = data.videoQualities || [];
 				currentVideoUrl = data.videoUrl || '';
+				// 分P 切换后音频轨可能也变了：同步刷新闭包里的副本
+				if (data.audioUrl !== undefined) audioUrl = data.audioUrl || '';
+				if (data.isDash !== undefined) isDash = !!data.isDash;
 				if (videoUrlText && currentVideoUrl) videoUrlText.textContent = currentVideoUrl;
 
 				var qSel = document.getElementById('_ms_vlp_quality');
@@ -6526,6 +6653,7 @@ VideoResolver.fillFromHtml(result, html);
 					var wasPlaying = !vid.paused;
 					vid.src = currentVideoUrl;
 					vid.load();
+					attachDashAudio(vid);      // 音轨随分P 一起切
 					if (wasPlaying) vid.play().catch(function(){});
 				}
 			});
@@ -9835,7 +9963,9 @@ VideoResolver.fillFromHtml(result, html);
 	};
 
 	Selection._updateCardMark = function (url) {
-		var card = document.querySelector('[data-url="' + U.cssEscape(url) + '"]');
+		// 性能：限定在面板内查询，避免每次点选都遍历整份文档
+		var scope = document.getElementById('_ms_box') || document;
+		var card = scope.querySelector('[data-url="' + U.cssEscape(url) + '"]');
 		if (!card) return;
 		var mark = card.querySelector('._ms_sel_mark');
 		var isSel = State.selected.has(url);
@@ -9850,6 +9980,8 @@ VideoResolver.fillFromHtml(result, html);
 				try { mark.style.setProperty('color', isSel ? MS_CONFIG.COLORS.white : pri, 'important'); }
 				catch (eCl) { mark.style.color = isSel ? MS_CONFIG.COLORS.white : pri; }
 				mark.textContent = isSel ? '\u2713' : '';
+				if (isSel) UI._popEl(mark, { from: 0.4, peak: 1.26, dur: 300 });
+				UI._popEl(card, { from: 0.982, peak: 1.014, dur: 230, fade: false });
 			} else {
 				mark.style.display = 'none';
 			}
@@ -11061,7 +11193,7 @@ VideoResolver.fillFromHtml(result, html);
 			'minImageSize', 'minImageWidth', 'minImageHeight', 'minVideoDuration', 'maxVideoDuration', 'minAudioDuration',
 			'showMinSizeKB', 'showMaxSizeKB', 'autoExtractThumb', 'autoPlayPreview', 'persistSelection',
 			'customHeaders', 'm3u8Quality', 'm3u8Concurrency', 'm3u8AutoMerge',
-			'enableSync', 'enableHistory', 'autoCheckUpdate', 'settingsExpanded',
+			'enableSync', 'enableHistory', 'autoCheckUpdate', 'settingsExpanded', 'devMode',
 			'domainRules', 'customRules', 'parserPlugins', 'plugins',
 			'aria2RpcUrl', 
 			'translateFrom', 'translateTo', 'translateEngine',
@@ -12298,7 +12430,14 @@ VideoResolver.fillFromHtml(result, html);
 	};
 
 	UI._isMobile = function() {
-		try { return window.innerWidth < 768; } catch (e) { return false; }
+		// 性能：卡片渲染会逐张调用，按视口宽度缓存，避免重复读取 window.innerWidth
+		try {
+			var w = window.innerWidth;
+			if (UI._isMobW === w && UI._isMobCache !== undefined) return UI._isMobCache;
+			UI._isMobW = w;
+			UI._isMobCache = w < 768;
+			return UI._isMobCache;
+		} catch (e) { return false; }
 	};
 
 	UI._setupMobileGestures = function() {
@@ -12674,15 +12813,23 @@ VideoResolver.fillFromHtml(result, html);
 		var dark = UI.isEffectivelyDark();
 		var built = UI._palettes[id];
 		if (built) return dark ? built.dark : built.light;
-		var custom = UI._getCustomPalette(id); 
+		// 性能：自定义调色板每次都会新建对象；按「id + 明暗」缓存一份
+		var ck = id + (dark ? '|d' : '|l');
+		if (UI._pcCacheKey === ck && UI._pcCache) return UI._pcCache;
+		var custom = UI._getCustomPalette(id);
+		var out;
 		if (custom) {
 			var mode = dark ? (custom.dark || {}) : (custom.light || {});
-			return {
+			out = {
 				primary: mode.primary || MS_CONFIG.COLORS.primary,
 				primary2: mode.primary2 || MS_CONFIG.COLORS.primary2
 			};
+		} else {
+			out = UI._palettes['indigo'].light;
 		}
-		return UI._palettes['indigo'].light;
+		UI._pcCacheKey = ck;
+		UI._pcCache = out;
+		return out;
 	};
 
 	UI.setPalette = function (id) {
@@ -12831,6 +12978,108 @@ VideoResolver.fillFromHtml(result, html);
 			} catch (e) {}
 		}
 		return h || 'rgba(120,120,255,' + alpha + ')';
+	};
+
+	// ===== 澎湃 OS（HyperOS）风格 =====
+	//   大圆角 + 分层柔和阴影 + 分段控件式标签栏 + 沉浸式留白
+	//   配色沿用用户所选主题色，仅调整质感与结构
+	UI._buildMiuiCss = function (dark, isMob) {
+		var pc = UI._paletteColors() || {};
+		var rgba = UI._ios27Rgba;
+		var A = pc.primary || MS_CONFIG.COLORS.primary;
+		var A2 = pc.primary2 || MS_CONFIG.COLORS.primary2;
+		var S = '#_ms_panel._ms_style_miui';
+
+		// HyperOS 配色：浅色偏暖白灰、深色近纯黑
+		var page    = dark ? '#181818' : '#f6f6f8';
+		var card    = dark ? '#232323' : '#ffffff';
+		var field   = dark ? '#2b2b2b' : '#efeff2';
+		var fieldA  = dark ? '#353535' : '#e5e5ea';
+		var line    = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
+		var ink     = dark ? '#f5f5f7' : '#141416';
+		var dim     = dark ? 'rgba(245,245,247,0.56)' : 'rgba(20,20,22,0.50)';
+		var shCard  = dark ? '0 2px 12px rgba(0,0,0,0.45),0 1px 3px rgba(0,0,0,0.30)'
+		                   : '0 2px 12px rgba(0,0,0,0.06),0 1px 3px rgba(0,0,0,0.04)';
+		var shHover = dark ? '0 14px 34px rgba(0,0,0,0.60)' : '0 14px 34px rgba(0,0,0,0.14)';
+		var shFloat = dark ? '0 20px 60px rgba(0,0,0,0.66)' : '0 20px 56px rgba(0,0,0,0.16)';
+		var knob    = dark ? '#2c2c2c' : '#ffffff';
+		var track   = dark ? 'rgba(120,120,128,0.32)' : 'rgba(120,120,128,0.20)';
+
+		var rOuter = isMob ? '0' : '24px 0 0 24px';
+		var rTop   = isMob ? '0' : '24px 0 0 0';
+		var rCard  = isMob ? '22px' : '22px';
+		var css = '';
+
+		// —— 面板：大圆角 + 分层投影 ——
+		css += S + '{border-radius:' + rOuter + ' !important;background:' + page + ' !important;'
+			+ 'box-shadow:' + shFloat + ' !important;overflow:hidden !important;}';
+		css += S + '>div:first-child{border-radius:' + rTop + ' !important;background:' + page + ' !important;'
+			+ 'border-bottom:none !important;padding:10px 6px 6px !important;box-shadow:none !important;}';
+		css += S + '>div:first-child>div:first-child{color:' + ink + ' !important;font-weight:700 !important;'
+			+ 'letter-spacing:.1px !important;font-size:' + (isMob ? '16px' : '15px') + ' !important;}';
+		// 页头圆钮：HyperOS 用大圆角方形而非纯圆
+		css += S + '>div:first-child button{width:34px !important;height:34px !important;min-width:34px !important;'
+			+ 'border-radius:12px !important;border:none !important;background:' + field + ' !important;'
+			+ 'color:' + dim + ' !important;box-shadow:none !important;padding:0 !important;}';
+		css += S + '>div:first-child button:hover{background:' + fieldA + ' !important;color:' + ink + ' !important;}';
+
+		// —— 标签栏：分段控件（浅灰胶囊 + 白色滑块）——
+		css += S + ' #_ms_tabs{background:' + field + ' !important;border:none !important;'
+			+ 'border-radius:999px !important;margin:6px 12px 10px !important;padding:4px !important;'
+			+ 'gap:2px !important;overflow-x:auto !important;}';
+		css += S + ' ._ms_tab{flex:1 0 auto !important;border-radius:999px !important;border:none !important;'
+			+ 'background:transparent !important;background-image:none !important;color:' + dim + ' !important;'
+			+ 'box-shadow:none !important;font-weight:500 !important;padding:8px 12px !important;}';
+		css += S + ' ._ms_tab[data-active="1"]{background:' + card + ' !important;background-image:none !important;'
+			+ 'color:' + A + ' !important;font-weight:650 !important;'
+			+ 'box-shadow:0 2px 8px rgba(0,0,0,' + (dark ? 0.50 : 0.10) + ') !important;}';
+		css += S + ' ._ms_tab:not([data-active="1"]):hover{background:' + fieldA + ' !important;color:' + ink + ' !important;}';
+
+		// —— 搜索 / 筛选 / 进度：与页面同底，弱化分隔线 ——
+		css += S + ' #_ms_search,' + S + ' #_ms_filter,' + S + ' #_ms_progress{background:' + page + ' !important;'
+			+ 'border-bottom:none !important;padding:2px 16px 10px !important;}';
+		css += S + ' #_ms_progress{padding:10px 16px !important;border-radius:18px !important;'
+			+ 'margin:0 12px 8px !important;background:' + card + ' !important;box-shadow:' + shCard + ' !important;}';
+
+		// —— 内容区 / 底栏 ——
+		css += S + ' #_ms_box{background:' + page + ' !important;}';
+		css += S + ' #_ms_footer{background:' + page + ' !important;border-top:none !important;'
+			+ 'padding:10px 12px calc(10px + env(safe-area-inset-bottom)) !important;}';
+
+		// —— 卡片：大白卡 + 分层阴影 + 无边框 ——
+		css += S + ' [data-url]{border-radius:' + rCard + ' !important;background:' + card + ' !important;'
+			+ 'border:none !important;box-shadow:' + shCard + ' !important;overflow:hidden !important;}';
+		css += S + ' [data-url]:hover{box-shadow:' + shHover + ' !important;}';
+
+		// —— 设置分组：卡片化的折叠面板 ——
+		css += S + ' ._ms_grp{border-radius:' + rCard + ' !important;background:' + card + ' !important;'
+			+ 'border:none !important;box-shadow:' + shCard + ' !important;margin-bottom:10px !important;}';
+		css += S + ' ._ms_grp_hd{padding:14px 16px !important;}';
+		css += S + ' ._ms_grp_body{padding:0 16px 16px !important;}';
+		css += S + ' ._ms_sec_hd{color:' + dim + ' !important;font-size:12px !important;font-weight:700 !important;'
+			+ 'letter-spacing:.3px !important;margin:18px 4px 10px !important;}';
+
+		// —— 输入控件：大圆角 + 聚焦主题色描边 ——
+		css += S + ' input:not([type="checkbox"]):not([type="radio"]),' + S + ' select,' + S + ' textarea{'
+			+ 'border-radius:16px !important;background:' + field + ' !important;border:2px solid transparent !important;'
+			+ 'color:' + ink + ' !important;box-shadow:none !important;}';
+		css += S + ' input:not([type="checkbox"]):not([type="radio"]):focus,' + S + ' select:focus,' + S + ' textarea:focus{'
+			+ 'border-color:' + A + ' !important;background:' + fieldA + ' !important;}';
+		css += S + ' input::placeholder,' + S + ' textarea::placeholder{color:' + dim + ' !important;}';
+
+		// —— 普通按钮：HyperOS 的胶囊感 ——
+		css += S + ' button:not(._ms_tab){border-radius:18px !important;box-shadow:none !important;font-weight:600 !important;}';
+		css += S + ' [data-op]{border-radius:14px !important;}';
+
+		// —— 开关（toggle）：HyperOS 风格滑轨 ——
+		css += S + ' input[type="checkbox"]{border-radius:999px !important;}';
+
+		// —— 滚动条：细而克制 ——
+		css += S + ' #_ms_box::-webkit-scrollbar{width:8px;}';
+		css += S + ' #_ms_box::-webkit-scrollbar-thumb{background:' + (dark ? 'rgba(255,255,255,.16)' : 'rgba(0,0,0,.14)')
+			+ ' !important;border-radius:99px !important;border:2px solid transparent !important;background-clip:content-box !important;}';
+
+		return css;
 	};
 
 	UI._buildIos27Css = function (dark, isMob) {
@@ -13440,6 +13689,7 @@ VideoResolver.fillFromHtml(result, html);
 			el.id = styleId;
 			(document.head || document.documentElement).appendChild(el);
 		}
+		if (UI._ensureAnimCss) UI._ensureAnimCss();   // 动效层：定义在 applyUiStyle 之后，加守卫防调用顺序问题
 		var isMob = U.isMobile();
 										var styleKey = style + '|' + (style === 'terminal' ? 'd' : (dark ? 'd' : 'l'))
 			+ '|' + (isMob ? 'm' : 'p') + '|' + UI.getPalette();
@@ -13448,7 +13698,7 @@ VideoResolver.fillFromHtml(result, html);
 			return;
 		}
 		UI._uiStyleKey = styleKey;
-								var needBuilder = { neumorph: '_buildNeumorphCss', brutal: '_buildBrutalCss', terminal: '_buildTerminalCss' }[style];
+								var needBuilder = { miui: '_buildMiuiCss', neumorph: '_buildNeumorphCss', brutal: '_buildBrutalCss', terminal: '_buildTerminalCss' }[style];
 		if (needBuilder && typeof UI[needBuilder] !== 'function') {
 			LOG.error('界面风格构建函数缺失: UI.' + needBuilder + '（风格 ' + style + ' 退回普通）');
 			style = 'normal';
@@ -13460,18 +13710,8 @@ VideoResolver.fillFromHtml(result, html);
 		css += 'body._ms_glass_idle #_ms_panel._ms_style_ios27 *, body._ms_glass_idle #_ms_float._ms_btn_ios27 { animation-play-state: paused !important; }'
 						+ 'body._ms_glass_idle #_ms_panel._ms_style_terminal > div:first-child > div::after { animation-play-state: paused !important; opacity: 0 !important; }';
 								css += '._ms_vlink_paused, ._ms_vlink_paused * { animation-play-state: paused !important; transition: none !important; }';
-		if (style === 'material') {
-			var r = isMob ? '0' : '28px 0 0 28px';
-			var headerR = isMob ? '0' : '28px 0 0 0';
-			var tabR = isMob ? '16px 16px 0 0' : '20px 0 0 0';
-			css += '#_ms_panel._ms_style_material { border-radius:' + r + ' !important; box-shadow:-24px 0 70px rgba(0,0,0,0.28), 0 0 0 1px rgba(0,0,0,0.06) !important; overflow:hidden !important; }';
-			css += '#_ms_panel._ms_style_material > div:first-child { border-radius:' + headerR + ' !important; }';
-			css += '#_ms_panel._ms_style_material #_ms_tabs { border-radius:' + tabR + ' !important; margin:0 10px !important; border:1px solid ' + (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)') + ' !important; border-bottom:none !important; }';
-			css += '#_ms_panel._ms_style_material #_ms_search, #_ms_panel._ms_style_material #_ms_filter, #_ms_panel._ms_style_material #_ms_progress { margin:0 10px !important; border-radius:0 0 12px 12px !important; border:1px solid ' + (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)') + ' !important; border-top:none !important; }';
-			css += '#_ms_panel._ms_style_material #_ms_box { margin:0 10px 10px 10px !important; border-radius:16px !important; border:1px solid ' + (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)') + ' !important; }';
-			css += '#_ms_panel._ms_style_material #_ms_footer { margin:0 10px 10px 10px !important; border-radius:16px !important; border:1px solid ' + (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)') + ' !important; }';
-			css += '#_ms_panel._ms_style_material ._ms_tab { border-radius:20px !important; }';
-			css += '#_ms_panel._ms_style_material [data-url] { border-radius:16px !important; }';
+		if (style === 'miui') {
+						css += UI._buildMiuiCss(dark, isMob);
 		} else if (style === 'ios27') {
 						css += UI._buildIos27Css(dark, isMob);
 		} else if (style === 'neumorph') {
@@ -13629,6 +13869,30 @@ VideoResolver.fillFromHtml(result, html);
 
 				UI._moConnect = function () {};
 	UI._moDisconnect = function () {};
+
+	// 依据「开发者模式」动态增删「诊断」标签，无需整块重建标签栏
+	UI._syncTabs = function () {
+		try {
+			var tabBar = document.getElementById('_ms_tabs');
+			if (!tabBar) return;
+			var existing = tabBar.querySelector ? tabBar.querySelector('._ms_tab[data-tab="diag"]') : null;
+			var want = !!(State.config && State.config.devMode);
+			if (want && !existing) {
+				var btn = document.createElement('button');
+				btn.className = '_ms_tab';
+				btn.setAttribute('data-tab', 'diag');
+				btn.innerHTML = UI._tabInnerHtml('diag', UI._tabLabel('diag'));
+				UI._applyTabStyle(btn, State.tab === 'diag');
+				btn.addEventListener('click', function () { UI.switchTab('diag'); });
+				tabBar.appendChild(btn);
+				UI._popEl(btn, { from: 0.86, peak: 1.05, dur: 280, fade: false });
+			} else if (!want && existing) {
+				try { existing.remove(); } catch (e1) {}
+				// 正停在诊断页时，关掉开发者模式要退回设置页
+				if (State.tab === 'diag') UI.switchTab('settings');
+			}
+		} catch (e) { LOG.warn('同步标签栏失败:', e); }
+	};
 
 	UI.setUiStyle = function (style) {
 		if (MS_CONFIG.UI_STYLE_IDS.indexOf(style) < 0) style = 'normal';
@@ -14086,6 +14350,321 @@ VideoResolver.fillFromHtml(result, html);
 	};
 
 	
+	// =========================================================================
+	// 动效增强层（卡片 / 按钮 / 标签 / 进度条 / 选中反馈）
+	//   · 只用 transform / opacity / filter —— 全部走合成层，不触发重排
+	//   · 入场与弹跳用 Web Animations API（不受各风格 CSS 的 animation-play-state 影响）
+	//   · 统一尊重 prefers-reduced-motion
+	// =========================================================================
+	UI._REDUCE_MOTION = function () {
+		try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { return false; }
+	};
+
+	UI._animCss = function () {
+		var P = '#_ms_panel';
+		var css = '';
+
+		// —— 媒体卡片：悬停抬升 + 缩略图微放大 + 高光扫过 + 按下回弹 ——
+		css += '._ms_card{transition:transform .24s cubic-bezier(.22,1,.36,1),box-shadow .24s ease,filter .24s ease;}';
+		css += '._ms_card>div:first-child{transition:transform .45s cubic-bezier(.22,1,.36,1);}';
+		css += '._ms_card:hover>div:first-child{transform:scale(1.07);}';
+		css += '._ms_card::after{content:"";position:absolute;left:-10%;top:-20%;width:120%;height:140%;pointer-events:none;z-index:3;'
+			+ 'background:linear-gradient(112deg,transparent 34%,rgba(255,255,255,.40) 47%,rgba(255,255,255,.16) 53%,transparent 66%);'
+			+ 'transform:translateX(-135%);opacity:0;}';
+		css += '._ms_card:hover::after{opacity:1;animation:_ms_sheen .95s cubic-bezier(.33,.72,.4,1) .04s 1 both;}';
+		css += '@keyframes _ms_sheen{from{transform:translateX(-135%)}to{transform:translateX(135%)}}';
+		css += '._ms_card:hover{transform:translateY(-5px);box-shadow:0 16px 34px rgba(0,0,0,.20);}';
+		css += '._ms_card:active{transform:translateY(-1px) scale(.968);transition-duration:.08s;}';
+
+		// —— 按钮 / 标签：浮起 + 按下回弹 ——
+		css += P + ' button{transition:transform .16s cubic-bezier(.22,1,.36,1),filter .16s ease;}';
+		css += P + ' button:hover{filter:brightness(1.08) saturate(1.04);transform:translateY(-1px);}';
+		css += P + ' button:active{transform:translateY(0) scale(.952);filter:brightness(.95);}';
+		css += P + ' button:focus-visible{outline:2px solid currentColor;outline-offset:2px;}';
+		css += P + ' ._ms_tab:hover{transform:translateY(-1.5px);}';
+
+		// —— 选中标记：出现时弹一下 ——
+		css += '._ms_sel_mark{will-change:transform;}';
+
+		// —— 进度条：流光扫过 ——
+		css += '#_ms_progress_bar{position:relative;overflow:hidden;}';
+		css += '#_ms_progress_bar::after{content:"";position:absolute;left:0;top:0;bottom:0;width:45%;'
+			+ 'background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);'
+			+ 'animation:_ms_shimmer 1.4s linear infinite;}';
+		css += '@keyframes _ms_shimmer{from{transform:translateX(-110%)}to{transform:translateX(320%)}}';
+
+		// —— 加载中：三点呼吸 ——
+		css += '._ms_dots{display:inline-flex;gap:4px;vertical-align:middle;}';
+		css += '._ms_dots i{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.35;'
+			+ 'animation:_ms_dot 1.15s ease-in-out infinite;}';
+		css += '._ms_dots i:nth-child(2){animation-delay:.16s;}._ms_dots i:nth-child(3){animation-delay:.32s;}';
+		css += '@keyframes _ms_dot{0%,70%,100%{opacity:.28;transform:translateY(0)}35%{opacity:1;transform:translateY(-3px)}}';
+
+		// —— 滚动条：细腻一点 ——
+		css += P + ' #_ms_box::-webkit-scrollbar{width:9px;height:9px;}';
+		css += P + ' #_ms_box::-webkit-scrollbar-thumb{border-radius:99px;background:rgba(128,128,128,.42);border:2px solid transparent;background-clip:content-box;transition:background .2s;}';
+		css += P + ' #_ms_box::-webkit-scrollbar-thumb:hover{background:rgba(128,128,128,.68);background-clip:content-box;}';
+
+		// —— 悬浮入口球：光环扩散 + 图标呼吸 ——
+		css += '#_ms_float::before{content:"";position:absolute;left:0;top:0;right:0;bottom:0;border-radius:50%;'
+			+ 'border:2px solid rgba(139,92,246,.62);opacity:0;pointer-events:none;'
+			+ 'animation:_ms_halo 2.8s cubic-bezier(.22,1,.36,1) infinite;}';
+		css += '@keyframes _ms_halo{0%{transform:scale(1);opacity:.66}72%{transform:scale(1.72);opacity:0}100%{transform:scale(1.72);opacity:0}}';
+		css += '#_ms_float>svg{animation:_ms_breathe 3.4s ease-in-out infinite;transform-origin:50% 50%;}';
+		css += '@keyframes _ms_breathe{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.13);opacity:.86}}';
+
+		// —— 尊重系统「减少动态效果」——
+		css += '@media (prefers-reduced-motion: reduce){'
+			+ '#_ms_float::before,#_ms_float>svg,'
+			+ '._ms_card,._ms_card>div:first-child,._ms_card::after,' + P + ' button,._ms_sel_mark,#_ms_progress_bar::after,._ms_dots i'
+			+ '{animation:none !important;transition:none !important;filter:none !important;}'
+			+ '._ms_card:hover,._ms_card:active,._ms_card:hover>div:first-child,' + P + ' button:hover,' + P + ' button:active'
+			+ '{transform:none !important;box-shadow:none !important;}'
+			+ '._ms_card::after{opacity:0 !important;}}';
+		return css;
+	};
+
+	UI._ensureAnimCss = function () {
+		try {
+			if (!document.getElementById('_ms_anim_css')) {
+				var el = document.createElement('style');
+				el.id = '_ms_anim_css';
+				el.textContent = UI._animCss();
+				(document.head || document.documentElement).appendChild(el);
+			}
+			UI._bindRipple();
+		} catch (e) {}
+	};
+
+	// —— 波纹：在点击位置扩散一圈，用完即删 ——
+	UI._ripple = function (el, x, y, color) {
+		if (!el || !el.getBoundingClientRect || UI._REDUCE_MOTION()) return;
+		try {
+			var r = el.getBoundingClientRect();
+			if (!r.width || !r.height) return;
+			// 性能：position/overflow 只需处理一次，结果记在元素上，避免每次点击都跑 getComputedStyle
+			if (!el._msRippleReady) {
+				var cs = null;
+				try { cs = window.getComputedStyle(el); } catch (e0) {}
+				if (!cs || cs.position === 'static') el.style.position = 'relative';
+				if (!cs || (cs.overflow !== 'hidden' && cs.overflow !== 'clip')) el.style.overflow = 'hidden';
+				try { el._msRippleReady = true; } catch (e5) {}
+			}
+			var size = Math.max(r.width, r.height) * 2;
+			var d = document.createElement('span');
+			d.setAttribute('aria-hidden', 'true');
+			d.style.cssText = 'position:absolute;pointer-events:none;border-radius:50%;z-index:0;'
+				+ 'left:' + (x - r.left - size / 2).toFixed(1) + 'px;top:' + (y - r.top - size / 2).toFixed(1) + 'px;'
+				+ 'width:' + size.toFixed(0) + 'px;height:' + size.toFixed(0) + 'px;'
+				+ 'background:radial-gradient(circle,' + (color || 'rgba(255,255,255,.62)') + ' 0%,rgba(255,255,255,0) 68%);'
+				+ 'transform:scale(.18);opacity:.62;';
+			el.appendChild(d);
+			var kill = function () { try { d.remove(); } catch (e1) {} };
+			var an = null;
+			try {
+				an = d.animate(
+					[{ transform: 'scale(.18)', opacity: .62 }, { transform: 'scale(1)', opacity: 0 }],
+					{ duration: 520, easing: 'cubic-bezier(.22,1,.36,1)' }
+				);
+				an.onfinish = kill;
+			} catch (e2) {}
+			setTimeout(kill, 900);
+		} catch (e) {}
+	};
+
+	UI._bindRipple = function () {
+		if (UI._rippleBound) return;
+		UI._rippleBound = true;
+		try {
+			document.addEventListener('pointerdown', function (e) {
+				try {
+					if (e.button != null && e.button !== 0) return;
+					var t = e.target;
+					if (!t || !t.closest) return;
+					var hit = t.closest('._ms_card,._ms_tab,#_ms_panel button,#_ms_sel_pop button,'
+						+ '#_ms_queue_modal button,#_ms_filter_panel button,#_ms_vlp_modal button,'
+						+ '#_ms_footer_menu button,#_ms_float_ctx_menu button');
+					if (!hit) return;
+					var col = null;
+					try { col = UI._ios27Rgba(UI.colors().primary, 0.55); } catch (e1) {}
+					UI._ripple(hit, e.clientX, e.clientY, col);
+				} catch (err) {}
+			}, { passive: true, capture: true });
+		} catch (e) {}
+	};
+
+	// —— 入场错峰：容器内元素依次淡入上浮 ——
+	UI._enterStagger = function (container, sel, opts) {
+		if (!container || !container.querySelectorAll || UI._REDUCE_MOTION()) return;
+		var o = opts || {};
+		var step = o.step != null ? o.step : 26;
+		var dur = o.dur != null ? o.dur : 420;
+		var max = o.max != null ? o.max : 30;
+		var fromY = o.y != null ? o.y : 14;
+		var els;
+		try { els = container.querySelectorAll(sel); } catch (e) { return; }
+		var n = Math.min(els.length, max);
+		for (var i = 0; i < n; i++) {
+			var el = els[i];
+			if (!el || typeof el.animate !== 'function') continue;
+			try {
+				el.animate(
+					[{ opacity: 0, transform: 'translateY(' + fromY + 'px) scale(.97)' },
+					 { opacity: 1, transform: 'none' }],
+					{ duration: dur, delay: i * step, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' }
+				);
+			} catch (e2) {}
+		}
+	};
+
+	// —— 元素弹跳反馈（选中勾、标签激活等）——
+	UI._popEl = function (el, opts) {
+		if (!el || typeof el.animate !== 'function' || UI._REDUCE_MOTION()) return;
+		var o = opts || {};
+		try {
+			el.animate(
+				[{ transform: 'scale(' + (o.from != null ? o.from : 0.35) + ')', opacity: o.fade === false ? 1 : 0 },
+				 { transform: 'scale(' + (o.peak != null ? o.peak : 1.22) + ')', opacity: 1 },
+				 { transform: 'scale(1)', opacity: 1 }],
+				{ duration: o.dur != null ? o.dur : 300, easing: 'cubic-bezier(.22,1.5,.36,1)' }
+			);
+		} catch (e) {}
+	};
+
+	// —— 标签顺序（决定左右滑动方向）——
+	UI._TAB_ORDER = ['img', 'video', 'audio', 'm3u8', 'translate', 'cookie', 'storage', 'plugins', 'settings', 'diag'];
+
+	// —— 标签切换：旧页滑出、新页滑入 ——
+	//   dir = +1：切到后面的标签，新页从右侧滑入；dir = -1：反之
+	//   旧内容用「克隆快照」覆盖在箱体上方随动画滑出，因此不需要改动任何渲染函数
+	UI._slideSwitch = function (box, dir, renderFn) {
+		try {
+			if (!box || typeof box.animate !== 'function') return false;
+			if (UI._REDUCE_MOTION()) return false;
+			var host = box.parentNode;
+			if (!host || host.nodeType !== 1) return false;
+
+			var prevTop = box.scrollTop || 0;
+			var D = (dir < 0) ? -1 : 1;
+
+			box.style.opacity = '';
+			box.style.pointerEvents = 'none';
+
+			// 旧内容快照（节点过多时跳过克隆，避免大列表带来额外开销）
+			var snap = null, snapInner = null;
+			try {
+				if (box.children.length > 0 && box.children.length <= 300) {
+					var frag = document.createDocumentFragment();
+					for (var i = 0; i < box.children.length; i++) frag.appendChild(box.children[i].cloneNode(true));
+					snap = document.createElement('div');
+					snap.setAttribute('aria-hidden', 'true');
+					snap.style.cssText = 'position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:3;';
+					snapInner = document.createElement('div');
+					snapInner.style.cssText = 'will-change:transform,opacity;';
+					snapInner.appendChild(frag);
+					snap.appendChild(snapInner);
+					host.appendChild(snap);
+				}
+			} catch (eSnap) { snap = null; snapInner = null; }
+
+			// 渲染新内容（此刻快照已脱离渲染函数的影响）
+			renderFn();
+
+			var dist = Math.max(40, Math.min(110, (box.clientWidth || 320) * 0.24));
+
+			// 新页滑入
+			var inA = null;
+			try {
+				box.style.willChange = 'transform,opacity';
+				inA = box.animate(
+					[{ transform: 'translateX(' + (D * dist) + 'px)', opacity: 0 },
+					 { transform: 'translateX(0px)', opacity: 1 }],
+					{ duration: 300, easing: 'cubic-bezier(.22,1,.36,1)' }
+				);
+			} catch (eInA) {}
+
+			// 旧页滑出（fill:forwards 防止动画结束后回闪）
+			if (snap && snapInner) {
+				try {
+					var shift = 'translateY(' + (-prevTop) + 'px)';
+					snapInner.style.transform = shift;
+					snapInner.animate(
+						[{ transform: shift + ' translateX(0px)', opacity: 1 },
+						 { transform: shift + ' translateX(' + (-D * dist * 0.82) + 'px)', opacity: 0 }],
+						{ duration: 260, easing: 'cubic-bezier(.4,0,.6,1)', fill: 'forwards' }
+					);
+				} catch (eOut) {}
+				setTimeout(function () { try { snap.remove(); } catch (e1) {} }, 330);
+			}
+
+			if (inA) { try { inA.onfinish = function () { box.style.willChange = ''; }; } catch (e2) {} }
+			else { setTimeout(function () { box.style.willChange = ''; }, 320); }
+
+			box.style.pointerEvents = 'auto';
+			return true;
+		} catch (e) { return false; }
+	};
+
+	// —— 折叠组：原地高度动画（展开 / 收起）——
+	//   先把内联样式设成动画的终态，再用 WAAPI 播一遍，结束时清掉内联样式 —— 无回闪
+	UI._toggleGroup = function (el, expand) {
+		if (!el) return;
+		try {
+			if (UI._REDUCE_MOTION() || typeof el.animate !== 'function') {
+				el.style.display = expand ? 'block' : 'none';
+				return;
+			}
+			var startH, endH;
+			if (expand) {
+				el.style.display = 'block';
+				el.style.height = '0px';
+				el.style.overflow = 'hidden';
+				el.style.opacity = '0';
+				startH = 0;
+				endH = el.scrollHeight;      // height:0 + overflow:hidden 下仍能测到内容高度
+				el.style.height = endH + 'px';
+				el.style.opacity = '1';
+			} else {
+				startH = el.offsetHeight;
+				endH = 0;
+				el.style.overflow = 'hidden';
+				el.style.height = '0px';
+				el.style.opacity = '0';
+			}
+			var a = null;
+			try {
+				a = el.animate(
+					[{ height: startH + 'px', opacity: expand ? 0 : 1 },
+					 { height: endH + 'px', opacity: expand ? 1 : 0 }],
+					{ duration: expand ? 280 : 220, easing: expand ? 'cubic-bezier(.22,1,.36,1)' : 'cubic-bezier(.4,0,.6,1)' }
+				);
+			} catch (e1) {}
+			var finish = function () {
+				try {
+					el.style.height = '';
+					el.style.overflow = '';
+					el.style.opacity = '';
+					if (!expand) el.style.display = 'none';
+				} catch (e2) {}
+			};
+			if (a) { try { a.onfinish = finish; } catch (e3) {} }
+			setTimeout(finish, (expand ? 280 : 220) + 60);   // 兜底：动画被中断也能收尾
+		} catch (e) {
+			try { el.style.display = expand ? 'block' : 'none'; } catch (e4) {}
+		}
+	};
+
+	// —— 内容切换：淡入上浮 ——
+	UI._contentFlash = function (el) {
+		if (!el || typeof el.animate !== 'function' || UI._REDUCE_MOTION()) return;
+		try {
+			el.animate(
+				[{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }],
+				{ duration: 260, easing: 'cubic-bezier(.22,1,.36,1)' }
+			);
+		} catch (e) {}
+	};
+
 	UI._panelStagger = function (phase) {
 		UI._staggerCancel();
 		var panel = State.panel;
@@ -14270,8 +14849,9 @@ VideoResolver.fillFromHtml(result, html);
 			{ key: 'storage', label: UI._tabLabel('storage') },
 			{ key: 'plugins', label: UI._tabLabel('plugins') },
 			{ key: 'settings', label: UI._tabLabel('settings') },
-			{ key: 'diag', label: UI._tabLabel('diag') },
 		];
+		// 「诊断」标签页属于开发者工具：默认隐藏，需在设置里开启开发者模式
+		if (State.config.devMode) tabs.push({ key: 'diag', label: UI._tabLabel('diag') });
 		for (var i = 0; i < tabs.length; i++) {
 			(function (t) {
 				var btn = document.createElement('button');
@@ -14320,7 +14900,7 @@ VideoResolver.fillFromHtml(result, html);
 
 				var box = document.createElement('div');
 		box.id = '_ms_box';
-		box.style.cssText = 'flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;background:' + c.bg + (isMob ? ';padding-bottom:env(safe-area-inset-bottom);' : '') + ';transition: background-color 0.3s, color 0.3s;';
+		box.style.cssText = 'flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;background:' + c.bg + (isMob ? ';padding-bottom:env(safe-area-inset-bottom);' : '') + ';transition: background-color 0.3s, color 0.3s;';
 		box.innerHTML = '<div style="padding:80px 20px;text-align:center;color:' + c.sub + ';font-size:14px;">' + LANG.t('clickTabScan') + '</div>';
 		var _boxScrollTimer = null;
 		box.addEventListener('scroll', function () {
@@ -14336,7 +14916,12 @@ VideoResolver.fillFromHtml(result, html);
 				Selection.exit();
 			}
 		});
-		State.panel.appendChild(box);
+		// 页面容器：box 是页面本体，pageHost 负责裁剪，让标签切换可以左右滑动
+		var pageHost = document.createElement('div');
+		pageHost.id = '_ms_page_host';
+		pageHost.style.cssText = 'position:relative;flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;';
+		pageHost.appendChild(box);
+		State.panel.appendChild(pageHost);
 
 				var footer = document.createElement('div');
 		footer.id = '_ms_footer';
@@ -14441,6 +15026,8 @@ VideoResolver.fillFromHtml(result, html);
 			}
 		}
 		var startTab = State.config.lastTab || State.tab || 'img';
+		// 旧版本可能把 lastTab 存成 'diag'：开发者模式关闭时诊断页已隐藏，回落到设置页
+		if (startTab === 'diag' && !State.config.devMode) startTab = 'settings';
 		var total = State.images.length + State.videos.length + State.audios.length + State.m3u8.length;
 		if (total === 0) Scanner.doFull(function () { toast(LANG.t('scanDoneToast')); UI.switchTab(startTab); });
 		else UI.switchTab(startTab);
@@ -14449,6 +15036,7 @@ VideoResolver.fillFromHtml(result, html);
 	UI.closePanel = function () {
 		if (!State.panel) return;
 		State.panelOpen = false;
+		State._renderedTab = null;   // 下次打开必定重新渲染，避免展示陈旧内容
 		UI._moDisconnect(); 
 		UI._glassIdle(true);
 		if (State.selectionMode && !State.config.persistSelection) Selection.exit();
@@ -14567,13 +15155,24 @@ VideoResolver.fillFromHtml(result, html);
 	};
 
 	UI.switchTab = function (tab) {
+		// 已经停在该标签页：保持内容与样式不动，也不播放左右滑动动画
+		var _sameTab = (State._renderedTab === tab) && !!State.panel;
 		State.tab = tab;
 		if (State.config && State.config.lastTab !== tab) {
 			State.config.lastTab = tab;
 			try { State.save(); } catch (e) {}
 		}
 		var tbs = document.querySelectorAll('._ms_tab');
-		for (var i = 0; i < tbs.length; i++) UI._applyTabStyle(tbs[i], tbs[i].getAttribute('data-tab') === tab);
+		var _activeTabBtn = null;
+		for (var i = 0; i < tbs.length; i++) {
+			var _isActive = tbs[i].getAttribute('data-tab') === tab;
+			UI._applyTabStyle(tbs[i], _isActive);
+			if (_isActive) _activeTabBtn = tbs[i];
+		}
+		if (_activeTabBtn && _activeTabBtn !== UI._lastActiveTabBtn) {
+			UI._lastActiveTabBtn = _activeTabBtn;
+			UI._popEl(_activeTabBtn, { from: 0.9, peak: 1.06, dur: 300, fade: false });
+		}
 		var searchEl = document.getElementById('_ms_search');
 		var filterEl = document.getElementById('_ms_filter');
 		var footerEl = document.getElementById('_ms_footer');
@@ -14584,6 +15183,8 @@ VideoResolver.fillFromHtml(result, html);
 		if (filterEl) filterEl.style.display = isMedia ? 'block' : 'none';
 		if (footerEl) footerEl.style.display = isMedia ? 'block' : 'none';
 		if (progressEl) progressEl.style.display = State.downloading ? 'block' : 'none';
+
+		if (_sameTab) return;      // 本页内点击本页按钮：直接返回，无切换、无动画
 
 		function renderTab() {
 			if (tab === 'img') UI.renderMedia('img');
@@ -14599,20 +15200,38 @@ VideoResolver.fillFromHtml(result, html);
 		}
 
 		var box = document.getElementById('_ms_box');
-		if (!box) { renderTab(); return; }
+		if (!box) { renderTab(); State._renderedTab = tab; return; }
 								if (!UI._tabScroll) UI._tabScroll = {};
 		var prevTab = State._prevTabForScroll;
 		if (prevTab && prevTab !== tab) UI._tabScroll[prevTab] = box.scrollTop || 0;
 		State._prevTabForScroll = tab;
 		var restoreTop = UI._tabScroll[tab] || 0;
+
+		// 滑动方向：按标签在栏中的先后顺序决定（往后切 → 新页从右侧滑入）
+		var dir = 1;
+		try {
+			var order = UI._TAB_ORDER || [];
+			var ni = order.indexOf(tab), oi = order.indexOf(prevTab);
+			if (ni >= 0 && oi >= 0) dir = (ni >= oi) ? 1 : -1;
+		} catch (eDir) {}
+
+		function applyTab() {
+			renderTab();
+			box.scrollTop = restoreTop;
+			State._renderedTab = tab;
+		}
+
+		if (UI._slideSwitch && UI._slideSwitch(box, dir, applyTab)) return;
+
+		// 回退路径：不支持 Web Animations / 开了「减少动态效果」时保持原来的淡入
 		box.style.opacity = '0';
 		box.style.pointerEvents = 'none';
 		requestAnimationFrame(function () {
 			requestAnimationFrame(function () {
-				renderTab();
-												box.scrollTop = restoreTop;
+				applyTab();
 				box.style.opacity = '1';
 				box.style.pointerEvents = 'auto';
+				UI._contentFlash(box);
 			});
 		});
 	};
@@ -15196,6 +15815,7 @@ VideoResolver.fillFromHtml(result, html);
 		}
 		UI._bindMediaGrid(container, kind, kwList);
 		UI._bindCardLongPress(container);
+		UI._enterStagger(container, '._ms_card', { step: 24, dur: 400, max: 36 });
 
 		UI.renderFooter(kind, kwList);
 		bindFilterButtons(kind);
@@ -15414,6 +16034,7 @@ VideoResolver.fillFromHtml(result, html);
 			container.appendChild(item);
 		}
 		box.appendChild(container);
+		UI._enterStagger(container, '[data-url]', { step: 30, dur: 380, max: 24, y: 10 });
 		UI.renderFooter('m3u8', list);
 	};
 
@@ -15813,12 +16434,21 @@ VideoResolver.fillFromHtml(result, html);
 		var ft = document.getElementById('_ms_footer');
 		if (!ft) return;
 		var c = UI.colors();
-		var total = State.listFor(kind).length;
-		var fullList = State.listFor(kind);
+		var fullList = State.listFor(kind);          // 性能：原来取两次，合并为一次
+		var total = fullList.length;
 		var selList = [];
 		for (var i = 0; i < list.length; i++) if (State.selected.has(list[i])) selList.push(list[i]);
 		var selCount = selList.length;
 		var displayList = list || [];
+
+		// 性能：选择模式下按钮集合不随勾选变化 —— 只刷新计数文本，
+		// 避免每点一张卡片就重建整条底栏（十来个按钮 + 图标）
+		var _sig = kind + '|' + (State.selectionMode ? 'sel' : 'norm');
+		if (State.selectionMode && ft._msFooterSig === _sig && ft._msFooterInfo && ft._msFooterInfo.parentNode === ft) {
+			ft._msFooterInfo.textContent = LANG.t('selInfo', {sel: selCount, shown: displayList.length, total: total});
+			return;
+		}
+		ft._msFooterSig = _sig;
 
 		ft.innerHTML = '';
 		var wrap = document.createElement('div');
@@ -15856,6 +16486,7 @@ VideoResolver.fillFromHtml(result, html);
 			info.style.cssText = 'font-size:12px;color:' + c.sub + ';margin-bottom:6px;text-align:center;';
 			info.textContent = LANG.t('selInfo', {sel: selCount, shown: displayList.length, total: total});
 			ft.appendChild(info);
+			ft._msFooterInfo = info;      // 供下次仅刷新文本使用
 
 			btn(LANG.t('selectAllBtn'), c.bg3, function () {
 				Selection.toggleAll(fullList, true);
@@ -15937,6 +16568,7 @@ VideoResolver.fillFromHtml(result, html);
 				Selection.exit();
 			});
 		} else {
+			ft._msFooterInfo = null;
 			var info2 = document.createElement('div');
 			info2.style.cssText = 'font-size:12px;color:' + c.sub + ';margin-bottom:6px;text-align:center;';
 			info2.textContent = LANG.t('selInfo', {sel: selCount, shown: displayList.length, total: total});
@@ -15982,6 +16614,16 @@ VideoResolver.fillFromHtml(result, html);
 			});
 		}
 		ft.appendChild(wrap);
+		// 工具栏动效：仅在按钮组结构变化时（进入/退出选择模式、换标签）上浮淡入，
+		// 单纯勾选卡片不会重播动画，避免连续点选时抖动
+		try {
+			var _ftBtns = wrap.querySelectorAll('button');
+			var _ftKey = _ftBtns.length + '|' + (ft.style.display || '') + '|' + kind;
+			if (UI._footerKey !== _ftKey) {
+				UI._footerKey = _ftKey;
+				UI._contentFlash(ft);
+			}
+		} catch (eFt) {}
 	};
 	UI._showFooterMenu = function (anchor, items) {
 		if (!items || items.length === 0) return;
@@ -17205,28 +17847,52 @@ VideoResolver.fillFromHtml(result, html);
 		function makeGroup(id, title, contentNode) {
 			var expanded = State.config.settingsExpanded[id] !== false;
 			var wrap = document.createElement('div');
-			wrap.style.cssText = 'border-radius:12px;background:' + c.bg2 + ';border:1px solid ' + c.border + ';margin-bottom:14px;overflow:hidden;';
+			wrap.className = '_ms_grp';
+			wrap.style.cssText = 'border-radius:12px;background:' + c.bg2 + ';border:1px solid ' + c.border + ';margin-bottom:10px;overflow:hidden;';
 			var header = document.createElement('div');
-			header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;user-select:none;-webkit-user-select:none;';
+			header.className = '_ms_grp_hd';
+			header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;cursor:pointer;user-select:none;-webkit-user-select:none;';
 			var titleEl = document.createElement('div');
 			titleEl.style.cssText = 'font-size:13px;font-weight:600;color:' + c.txt + ';';
 			titleEl.textContent = title;
 			var arrow = document.createElement('span');
-			arrow.innerHTML = expanded ? '▼' : MS_CONFIG.ICONS.arrowRight;
-			arrow.style.cssText = 'font-size:12px;color:' + c.sub + ';';
+			arrow.className = '_ms_grp_arw';
+			arrow.innerHTML = MS_CONFIG.ICONS.arrowRight;
+			arrow.style.cssText = 'display:inline-flex;align-items:center;color:' + c.sub
+				+ ';transition:transform .26s cubic-bezier(.22,1,.36,1);transform:rotate(' + (expanded ? '90deg' : '0deg') + ');';
 			header.appendChild(titleEl);
 			header.appendChild(arrow);
 			var body = document.createElement('div');
+			body.className = '_ms_grp_body';
 			body.style.cssText = 'padding:0 14px 14px 14px;display:' + (expanded ? 'block' : 'none') + ';';
 			body.appendChild(contentNode);
 			header.addEventListener('click', function () {
-				State.config.settingsExpanded[id] = !expanded;
+				// 原地展开 / 收起：不再整页重建，因此有动画且不丢滚动位置
+				var willExpand = State.config.settingsExpanded[id] === false;
+				State.config.settingsExpanded[id] = willExpand;
 				State.save();
-				UI.renderSettings();
+				arrow.style.transform = 'rotate(' + (willExpand ? '90deg' : '0deg') + ')';
+				UI._toggleGroup(body, willExpand);
 			});
 			wrap.appendChild(header);
 			wrap.appendChild(body);
 			return wrap;
+		}
+
+		// 设置分区：把 23 个分组显式归入 5 个大类（重排与源码顺序无关）
+		var _SEC_ORDER = ['secAppearance', 'secDownload', 'secCapture', 'secExtend', 'secSystem'];
+		var _groupMap = {};
+		function addGroup(sec, node) {
+			if (!_groupMap[sec]) _groupMap[sec] = [];
+			_groupMap[sec].push(node);
+		}
+		function makeSectionHeader(title) {
+			var h = document.createElement('div');
+			h.className = '_ms_sec_hd';
+			h.textContent = title;
+			h.style.cssText = 'font-size:12px;font-weight:700;letter-spacing:.4px;color:' + c.sub
+				+ ';margin:16px 2px 8px;padding-left:2px;';
+			return h;
 		}
 
 				var themeRow = document.createElement('div');
@@ -17242,18 +17908,14 @@ VideoResolver.fillFromHtml(result, html);
 				themeRow.appendChild(b);
 			})(themes[ti]);
 		}
-		container.appendChild(makeGroup('theme', LANG.t('grpTheme'), themeRow));
+		addGroup('secAppearance', makeGroup('theme', LANG.t('grpTheme'), themeRow));
 
 				var styleWrap = document.createElement('div');
-		var styleDesc = document.createElement('div');
-		styleDesc.textContent = LANG.t('uiStyleDesc');
-		styleDesc.style.cssText = 'font-size:12px;color:' + c.sub + ';margin-bottom:10px;';
-		styleWrap.appendChild(styleDesc);
 		var styleRow = document.createElement('div');
 		styleRow.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;';
 		var styles = [
 			['normal', LANG.t('uiStyleNormal')],
-			['material', LANG.t('uiStyleMaterial')],
+			['miui', LANG.t('uiStyleMiui')],
 			['ios27', LANG.t('uiStyleIos27')],
 			['neumorph', LANG.t('uiStyleNeumorph')],
 			['brutal', LANG.t('uiStyleBrutal')],
@@ -17270,7 +17932,7 @@ VideoResolver.fillFromHtml(result, html);
 			})(styles[si]);
 		}
 		styleWrap.appendChild(styleRow);
-		container.appendChild(makeGroup('uiStyle', LANG.t('grpUiStyle'), styleWrap));
+		addGroup('secAppearance', makeGroup('uiStyle', LANG.t('grpUiStyle'), styleWrap));
 
 				var palWrap = document.createElement('div');
 		var palRow = document.createElement('div');
@@ -17366,14 +18028,14 @@ VideoResolver.fillFromHtml(result, html);
 		customPalForm.appendChild(cpSave);
 		palWrap.appendChild(customPalForm);
 
-		container.appendChild(makeGroup('palette', LANG.t('grpPalette'), palWrap));
+		addGroup('secAppearance', makeGroup('palette', LANG.t('grpPalette'), palWrap));
 
 				var tplInput = document.createElement('input');
 		tplInput.type = 'text';
 		tplInput.value = State.config.nameTpl;
 		tplInput.style.cssText = 'width:100%;padding:8px 10px;border:1px solid ' + c.border + ';border-radius:8px;font-size:13px;background:' + c.bg + ';color:' + c.txt + ';box-sizing:border-box;';
 		tplInput.addEventListener('change', function () { State.config.nameTpl = tplInput.value || '{域名}_{日期}_{序号}_{后缀}'; State.save(); toast(LANG.t('saved')); });
-		container.appendChild(makeGroup('nameTpl', LANG.t('grpNameTpl'), tplInput));
+		addGroup('secDownload', makeGroup('nameTpl', LANG.t('grpNameTpl'), tplInput));
 
 				var confRow = document.createElement('div');
 		confRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px;align-items:center;';
@@ -17397,7 +18059,7 @@ VideoResolver.fillFromHtml(result, html);
 		numSetting(LANG.t('concurrency'), 'batchConcurrency', 1, 8, 1, confRow);
 		numSetting(LANG.t('intervalMs'), 'batchDelay', 50, 5000, 100, confRow);
 		numSetting(LANG.t('retries'), 'batchRetry', 0, 5, 1, confRow);
-		container.appendChild(makeGroup('batch', LANG.t('grpBatch'), confRow));
+		addGroup('secDownload', makeGroup('batch', LANG.t('grpBatch'), confRow));
 
 				var aria2Content = document.createElement('div');
 		function aria2Input(label, key) {
@@ -17416,7 +18078,7 @@ VideoResolver.fillFromHtml(result, html);
 		}
 		aria2Content.appendChild(aria2Input(LANG.t('aria2RpcUrl'), 'aria2RpcUrl'));
 		aria2Content.appendChild(aria2Input(LANG.t('aria2RpcSecret'), 'aria2RpcSecret'));
-		container.appendChild(makeGroup('aria2', LANG.t('grpAria2'), aria2Content));
+		addGroup('secDownload', makeGroup('aria2', LANG.t('grpAria2'), aria2Content));
 
 				var m3u8Row = document.createElement('div');
 		m3u8Row.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px;align-items:center;';
@@ -17441,7 +18103,7 @@ VideoResolver.fillFromHtml(result, html);
 		m3u8Row.appendChild(qLabel); m3u8Row.appendChild(qualitySel);
 		var segLabel = LANG.t('segmentsLabel');
 				numSetting(segLabel, 'm3u8Concurrency', 1, 8, 1, m3u8Row);
-		container.appendChild(makeGroup('m3u8', LANG.t('grpM3u8'), m3u8Row));
+		addGroup('secDownload', makeGroup('m3u8', LANG.t('grpM3u8'), m3u8Row));
 
 				var headersContent = document.createElement('div');
 		function headerInput(label, key) {
@@ -17461,7 +18123,7 @@ VideoResolver.fillFromHtml(result, html);
 		headersContent.appendChild(headerInput(LANG.t('referer'), 'Referer'));
 		headersContent.appendChild(headerInput(LANG.t('userAgent'), 'UserAgent'));
 		headersContent.appendChild(headerInput(LANG.t('cookie'), 'Cookie'));
-		container.appendChild(makeGroup('headers', LANG.t('grpHeaders'), headersContent));
+		addGroup('secDownload', makeGroup('headers', LANG.t('grpHeaders'), headersContent));
 
 				var logSel = document.createElement('select');
 		logSel.style.cssText = 'padding:8px 10px;border:1px solid ' + c.border + ';border-radius:8px;background:' + c.bg + ';color:' + c.txt + ';font-size:12px;';
@@ -17473,7 +18135,7 @@ VideoResolver.fillFromHtml(result, html);
 			logSel.appendChild(opt);
 		}
 		logSel.addEventListener('change', function () { State.config.logLevel = parseInt(logSel.value, 10); LOG.setLevel(State.config.logLevel); State.save(); toast(LANG.t('logLevelChanged')); });
-		container.appendChild(makeGroup('log', LANG.t('grpLog'), logSel));
+		addGroup('secSystem', makeGroup('log', LANG.t('grpLog'), logSel));
 
 				var ob = document.createElement('div');
 		ob.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;';
@@ -17496,7 +18158,7 @@ VideoResolver.fillFromHtml(result, html);
 			if (!confirm(LANG.t('confirmReset'))) return;
 			State.resetConfig(); applyPanelThemeNow(); toast(LANG.t('resetDone')); UI.renderSettings();
 		}, 1.2);
-		container.appendChild(makeGroup('other', LANG.t('grpOther'), ob));
+		addGroup('secSystem', makeGroup('other', LANG.t('grpOther'), ob));
 
 				var langContainer = document.createElement('div');
 		langContainer.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;';
@@ -17515,7 +18177,7 @@ VideoResolver.fillFromHtml(result, html);
 				langContainer.appendChild(lb);
 			})(langs[li]);
 		}
-		container.appendChild(makeGroup('lang', LANG.t('grpLang'), langContainer));
+		addGroup('secAppearance', makeGroup('lang', LANG.t('grpLang'), langContainer));
 
 				var drContent = document.createElement('div');
 		var drText = document.createElement('textarea');
@@ -17553,7 +18215,7 @@ VideoResolver.fillFromHtml(result, html);
 			UI.renderSettings();
 		};
 		drContent.appendChild(drBtn);
-		container.appendChild(makeGroup('domainRules', LANG.t('grpDomainRules'), drContent));
+		addGroup('secCapture', makeGroup('domainRules', LANG.t('grpDomainRules'), drContent));
 
 										if (!UI._settingsState) UI._settingsState = {};
 		if (typeof UI._settingsState.pluginTab !== 'string') UI._settingsState.pluginTab = 'rules';
@@ -17974,7 +18636,7 @@ VideoResolver.fillFromHtml(result, html);
 
 		pluginContent.appendChild(rulesSection);
 		pluginContent.appendChild(parsersSection);
-		container.appendChild(makeGroup('plugins', LANG.t('grpPlugins'), pluginContent));
+		addGroup('secExtend', makeGroup('plugins', LANG.t('grpPlugins'), pluginContent));
 
 				var thumbInner = document.createElement('div');
 		thumbInner.style.cssText = 'display:flex;align-items:center;justify-content:space-between;';
@@ -17987,7 +18649,7 @@ VideoResolver.fillFromHtml(result, html);
 		});
 		thumbInner.appendChild(thumbInfo);
 		thumbInner.appendChild(thumbToggle);
-		container.appendChild(makeGroup('videoThumb', LANG.t('grpVideoThumb'), thumbInner));
+		addGroup('secAppearance', makeGroup('videoThumb', LANG.t('grpVideoThumb'), thumbInner));
 
 				var updContent = document.createElement('div');
 		var updInner = document.createElement('div');
@@ -18042,7 +18704,7 @@ VideoResolver.fillFromHtml(result, html);
 		});
 		updBtnRow.appendChild(checkBtn);
 		updContent.appendChild(updBtnRow);
-		container.appendChild(makeGroup('autoUpdate', LANG.t('grpAutoUpdate'), updContent));
+		addGroup('secSystem', makeGroup('autoUpdate', LANG.t('grpAutoUpdate'), updContent));
 
 				var persistInner = document.createElement('div');
 		persistInner.style.cssText = 'display:flex;align-items:center;justify-content:space-between;';
@@ -18055,7 +18717,28 @@ VideoResolver.fillFromHtml(result, html);
 		});
 		persistInner.appendChild(persistInfo);
 		persistInner.appendChild(persistToggle);
-		container.appendChild(makeGroup('persistSelection', LANG.t('grpPersistSelection'), persistInner));
+		addGroup('secCapture', makeGroup('persistSelection', LANG.t('grpPersistSelection'), persistInner));
+
+				var devInner = document.createElement('div');
+		devInner.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:10px;';
+		var devInfo = document.createElement('div');
+		var devTitle = document.createElement('div');
+		devTitle.style.cssText = 'font-size:13px;font-weight:700;color:' + c.txt + ';';
+		devTitle.appendChild(UI.iconTextEl(MS_CONFIG.ICONS.wrench, LANG.t('devMode')));
+		var devDesc = document.createElement('div');
+		devDesc.style.cssText = 'font-size:11px;color:' + c.sub + ';margin-top:2px;';
+		devDesc.textContent = LANG.t('devModeDesc');
+		devInfo.appendChild(devTitle);
+		devInfo.appendChild(devDesc);
+		var devToggle = UI.createToggle(!!State.config.devMode, function (val) {
+			State.config.devMode = !!val;
+			State.save();
+			UI._syncTabs();
+			toast(LANG.t('saved'));
+		});
+		devInner.appendChild(devInfo);
+		devInner.appendChild(devToggle);
+		addGroup('secSystem', makeGroup('devMode', LANG.t('grpDevMode'), devInner));
 
 				var scBody = document.createElement('div');
 		scBody.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
@@ -18106,7 +18789,7 @@ VideoResolver.fillFromHtml(result, html);
 		scBody.appendChild(shortcutSetting(LANG.t('shortcutToggle'), 'shortcutToggle', 'shortcutToggleMod'));
 		scBody.appendChild(shortcutSetting(LANG.t('shortcutTranslate'), 'shortcutTranslate', 'shortcutTranslateMod'));
 		scBody.appendChild(shortcutSetting(LANG.t('shortcutClose'), 'shortcutClose', 'shortcutCloseMod'));
-		container.appendChild(makeGroup('shortcuts', LANG.t('grpShortcuts'), scBody));
+		addGroup('secExtend', makeGroup('shortcuts', LANG.t('grpShortcuts'), scBody));
 
 				function historyHost(url) {
 			try { var u = new URL(url, location.href); return u.hostname; } catch (e) { return url; }
@@ -18204,7 +18887,7 @@ VideoResolver.fillFromHtml(result, html);
 			toast(LANG.t('cleared'));
 		});
 		rhWrap.appendChild(rhClearBtn);
-		container.appendChild(makeGroup('resourceHistory', LANG.t('grpResourceHistory'), rhWrap));
+		addGroup('secCapture', makeGroup('resourceHistory', LANG.t('grpResourceHistory'), rhWrap));
 
 				var dhList = document.createElement('div');
 		dhList.style.cssText = 'max-height:220px;overflow:auto;margin-bottom:8px;';
@@ -18246,7 +18929,7 @@ VideoResolver.fillFromHtml(result, html);
 			toast(LANG.t('cleared'));
 		});
 		dhContent.appendChild(dhClearBtn);
-		container.appendChild(makeGroup('downloadHistory', LANG.t('grpDownloadHistory'), dhContent));
+		addGroup('secDownload', makeGroup('downloadHistory', LANG.t('grpDownloadHistory'), dhContent));
 
 		
 		function _ai3Lab(text) {
@@ -18401,7 +19084,7 @@ VideoResolver.fillFromHtml(result, html);
 				]));
 			}
 		})();
-		container.appendChild(makeGroup('audioId', LANG.t('grpAudioId'), aidContent));
+		addGroup('secExtend', makeGroup('audioId', LANG.t('grpAudioId'), aidContent));
 
 		
 		var trContent = document.createElement('div');
@@ -18469,7 +19152,7 @@ VideoResolver.fillFromHtml(result, html);
 				]));
 			}
 		})();
-		container.appendChild(makeGroup('transcribe', LANG.t('grpTranscribe'), trContent));
+		addGroup('secExtend', makeGroup('transcribe', LANG.t('grpTranscribe'), trContent));
 
 		
 		var wdContent = document.createElement('div');
@@ -18533,7 +19216,7 @@ VideoResolver.fillFromHtml(result, html);
 				}
 			]));
 		})();
-		container.appendChild(makeGroup('webdav', LANG.t('grpWebdav'), wdContent));
+		addGroup('secExtend', makeGroup('webdav', LANG.t('grpWebdav'), wdContent));
 
 		var info = document.createElement('div');
 		info.style.cssText = 'padding:12px;border-radius:10px;background:' + c.bg2 + ';font-size:11px;color:' + c.sub + ';line-height:1.8;text-align:center;';
@@ -18543,8 +19226,6 @@ VideoResolver.fillFromHtml(result, html);
 		infoL2.textContent = LANG.t('infoLine2');
 		info.appendChild(infoL1);
 		info.appendChild(infoL2);
-		container.appendChild(info);
-
 								var brandWrap = document.createElement('div');
 		brandWrap.style.cssText = 'margin-top:14px;border-radius:12px;overflow:hidden;'
 			+ 'border:1px solid ' + c.border + ';background:#ffffff;';
@@ -18556,6 +19237,17 @@ VideoResolver.fillFromHtml(result, html);
 				brandImg.onerror = function () { try { brandWrap.remove(); } catch (e) {} };
 		brandImg.src = UI._BRAND_IMG;
 		brandWrap.appendChild(brandImg);
+		// 按分区顺序输出（分区内保持原有相对顺序）
+		for (var _si = 0; _si < _SEC_ORDER.length; _si++) {
+			var _key = _SEC_ORDER[_si];
+			var _list = _groupMap[_key];
+			if (!_list || !_list.length) continue;
+			container.appendChild(makeSectionHeader(LANG.t(_key)));
+			for (var _gi = 0; _gi < _list.length; _gi++) container.appendChild(_list[_gi]);
+		}
+
+		// 版本 / 快捷键 小字，以及品牌图 —— 都放在设置页最底部
+		container.appendChild(info);
 		container.appendChild(brandWrap);
 
 		box.appendChild(container);
